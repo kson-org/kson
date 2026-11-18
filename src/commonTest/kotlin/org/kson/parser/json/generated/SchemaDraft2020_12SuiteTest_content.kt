@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "{\"foo\": \"bar\"}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "{:}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJmb28iOiAiYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentEncoding": "base64"
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJmb28iOi%iYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentEncoding": "base64"
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentEncoding": "base64"
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJmb28iOiAiYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -188,9 +188,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "ezp9Cg=="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -212,9 +212,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "{}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -236,9 +236,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -260,9 +260,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJmb28iOiAiYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -295,9 +295,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJib28iOiAyMCwgImZvbyI6ICJiYXoifQ=="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -330,9 +330,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "eyJib28iOiAyMH0="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -365,9 +365,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "e30="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -400,9 +400,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "W10="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -435,9 +435,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "ezp9Cg=="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -470,9 +470,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 "{}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {
@@ -505,9 +505,9 @@ class SchemaDraft2020_12SuiteTest_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64",
                     "contentSchema": {

@@ -24,47 +24,47 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
     fun jsonSchemaSuiteTest_1() {
         // the implementation must not be confused by an $id buried in the enum
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                    "$id": "https://localhost:1234/id/my_identifier.json",
                     "type": "null"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                    "$id": "https://localhost:1234/id/my_identifier.json",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                            "$id": "https://localhost:1234/id/my_identifier.json",
                             "type": "string"
                         },
                         "zzz_id_in_const": {
                             "const": {
-                                "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                "$id": "https://localhost:1234/id/my_identifier.json",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_enum"
+                            "$ref": "#/$defs/id_in_enum"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/id/my_identifier.json"
+                            "$ref": "https://localhost:1234/id/my_identifier.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::exact match to enum, and type matches"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::exact match to enum, and type matches"    """)
     }
 
     /**
@@ -81,44 +81,44 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
     fun jsonSchemaSuiteTest_2() {
         // the implementation must not be confused by an $id buried in the enum
         assertKsonEnforcesSchema(
-            """
-                "a string to match #/${'$'}defs/id_in_enum"
+            $$"""
+                "a string to match #/$defs/id_in_enum"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                    "$id": "https://localhost:1234/id/my_identifier.json",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                            "$id": "https://localhost:1234/id/my_identifier.json",
                             "type": "string"
                         },
                         "zzz_id_in_const": {
                             "const": {
-                                "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                "$id": "https://localhost:1234/id/my_identifier.json",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_enum"
+                            "$ref": "#/$defs/id_in_enum"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/id/my_identifier.json"
+                            "$ref": "https://localhost:1234/id/my_identifier.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::match ${'$'}ref to ${'$'}id"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::match $ref to $id"    """)
     }
 
     /**
@@ -134,41 +134,41 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                    "$id": "https://localhost:1234/id/my_identifier.json",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                            "$id": "https://localhost:1234/id/my_identifier.json",
                             "type": "string"
                         },
                         "zzz_id_in_const": {
                             "const": {
-                                "${'$'}id": "https://localhost:1234/id/my_identifier.json",
+                                "$id": "https://localhost:1234/id/my_identifier.json",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_enum"
+                            "$ref": "#/$defs/id_in_enum"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/id/my_identifier.json"
+                            "$ref": "https://localhost:1234/id/my_identifier.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::no match on enum or ${'$'}ref to ${'$'}id"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::no match on enum or $ref to $id"    """)
     }
 
     /**
@@ -188,29 +188,29 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 "a string"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_unknown0": {
                             "not": {
                                 "array_of_schemas": [
                                     {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "null"
                                     }
                                 ]
                             }
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                            "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                             "type": "string"
                         },
                         "id_in_unknown1": {
                             "not": {
                                 "object_of_schemas": {
                                     "foo": {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "integer"
                                     }
                                 }
@@ -219,19 +219,19 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown0"
+                            "$ref": "#/$defs/id_in_unknown0"
                         },
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown1"
+                            "$ref": "#/$defs/id_in_unknown1"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
+                            "$ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches second anyOf, which has a real schema in it"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches second anyOf, which has a real schema in it"    """)
     }
 
     /**
@@ -247,29 +247,29 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_unknown0": {
                             "not": {
                                 "array_of_schemas": [
                                     {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "null"
                                     }
                                 ]
                             }
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                            "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                             "type": "string"
                         },
                         "id_in_unknown1": {
                             "not": {
                                 "object_of_schemas": {
                                     "foo": {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "integer"
                                     }
                                 }
@@ -278,19 +278,19 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown0"
+                            "$ref": "#/$defs/id_in_unknown0"
                         },
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown1"
+                            "$ref": "#/$defs/id_in_unknown1"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
+                            "$ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in first anyOf"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches non-schema in first anyOf"    """)
     }
 
     /**
@@ -310,29 +310,29 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "id_in_unknown0": {
                             "not": {
                                 "array_of_schemas": [
                                     {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "null"
                                     }
                                 ]
                             }
                         },
                         "real_id_in_schema": {
-                            "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                            "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                             "type": "string"
                         },
                         "id_in_unknown1": {
                             "not": {
                                 "object_of_schemas": {
                                     "foo": {
-                                        "${'$'}id": "https://localhost:1234/unknownKeyword/my_identifier.json",
+                                        "$id": "https://localhost:1234/unknownKeyword/my_identifier.json",
                                         "type": "integer"
                                     }
                                 }
@@ -341,19 +341,19 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown0"
+                            "$ref": "#/$defs/id_in_unknown0"
                         },
                         {
-                            "${'$'}ref": "#/${'$'}defs/id_in_unknown1"
+                            "$ref": "#/$defs/id_in_unknown1"
                         },
                         {
-                            "${'$'}ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
+                            "$ref": "https://localhost:1234/unknownKeyword/my_identifier.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in third anyOf"    """)
+            $$"""    schemaTestId: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches non-schema in third anyOf"    """)
     }
 
     /**
@@ -370,47 +370,47 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
     fun jsonSchemaSuiteTest_7() {
         // the implementation must not be confused by an $anchor buried in the enum
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}anchor": "my_anchor",
+                    "$anchor": "my_anchor",
                     "type": "null"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "anchor_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_identifier_in_schema": {
-                            "${'$'}anchor": "my_anchor",
+                            "$anchor": "my_anchor",
                             "type": "string"
                         },
                         "zzz_anchor_in_const": {
                             "const": {
-                                "${'$'}anchor": "my_anchor",
+                                "$anchor": "my_anchor",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/anchor_in_enum"
+                            "$ref": "#/$defs/anchor_in_enum"
                         },
                         {
-                            "${'$'}ref": "#my_anchor"
+                            "$ref": "#my_anchor"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::exact match to enum, and type matches"    """)
+            $$"""    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier ($anchor)::exact match to enum, and type matches"    """)
     }
 
     /**
@@ -432,41 +432,41 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "type": "null"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "anchor_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_identifier_in_schema": {
-                            "${'$'}anchor": "my_anchor",
+                            "$anchor": "my_anchor",
                             "type": "string"
                         },
                         "zzz_anchor_in_const": {
                             "const": {
-                                "${'$'}anchor": "my_anchor",
+                                "$anchor": "my_anchor",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/anchor_in_enum"
+                            "$ref": "#/$defs/anchor_in_enum"
                         },
                         {
-                            "${'$'}ref": "#my_anchor"
+                            "$ref": "#my_anchor"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::implementations that strip ${'$'}anchor may match either definition"    """)
+            $$"""    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier ($anchor)::implementations that strip $anchor may match either definition"    """)
     }
 
     /**
@@ -483,44 +483,44 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
     fun jsonSchemaSuiteTest_9() {
         // the implementation must not be confused by an $anchor buried in the enum
         assertKsonEnforcesSchema(
-            """
-                "a string to match #/${'$'}defs/anchor_in_enum"
+            $$"""
+                "a string to match #/$defs/anchor_in_enum"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "anchor_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_identifier_in_schema": {
-                            "${'$'}anchor": "my_anchor",
+                            "$anchor": "my_anchor",
                             "type": "string"
                         },
                         "zzz_anchor_in_const": {
                             "const": {
-                                "${'$'}anchor": "my_anchor",
+                                "$anchor": "my_anchor",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/anchor_in_enum"
+                            "$ref": "#/$defs/anchor_in_enum"
                         },
                         {
-                            "${'$'}ref": "#my_anchor"
+                            "$ref": "#my_anchor"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::match ${'$'}ref to ${'$'}anchor"    """)
+            $$"""    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier ($anchor)::match $ref to $anchor"    """)
     }
 
     /**
@@ -540,41 +540,41 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "anchor_in_enum": {
                             "enum": [
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "null"
                                 }
                             ]
                         },
                         "real_identifier_in_schema": {
-                            "${'$'}anchor": "my_anchor",
+                            "$anchor": "my_anchor",
                             "type": "string"
                         },
                         "zzz_anchor_in_const": {
                             "const": {
-                                "${'$'}anchor": "my_anchor",
+                                "$anchor": "my_anchor",
                                 "type": "null"
                             }
                         }
                     },
                     "anyOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/anchor_in_enum"
+                            "$ref": "#/$defs/anchor_in_enum"
                         },
                         {
-                            "${'$'}ref": "#my_anchor"
+                            "$ref": "#my_anchor"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::no match on enum or ${'$'}ref to ${'$'}anchor"    """)
+            $$"""    schemaTestId: "optional/non-schemas::anchor inside an enum is not a real identifier ($anchor)::no match on enum or $ref to $anchor"    """)
     }
 
     /**
@@ -592,15 +592,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unknown-keyword": {
                         "type": "integer"
                     },
                     "properties": {
                         "bar": {
-                            "${'$'}ref": "#/unknown-keyword"
+                            "$ref": "#/unknown-keyword"
                         }
                     }
                 }
@@ -624,15 +624,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unknown-keyword": {
                         "type": "integer"
                     },
                     "properties": {
                         "bar": {
-                            "${'$'}ref": "#/unknown-keyword"
+                            "$ref": "#/unknown-keyword"
                         }
                     }
                 }
@@ -656,15 +656,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unknown/keyword": {
                         "type": "integer"
                     },
                     "properties": {
                         "bar": {
-                            "${'$'}ref": "#/unknown~1keyword"
+                            "$ref": "#/unknown~1keyword"
                         }
                     }
                 }
@@ -688,15 +688,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unknown/keyword": {
                         "type": "integer"
                     },
                     "properties": {
                         "bar": {
-                            "${'$'}ref": "#/unknown~1keyword"
+                            "$ref": "#/unknown~1keyword"
                         }
                     }
                 }
@@ -720,9 +720,9 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "unknown-keyword": {
@@ -730,7 +730,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                             }
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo/unknown-keyword"
+                            "$ref": "#/properties/foo/unknown-keyword"
                         }
                     }
                 }
@@ -754,9 +754,9 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "unknown-keyword": {
@@ -764,7 +764,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                             }
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo/unknown-keyword"
+                            "$ref": "#/properties/foo/unknown-keyword"
                         }
                     }
                 }
@@ -786,15 +786,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 "a string"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "examples": [
                         {
                             "type": "string"
                         }
                     ],
-                    "${'$'}ref": "#/examples/0"
+                    "$ref": "#/examples/0"
                 }
             """,
             true,
@@ -814,15 +814,15 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
             """
                 42
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "examples": [
                         {
                             "type": "string"
                         }
                     ],
-                    "${'$'}ref": "#/examples/0"
+                    "$ref": "#/examples/0"
                 }
             """,
             false,
@@ -844,9 +844,9 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "unknown/keyword": {
@@ -854,7 +854,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                             }
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo/unknown~1keyword"
+                            "$ref": "#/properties/foo/unknown~1keyword"
                         }
                     }
                 }
@@ -878,9 +878,9 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "unknown/keyword": {
@@ -888,7 +888,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
                             }
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo/unknown~1keyword"
+                            "$ref": "#/properties/foo/unknown~1keyword"
                         }
                     }
                 }

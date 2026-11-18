@@ -29,9 +29,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1
                 }
             """,
@@ -77,9 +77,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1
                 }
             """,
@@ -100,9 +100,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1
                 }
             """,
@@ -126,9 +126,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1.0
                 }
             """,
@@ -149,9 +149,9 @@ class SchemaDraft2020_12SuiteTest_minItems : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minItems": 1.0
                 }
             """,

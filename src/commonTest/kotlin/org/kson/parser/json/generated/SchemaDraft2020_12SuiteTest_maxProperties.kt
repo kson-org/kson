@@ -28,9 +28,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -81,9 +81,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "baz": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -108,9 +108,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -131,9 +131,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
             """
                 "foobar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -154,9 +154,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2
                 }
             """,
@@ -179,9 +179,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2.0
                 }
             """,
@@ -206,9 +206,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "baz": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 2.0
                 }
             """,
@@ -229,9 +229,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 0
                 }
             """,
@@ -254,9 +254,9 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxProperties": 0
                 }
             """,

@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "127.0.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "127.0.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -242,9 +242,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "256.256.256.256"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -269,9 +269,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "127.0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -296,9 +296,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "127.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -323,9 +323,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "127.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -350,9 +350,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "0x7f000001"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -377,9 +377,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "2130706433"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -404,9 +404,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "1২7.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -431,9 +431,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "１９２.１６８.１.１"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -458,9 +458,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "𝟏𝟗𝟐.𝟏𝟔𝟖.𝟏.𝟏"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -485,9 +485,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.1.0/24"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -512,9 +512,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 " 192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -539,9 +539,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1 "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -566,9 +566,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -593,9 +593,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "0x7f.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -620,9 +620,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "0o10.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -647,9 +647,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168..1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -674,9 +674,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 ".192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -701,9 +701,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -724,9 +724,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "0.0.0.0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -747,9 +747,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "255.255.255.255"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -770,9 +770,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "200.0.0.0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -793,9 +793,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "10.20.30.40"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -820,9 +820,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -847,9 +847,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "+1.2.3.4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -874,9 +874,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "-1.2.3.4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -901,9 +901,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "1e2.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -928,9 +928,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.a.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -955,9 +955,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192. 168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -982,9 +982,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1\t"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -1009,9 +1009,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1\u0000.evil.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -1036,9 +1036,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.1:80"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -1063,9 +1063,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "::ffff:192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,
@@ -1090,9 +1090,9 @@ class SchemaDraft2020_12SuiteTest_format_ipv4 : JsonSchemaTest {
             """
                 "192.168.0.256"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "ipv4"
                 }
             """,

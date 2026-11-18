@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": true
                 }
@@ -53,9 +53,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": true
                 }
@@ -77,9 +77,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": {
                         "type": "string",
@@ -106,9 +106,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": {
                         "type": "string",
@@ -139,9 +139,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "fo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": {
                         "type": "string",
@@ -166,9 +166,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": false
                 }
@@ -196,9 +196,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": false
                 }
@@ -222,9 +222,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -258,9 +258,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -289,9 +289,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "^foo": {
@@ -325,9 +325,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "^foo": {
@@ -356,9 +356,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -389,9 +389,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -421,9 +421,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -456,9 +456,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -491,9 +491,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -537,9 +537,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -578,9 +578,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -624,9 +624,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -664,9 +664,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -701,9 +701,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -737,9 +737,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -777,9 +777,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -817,9 +817,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -886,9 +886,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "not-baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -951,9 +951,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1021,9 +1021,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "quux": "not-quux"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1085,9 +1085,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1144,9 +1144,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "quux": "quux"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1202,9 +1202,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1246,9 +1246,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1308,9 +1308,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1364,9 +1364,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1425,9 +1425,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1481,9 +1481,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "then"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1532,9 +1532,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1578,9 +1578,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1629,9 +1629,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1676,9 +1676,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1728,9 +1728,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1778,9 +1778,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1829,9 +1829,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "if": {
                         "properties": {
@@ -1876,9 +1876,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1923,9 +1923,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -1966,9 +1966,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2004,9 +2004,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2039,18 +2039,18 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
-                    "${'$'}ref": "#/${'$'}defs/bar",
+                    "$ref": "#/$defs/bar",
                     "properties": {
                         "foo": {
                             "type": "string"
                         }
                     },
                     "unevaluatedProperties": false,
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "properties": {
                                 "bar": {
@@ -2062,7 +2062,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties with ${'$'}ref::with no unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties with $ref::with no unevaluated properties"    """)
     }
 
     /**
@@ -2086,18 +2086,18 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
-                    "${'$'}ref": "#/${'$'}defs/bar",
+                    "$ref": "#/$defs/bar",
                     "properties": {
                         "foo": {
                             "type": "string"
                         }
                     },
                     "unevaluatedProperties": false,
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "properties": {
                                 "bar": {
@@ -2109,7 +2109,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties with ${'$'}ref::with unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties with $ref::with unevaluated properties"    """)
     }
 
     /**
@@ -2128,9 +2128,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": false,
                     "properties": {
@@ -2138,8 +2138,8 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                             "type": "string"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/bar",
-                    "${'$'}defs": {
+                    "$ref": "#/$defs/bar",
+                    "$defs": {
                         "bar": {
                             "properties": {
                                 "bar": {
@@ -2151,7 +2151,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties before ${'$'}ref::with no unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties before $ref::with no unevaluated properties"    """)
     }
 
     /**
@@ -2175,9 +2175,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "unevaluatedProperties": false,
                     "properties": {
@@ -2185,8 +2185,8 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                             "type": "string"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/bar",
-                    "${'$'}defs": {
+                    "$ref": "#/$defs/bar",
+                    "$defs": {
                         "bar": {
                             "properties": {
                                 "bar": {
@@ -2198,7 +2198,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties before ${'$'}ref::with unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties before $ref::with unevaluated properties"    """)
     }
 
     /**
@@ -2217,14 +2217,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
-                    "${'$'}ref": "./baseSchema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
+                    "$ref": "./baseSchema",
+                    "$defs": {
                         "derived": {
-                            "${'$'}dynamicAnchor": "addons",
+                            "$dynamicAnchor": "addons",
                             "properties": {
                                 "bar": {
                                     "type": "string"
@@ -2232,19 +2232,19 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                             }
                         },
                         "baseSchema": {
-                            "${'$'}id": "./baseSchema",
-                            "${'$'}comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                            "$id": "./baseSchema",
+                            "$comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
                             "unevaluatedProperties": false,
                             "properties": {
                                 "foo": {
                                     "type": "string"
                                 }
                             },
-                            "${'$'}dynamicRef": "#addons",
-                            "${'$'}defs": {
+                            "$dynamicRef": "#addons",
+                            "$defs": {
                                 "defaultAddons": {
-                                    "${'$'}comment": "Needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "addons"
+                                    "$comment": "Needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "addons"
                                 }
                             }
                         }
@@ -2252,7 +2252,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties with ${'$'}dynamicRef (2020)::with no unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with no unevaluated properties"    """)
     }
 
     /**
@@ -2276,14 +2276,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "baz": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
-                    "${'$'}ref": "./baseSchema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://example.com/unevaluated-properties-with-dynamic-ref/derived",
+                    "$ref": "./baseSchema",
+                    "$defs": {
                         "derived": {
-                            "${'$'}dynamicAnchor": "addons",
+                            "$dynamicAnchor": "addons",
                             "properties": {
                                 "bar": {
                                     "type": "string"
@@ -2291,19 +2291,19 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                             }
                         },
                         "baseSchema": {
-                            "${'$'}id": "./baseSchema",
-                            "${'$'}comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
+                            "$id": "./baseSchema",
+                            "$comment": "unevaluatedProperties comes first so it's more likely to catch bugs with implementations that are sensitive to keyword ordering",
                             "unevaluatedProperties": false,
                             "properties": {
                                 "foo": {
                                     "type": "string"
                                 }
                             },
-                            "${'$'}dynamicRef": "#addons",
-                            "${'$'}defs": {
+                            "$dynamicRef": "#addons",
+                            "$defs": {
                                 "defaultAddons": {
-                                    "${'$'}comment": "Needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "addons"
+                                    "$comment": "Needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "addons"
                                 }
                             }
                         }
@@ -2311,7 +2311,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "unevaluatedProperties::unevaluatedProperties with ${'$'}dynamicRef (2020)::with unevaluated properties"    """)
+            $$"""    schemaTestId: "unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with unevaluated properties"    """)
     }
 
     /**
@@ -2333,9 +2333,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "properties": {
@@ -2371,9 +2371,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "unevaluatedProperties": false
@@ -2405,9 +2405,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2442,9 +2442,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2478,9 +2478,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2515,9 +2515,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2555,9 +2555,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2596,9 +2596,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2632,9 +2632,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2673,9 +2673,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2713,9 +2713,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2756,9 +2756,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2794,9 +2794,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2837,9 +2837,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -2877,9 +2877,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2933,9 +2933,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -2987,9 +2987,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3027,9 +3027,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3071,9 +3071,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3116,9 +3116,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3160,9 +3160,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3200,9 +3200,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -3238,13 +3238,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3269,13 +3269,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "x": {}
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3305,13 +3305,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "y": {}
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3338,13 +3338,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3376,13 +3376,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3411,13 +3411,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3451,13 +3451,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "x": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "unevaluatedProperties": false
@@ -3480,10 +3480,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3500,7 +3500,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3510,7 +3510,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3546,10 +3546,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "b": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3566,7 +3566,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3576,7 +3576,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3612,10 +3612,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "y": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3632,7 +3632,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3642,7 +3642,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3678,10 +3678,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "x": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3698,7 +3698,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3708,7 +3708,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3744,10 +3744,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "y": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3764,7 +3764,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3774,7 +3774,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3811,10 +3811,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "x": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3831,7 +3831,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3841,7 +3841,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3878,10 +3878,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "y": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3898,7 +3898,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3908,7 +3908,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -3946,10 +3946,10 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "y": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "properties": {
                                 "a": true
@@ -3966,7 +3966,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "properties": {
@@ -3976,7 +3976,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                         {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4009,14 +4009,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4065,7 +4065,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4098,14 +4098,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "a": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4154,7 +4154,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4187,14 +4187,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "b": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4243,7 +4243,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4276,14 +4276,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "c": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4332,7 +4332,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4365,14 +4365,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "d": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4421,7 +4421,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4455,14 +4455,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "b": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4511,7 +4511,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4545,14 +4545,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "c": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4601,7 +4601,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4635,14 +4635,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "d": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4691,7 +4691,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4725,14 +4725,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "c": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4781,7 +4781,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4815,14 +4815,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "d": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4871,7 +4871,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4905,14 +4905,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "d": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -4961,7 +4961,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -4994,14 +4994,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "xx": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5050,7 +5050,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5084,14 +5084,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foox": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5140,7 +5140,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5178,14 +5178,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5234,7 +5234,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5268,14 +5268,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "a": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5324,7 +5324,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5358,14 +5358,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "b": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5414,7 +5414,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5448,14 +5448,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "c": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5504,7 +5504,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5538,14 +5538,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "d": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5594,7 +5594,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5627,14 +5627,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "all": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5683,7 +5683,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5717,14 +5717,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5773,7 +5773,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5807,14 +5807,14 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "a": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "one": {
                             "oneOf": [
                                 {
-                                    "${'$'}ref": "#/${'$'}defs/two"
+                                    "$ref": "#/$defs/two"
                                 },
                                 {
                                     "required": [
@@ -5863,7 +5863,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     },
                     "oneOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/one"
+                            "$ref": "#/$defs/one"
                         },
                         {
                             "required": [
@@ -5894,9 +5894,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -5917,9 +5917,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -5940,9 +5940,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -5963,9 +5963,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -5986,9 +5986,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -6009,9 +6009,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": false
                 }
             """,
@@ -6034,9 +6034,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "unevaluatedProperties": {
                         "type": "null"
                     }
@@ -6061,9 +6061,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "a": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "propertyNames": {
                         "maxLength": 1
                     },
@@ -6095,9 +6095,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "a": "b"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "propertyNames": {
                         "maxLength": 1
                     },
@@ -6125,9 +6125,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "if": {
                         "patternProperties": {
                             "foo": {
@@ -6161,9 +6161,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "if": {
                         "patternProperties": {
                             "foo": {
@@ -6197,9 +6197,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "foo": ""
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo2": {}
                     },
@@ -6237,9 +6237,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": ""
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo2": {}
                     },
@@ -6274,9 +6274,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": ""
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo2": {}
                     },
@@ -6317,9 +6317,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "properties": {
@@ -6353,13 +6353,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "patternProperties": {
-                                "^bar${'$'}": {
+                                "^bar$": {
                                     "type": "string"
                                 }
                             }
@@ -6394,13 +6394,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "patternProperties": {
-                                "^bar${'$'}": {
+                                "^bar$": {
                                     "type": "string"
                                 }
                             }
@@ -6430,9 +6430,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "additionalProperties": {
@@ -6469,9 +6469,9 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "additionalProperties": {

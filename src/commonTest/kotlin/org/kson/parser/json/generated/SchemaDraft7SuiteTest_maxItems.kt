@@ -28,9 +28,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2
                 }
             """,
@@ -81,9 +81,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2
                 }
             """,
@@ -104,9 +104,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
             """
                 "foobar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2
                 }
             """,
@@ -129,9 +129,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2.0
                 }
             """,
@@ -156,9 +156,9 @@ class SchemaDraft7SuiteTest_maxItems : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxItems": 2.0
                 }
             """,

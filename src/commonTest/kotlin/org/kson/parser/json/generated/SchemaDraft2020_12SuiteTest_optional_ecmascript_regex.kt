@@ -27,15 +27,15 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "abc\\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^abc${'$'}"
+                    "pattern": "^abc$"
                 }
             """,
             false,
-            """    schemaTestId: "optional/ecmascript-regex::ECMA 262 regex ${'$'} does not match trailing newline::matches in Python, but not in ECMA 262"    """)
+            $$"""    schemaTestId: "optional/ecmascript-regex::ECMA 262 regex $ does not match trailing newline::matches in Python, but not in ECMA 262"    """)
     }
 
     /**
@@ -51,15 +51,15 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^abc${'$'}"
+                    "pattern": "^abc$"
                 }
             """,
             true,
-            """    schemaTestId: "optional/ecmascript-regex::ECMA 262 regex ${'$'} does not match trailing newline::matches"    """)
+            $$"""    schemaTestId: "optional/ecmascript-regex::ECMA 262 regex $ does not match trailing newline::matches"    """)
     }
 
     /**
@@ -75,11 +75,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\\t"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\t${'$'}"
+                    "pattern": "^\\t$"
                 }
             """,
             false,
@@ -99,11 +99,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\t"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\t${'$'}"
+                    "pattern": "^\\t$"
                 }
             """,
             true,
@@ -123,11 +123,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\\cC"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\cC${'$'}"
+                    "pattern": "^\\cC$"
                 }
             """,
             false,
@@ -147,11 +147,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u0003"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\cC${'$'}"
+                    "pattern": "^\\cC$"
                 }
             """,
             true,
@@ -171,11 +171,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\\cc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\cc${'$'}"
+                    "pattern": "^\\cc$"
                 }
             """,
             false,
@@ -199,11 +199,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u0003"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\cc${'$'}"
+                    "pattern": "^\\cc$"
                 }
             """,
             true,
@@ -223,11 +223,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\d${'$'}"
+                    "pattern": "^\\d$"
                 }
             """,
             true,
@@ -247,11 +247,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "߀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\d${'$'}"
+                    "pattern": "^\\d$"
                 }
             """,
             false,
@@ -271,11 +271,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "߀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\d${'$'}"
+                    "pattern": "^\\d$"
                 }
             """,
             false,
@@ -295,11 +295,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\D${'$'}"
+                    "pattern": "^\\D$"
                 }
             """,
             false,
@@ -319,11 +319,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "߀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\D${'$'}"
+                    "pattern": "^\\D$"
                 }
             """,
             true,
@@ -343,11 +343,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "߀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\D${'$'}"
+                    "pattern": "^\\D$"
                 }
             """,
             true,
@@ -367,11 +367,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\w${'$'}"
+                    "pattern": "^\\w$"
                 }
             """,
             true,
@@ -391,11 +391,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "é"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\w${'$'}"
+                    "pattern": "^\\w$"
                 }
             """,
             false,
@@ -415,11 +415,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\W${'$'}"
+                    "pattern": "^\\W$"
                 }
             """,
             false,
@@ -439,11 +439,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "é"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\W${'$'}"
+                    "pattern": "^\\W$"
                 }
             """,
             true,
@@ -463,11 +463,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -487,11 +487,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\t"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -511,11 +511,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u000b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -535,11 +535,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -563,11 +563,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -591,11 +591,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "﻿"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -615,11 +615,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -643,11 +643,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -671,11 +671,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             true,
@@ -695,11 +695,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u0001"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             false,
@@ -719,11 +719,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "–"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\s${'$'}"
+                    "pattern": "^\\s$"
                 }
             """,
             false,
@@ -743,11 +743,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -767,11 +767,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\t"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -791,11 +791,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u000b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -815,11 +815,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -843,11 +843,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -871,11 +871,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "﻿"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -895,11 +895,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -923,11 +923,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -951,11 +951,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 " "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             false,
@@ -975,11 +975,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "\u0001"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             true,
@@ -999,11 +999,11 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "–"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
-                    "pattern": "^\\S${'$'}"
+                    "pattern": "^\\S$"
                 }
             """,
             true,
@@ -1027,9 +1027,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance etaient des saisons longues, longues. Nous vivions en trois lieux: l'ecole, l'eglise et la patinoire; mais la vraie vie etait sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\p{Letter}cole"
                 }
             """,
@@ -1054,9 +1054,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\p{Letter}cole"
                 }
             """,
@@ -1081,9 +1081,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\p{Letter}cole"
                 }
             """,
@@ -1108,9 +1108,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "LES HIVERS DE MON ENFANCE ÉTAIENT DES SAISONS LONGUES, LONGUES. NOUS VIVIONS EN TROIS LIEUX: L'ÉCOLE, L'ÉGLISE ET LA PATINOIRE; MAIS LA VRAIE VIE ÉTAIT SUR LA PATINOIRE."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\p{Letter}cole"
                 }
             """,
@@ -1131,9 +1131,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance etaient des saisons longues, longues. Nous vivions en trois lieux: l'ecole, l'eglise et la patinoire; mais la vraie vie etait sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\wcole"
                 }
             """,
@@ -1154,9 +1154,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\wcole"
                 }
             """,
@@ -1177,9 +1177,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\wcole"
                 }
             """,
@@ -1200,9 +1200,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "LES HIVERS DE MON ENFANCE ÉTAIENT DES SAISONS LONGUES, LONGUES. NOUS VIVIONS EN TROIS LIEUX: L'ÉCOLE, L'ÉGLISE ET LA PATINOIRE; MAIS LA VRAIE VIE ÉTAIT SUR LA PATINOIRE."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "\\wcole"
                 }
             """,
@@ -1223,9 +1223,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "[a-z]cole"
                 }
             """,
@@ -1246,9 +1246,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance étaient des saisons longues, longues. Nous vivions en trois lieux: l'école, l'église et la patinoire; mais la vraie vie était sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "[a-z]cole"
                 }
             """,
@@ -1269,9 +1269,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "Les hivers de mon enfance etaient des saisons longues, longues. Nous vivions en trois lieux: l'ecole, l'eglise et la patinoire; mais la vraie vie etait sur la patinoire."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "pattern": "[a-z]cole"
                 }
             """,
@@ -1292,10 +1292,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "42"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\d+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\d+$"
                 }
             """,
             true,
@@ -1315,10 +1315,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "-%#"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\d+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\d+$"
                 }
             """,
             false,
@@ -1338,10 +1338,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "৪২"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\d+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\d+$"
                 }
             """,
             false,
@@ -1365,10 +1365,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "42"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\p{digit}+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\p{digit}+$"
                 }
             """,
             true,
@@ -1392,10 +1392,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "-%#"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\p{digit}+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\p{digit}+$"
                 }
             """,
             false,
@@ -1419,10 +1419,10 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
             """
                 "৪২"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^\\p{digit}+${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^\\p{digit}+$"
                 }
             """,
             true,
@@ -1448,9 +1448,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'ecole": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\p{Letter}cole": {}
@@ -1481,9 +1481,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\p{Letter}cole": {}
@@ -1514,9 +1514,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\p{Letter}cole": {}
@@ -1547,9 +1547,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "L'ÉCOLE": "PAS DE VRAIE VIE"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\p{Letter}cole": {}
@@ -1576,9 +1576,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'ecole": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\wcole": {}
@@ -1605,9 +1605,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\wcole": {}
@@ -1634,9 +1634,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\wcole": {}
@@ -1663,9 +1663,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "L'ÉCOLE": "PAS DE VRAIE VIE"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "\\wcole": {}
@@ -1692,9 +1692,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "[a-z]cole": {}
@@ -1721,9 +1721,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'école": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "[a-z]cole": {}
@@ -1750,9 +1750,9 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "l'ecole": "pas de vraie vie"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
                         "[a-z]cole": {}
@@ -1779,12 +1779,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "42": "life, the universe, and everything"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\d+${'$'}": {}
+                        "^\\d+$": {}
                     },
                     "additionalProperties": false
                 }
@@ -1808,12 +1808,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "-%#": "spending the year dead for tax reasons"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\d+${'$'}": {}
+                        "^\\d+$": {}
                     },
                     "additionalProperties": false
                 }
@@ -1837,12 +1837,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "৪২": "khajit has wares if you have coin"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\d+${'$'}": {}
+                        "^\\d+$": {}
                     },
                     "additionalProperties": false
                 }
@@ -1870,12 +1870,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "42": "life, the universe, and everything"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\p{digit}+${'$'}": {}
+                        "^\\p{digit}+$": {}
                     },
                     "additionalProperties": false
                 }
@@ -1903,12 +1903,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "-%#": "spending the year dead for tax reasons"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\p{digit}+${'$'}": {}
+                        "^\\p{digit}+$": {}
                     },
                     "additionalProperties": false
                 }
@@ -1936,12 +1936,12 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
                     "৪২": "khajit has wares if you have coin"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "patternProperties": {
-                        "^\\p{digit}+${'$'}": {}
+                        "^\\p{digit}+$": {}
                     },
                     "additionalProperties": false
                 }

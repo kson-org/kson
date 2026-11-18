@@ -27,10 +27,10 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
             """
                 "127.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
-                    "${'$'}id": "https://schema/using/format-assertion/false",
+                    "$schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
+                    "$id": "https://schema/using/format-assertion/false",
                     "format": "ipv4"
                 }
             """,
@@ -55,10 +55,10 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
             """
                 "not-an-ipv4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
-                    "${'$'}id": "https://schema/using/format-assertion/false",
+                    "$schema": "http://localhost:1234/draft2020-12/format-assertion-false.json",
+                    "$id": "https://schema/using/format-assertion/false",
                     "format": "ipv4"
                 }
             """,
@@ -79,10 +79,10 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
             """
                 "127.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/format-assertion-true.json",
-                    "${'$'}id": "https://schema/using/format-assertion/true",
+                    "$schema": "http://localhost:1234/draft2020-12/format-assertion-true.json",
+                    "$id": "https://schema/using/format-assertion/true",
                     "format": "ipv4"
                 }
             """,
@@ -107,10 +107,10 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
             """
                 "not-an-ipv4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/format-assertion-true.json",
-                    "${'$'}id": "https://schema/using/format-assertion/true",
+                    "$schema": "http://localhost:1234/draft2020-12/format-assertion-true.json",
+                    "$id": "https://schema/using/format-assertion/true",
                     "format": "ipv4"
                 }
             """,

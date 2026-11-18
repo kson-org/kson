@@ -31,9 +31,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 1.2345678910111214E52
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -58,9 +58,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -1.2345678910111214E52
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -81,9 +81,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 9.824928374923492E52
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -104,9 +104,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -9.824928374923492E52
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -127,9 +127,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 9.824928374923492E52
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -154,9 +154,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 18446744073709551600
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 18446744073709551615
                 }
             """,
@@ -181,9 +181,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 1.8446744073709552E19
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 18446744073709551615
                 }
             """,
@@ -208,9 +208,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 9.727837981879871E26
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 9.727837981879871E26
                 }
             """,
@@ -231,9 +231,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 9.727837981879871E26
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 9.727837981879871E26
                 }
             """,
@@ -254,9 +254,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -1.8446744073709552E19
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minimum": -1.8446744073709552E19
                 }
             """,
@@ -281,9 +281,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -1.8446744073709552E19
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minimum": -1.8446744073709552E19
                 }
             """,
@@ -308,9 +308,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -9.727837981879871E26
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMinimum": -9.727837981879871E26
                 }
             """,
@@ -331,9 +331,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 -9.727837981879871E26
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMinimum": -9.727837981879871E26
                 }
             """,
@@ -354,9 +354,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0.12345678912345678
                     ]
@@ -383,9 +383,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0.12345678912345678
                     ]
@@ -412,9 +412,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0.12345678912345678
                     ]
@@ -437,9 +437,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "const": 0.12345678912345678
                 }
             """,
@@ -464,9 +464,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "const": 0.12345678912345678
                 }
             """,
@@ -491,9 +491,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 0.12345678912345678
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "const": 0.12345678912345678
                 }
             """,
@@ -514,9 +514,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 1.0E308
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number",
                     "multipleOf": 0.5
                 }
@@ -545,9 +545,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     0.12345678912345678
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -571,9 +571,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     0.12345678912345678
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -597,9 +597,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     0.12345678912345678
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -631,9 +631,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -661,9 +661,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -695,9 +695,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -725,9 +725,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -748,9 +748,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 3.0E20
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 3
                 }
             """,
@@ -775,9 +775,9 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
             """
                 1.0E20
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 3
                 }
             """,

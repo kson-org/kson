@@ -31,9 +31,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "\\a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -58,9 +58,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?P<name>x)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -85,9 +85,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?P<n>a)(?P=n)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -112,9 +112,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?#comment)a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -139,9 +139,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?i)abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -166,9 +166,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?ims)abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -189,9 +189,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<name>x)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -212,9 +212,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<n>a)\\k<n>"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -235,9 +235,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<=a+)b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -258,9 +258,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "[]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -281,9 +281,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "[^]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,
@@ -304,9 +304,9 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "\\cA"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "regex"
                 }
             """,

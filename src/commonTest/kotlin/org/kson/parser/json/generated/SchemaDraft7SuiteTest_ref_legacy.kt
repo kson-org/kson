@@ -30,15 +30,15 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
                         },
                         {
-                            "${'$'}ref": "#/items/0"
+                            "$ref": "#/items/0"
                         }
                     ]
                 }
@@ -63,15 +63,15 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
                         },
                         {
-                            "${'$'}ref": "#/items/0"
+                            "$ref": "#/items/0"
                         }
                     ]
                 }
@@ -95,9 +95,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "slash": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -111,13 +111,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "tilde": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -157,13 +157,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -187,9 +187,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "percent": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -203,13 +203,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -233,9 +233,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "slash": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -249,13 +249,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -279,9 +279,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "tilde": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -295,13 +295,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -325,9 +325,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "percent": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "tilde~field": {
                             "type": "integer"
@@ -341,13 +341,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/definitions/tilde~0field"
+                            "$ref": "#/definitions/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/definitions/slash~1field"
+                            "$ref": "#/definitions/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/definitions/percent%25field"
+                            "$ref": "#/definitions/percent%25field"
                         }
                     }
                 }
@@ -371,23 +371,23 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": 5
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "a": {
                             "type": "integer"
                         },
                         "b": {
-                            "${'$'}ref": "#/definitions/a"
+                            "$ref": "#/definitions/a"
                         },
                         "c": {
-                            "${'$'}ref": "#/definitions/b"
+                            "$ref": "#/definitions/b"
                         }
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/c"
+                            "$ref": "#/definitions/c"
                         }
                     }
                 }
@@ -411,23 +411,23 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "a": {
                             "type": "integer"
                         },
                         "b": {
-                            "${'$'}ref": "#/definitions/a"
+                            "$ref": "#/definitions/a"
                         },
                         "c": {
-                            "${'$'}ref": "#/definitions/b"
+                            "$ref": "#/definitions/b"
                         }
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/c"
+                            "$ref": "#/definitions/c"
                         }
                     }
                 }
@@ -451,9 +451,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": []
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "reffed": {
                             "type": "array"
@@ -461,7 +461,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/reffed",
+                            "$ref": "#/definitions/reffed",
                             "maxItems": 2
                         }
                     }
@@ -490,9 +490,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "reffed": {
                             "type": "array"
@@ -500,7 +500,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/reffed",
+                            "$ref": "#/definitions/reffed",
                             "maxItems": 2
                         }
                     }
@@ -525,9 +525,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": "string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "reffed": {
                             "type": "array"
@@ -535,7 +535,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/reffed",
+                            "$ref": "#/definitions/reffed",
                             "maxItems": 2
                         }
                     }
@@ -555,17 +555,17 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
     fun jsonSchemaSuiteTest_14() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "a"
+                    "$ref": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
-                        "${'$'}ref": {
-                            "${'$'}ref": "#/definitions/is-string"
+                        "$ref": {
+                            "$ref": "#/definitions/is-string"
                         }
                     },
                     "definitions": {
@@ -576,7 +576,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::property named ${'$'}ref, containing an actual ${'$'}ref::property named ${'$'}ref valid"    """)
+            $$"""    schemaTestId: "ref-legacy::property named $ref, containing an actual $ref::property named $ref valid"    """)
     }
 
     /**
@@ -589,17 +589,17 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
     fun jsonSchemaSuiteTest_15() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": 2
+                    "$ref": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
-                        "${'$'}ref": {
-                            "${'$'}ref": "#/definitions/is-string"
+                        "$ref": {
+                            "$ref": "#/definitions/is-string"
                         }
                     },
                     "definitions": {
@@ -610,7 +610,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::property named ${'$'}ref, containing an actual ${'$'}ref::property named ${'$'}ref invalid"    """)
+            $$"""    schemaTestId: "ref-legacy::property named $ref, containing an actual $ref::property named $ref invalid"    """)
     }
 
     /**
@@ -626,9 +626,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 "this is a string"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "a_string": {
                             "type": "string"
@@ -636,13 +636,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/definitions/a_string"
+                            "$ref": "#/definitions/a_string"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::naive replacement of ${'$'}ref with its destination is not correct::do not evaluate the ${'$'}ref inside the enum, matching any string"    """)
+            $$"""    schemaTestId: "ref-legacy::naive replacement of $ref with its destination is not correct::do not evaluate the $ref inside the enum, matching any string"    """)
     }
 
     /**
@@ -660,9 +660,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "type": "string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "a_string": {
                             "type": "string"
@@ -670,13 +670,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/definitions/a_string"
+                            "$ref": "#/definitions/a_string"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::naive replacement of ${'$'}ref with its destination is not correct::do not evaluate the ${'$'}ref inside the enum, definition exact match"    """)
+            $$"""    schemaTestId: "ref-legacy::naive replacement of $ref with its destination is not correct::do not evaluate the $ref inside the enum, definition exact match"    """)
     }
 
     /**
@@ -689,14 +689,14 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
     fun jsonSchemaSuiteTest_18() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "#/definitions/a_string"
+                    "$ref": "#/definitions/a_string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "a_string": {
                             "type": "string"
@@ -704,13 +704,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/definitions/a_string"
+                            "$ref": "#/definitions/a_string"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::naive replacement of ${'$'}ref with its destination is not correct::match the enum exactly"    """)
+            $$"""    schemaTestId: "ref-legacy::naive replacement of $ref with its destination is not correct::match the enum exactly"    """)
     }
 
     /**
@@ -726,12 +726,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/bool"
+                            "$ref": "#/definitions/bool"
                         }
                     ],
                     "definitions": {
@@ -740,7 +740,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::${'$'}ref to boolean schema true::any value is valid"    """)
+            $$"""    schemaTestId: "ref-legacy::$ref to boolean schema true::any value is valid"    """)
     }
 
     /**
@@ -756,12 +756,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/bool"
+                            "$ref": "#/definitions/bool"
                         }
                     ],
                     "definitions": {
@@ -770,7 +770,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::${'$'}ref to boolean schema false::any value is invalid"    """)
+            $$"""    schemaTestId: "ref-legacy::$ref to boolean schema false::any value is invalid"    """)
     }
 
     /**
@@ -788,12 +788,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo\"bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo\"bar": {
-                            "${'$'}ref": "#/definitions/foo%22bar"
+                            "$ref": "#/definitions/foo%22bar"
                         }
                     },
                     "definitions": {
@@ -822,12 +822,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo\"bar": "1"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo\"bar": {
-                            "${'$'}ref": "#/definitions/foo%22bar"
+                            "$ref": "#/definitions/foo%22bar"
                         }
                     },
                     "definitions": {
@@ -856,9 +856,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "": {
                             "definitions": {
@@ -870,13 +870,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions//definitions/"
+                            "$ref": "#/definitions//definitions/"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::empty tokens in ${'$'}ref json-pointer::number is valid"    """)
+            $$"""    schemaTestId: "ref-legacy::empty tokens in $ref json-pointer::number is valid"    """)
     }
 
     /**
@@ -894,9 +894,9 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "foo": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "": {
                             "definitions": {
@@ -908,13 +908,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions//definitions/"
+                            "$ref": "#/definitions//definitions/"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::empty tokens in ${'$'}ref json-pointer::non-number is invalid"    """)
+            $$"""    schemaTestId: "ref-legacy::empty tokens in $ref json-pointer::non-number is invalid"    """)
     }
 
     /**
@@ -934,10 +934,10 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
                 }
             """,
             true,
@@ -961,10 +961,10 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
                 }
             """,
             false,
@@ -988,10 +988,10 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
                 }
             """,
             true,
@@ -1015,10 +1015,10 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
                 }
             """,
             false,
@@ -1044,13 +1044,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "name": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name.json#/definitions/orNull"
+                            "$ref": "http://localhost:1234/name.json#/definitions/orNull"
                         }
                     }
                 }
@@ -1078,13 +1078,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "name": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name.json#/definitions/orNull"
+                            "$ref": "http://localhost:1234/name.json#/definitions/orNull"
                         }
                     }
                 }
@@ -1114,13 +1114,13 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name.json#/definitions/orNull"
+                            "$ref": "http://localhost:1234/name.json#/definitions/orNull"
                         }
                     }
                 }
@@ -1148,12 +1148,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "http://localhost:1234/ref-and-definitions.json"
+                            "$ref": "http://localhost:1234/ref-and-definitions.json"
                         }
                     ]
                 }
@@ -1181,12 +1181,12 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "http://localhost:1234/ref-and-definitions.json"
+                            "$ref": "http://localhost:1234/ref-and-definitions.json"
                         }
                     ]
                 }

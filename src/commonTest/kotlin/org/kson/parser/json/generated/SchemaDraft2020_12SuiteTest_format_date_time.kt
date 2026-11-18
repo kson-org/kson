@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-02-31T15:59:60.123-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-19T08:30:06.283185Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-19T08:30:06Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1937-01-01T12:00:27.87+00:20"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -257,9 +257,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-12-31T15:59:50.123-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -280,9 +280,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1998-12-31T23:59:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -303,9 +303,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1998-12-31T15:59:60.123-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -330,9 +330,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1998-12-31T23:59:61Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -357,9 +357,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1998-12-31T23:58:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -384,9 +384,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1998-12-31T22:59:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -411,9 +411,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-02-31T15:59:59.123-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -438,9 +438,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-12-31T15:59:59-24:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -465,9 +465,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-19T08:30:06.28123+01:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -492,9 +492,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-12-31T24:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -519,9 +519,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-12-31T15:60:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -546,9 +546,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1990-12-31T10:00:00+10:60"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -573,9 +573,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "06/19/1963 08:30:06 PST"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -596,9 +596,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-19t08:30:06.283185z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -623,9 +623,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2013-350T01:01:01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -650,9 +650,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-6-19T08:30:06.283185Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -677,9 +677,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-1T08:30:06.283185Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -704,9 +704,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-1৪T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -731,9 +731,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1963-06-11T0৪:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -758,9 +758,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "+11963-06-19T08:30:06.283185Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -785,9 +785,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50+01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -812,9 +812,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2016-12-31T24:59:60+01:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -835,9 +835,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T00:59:59.999999999999999Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -862,9 +862,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50Z\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -889,9 +889,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -916,9 +916,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50Ztail"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -943,9 +943,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:60:00+00:01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -966,9 +966,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2021-02-28T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -993,9 +993,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2020-02-30T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1020,9 +1020,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2021-02-29T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1043,9 +1043,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2020-02-29T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1070,9 +1070,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "0100-02-29T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1093,9 +1093,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "0400-02-29T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1120,9 +1120,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "2100-02-29T00:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1147,9 +1147,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50.Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1174,9 +1174,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50,5Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1201,9 +1201,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 " 1985-04-12T23:20:50Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,
@@ -1228,9 +1228,9 @@ class SchemaDraft2020_12SuiteTest_format_date_time : JsonSchemaTest {
             """
                 "1985-04-12T23:20:50Z "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "date-time"
                 }
             """,

@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "22:59:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -81,9 +81,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:58:60Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -104,9 +104,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60+00:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -131,9 +131,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "22:59:60+00:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -158,9 +158,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:58:60+00:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -181,9 +181,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "01:29:60+01:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -204,9 +204,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:29:60+23:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -231,9 +231,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60+01:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -258,9 +258,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60+00:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -281,9 +281,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "15:59:60-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -304,9 +304,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "00:29:60-23:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -331,9 +331,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60-01:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,
@@ -358,9 +358,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_time : JsonSchemaTest {
             """
                 "23:59:60-00:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "time"
                 }
             """,

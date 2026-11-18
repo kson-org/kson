@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "integer"
@@ -56,9 +56,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 2.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "integer"
@@ -86,9 +86,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 3
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "integer"
@@ -116,9 +116,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 1.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "integer"
@@ -146,9 +146,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 3
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
                     "oneOf": [
                         {
@@ -177,9 +177,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foobar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
                     "oneOf": [
                         {
@@ -208,9 +208,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "string",
                     "oneOf": [
                         {
@@ -239,9 +239,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         true,
                         true,
@@ -266,9 +266,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         true,
                         false,
@@ -293,9 +293,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         true,
                         true,
@@ -320,9 +320,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         false,
                         false,
@@ -349,9 +349,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -395,9 +395,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "foo": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -442,9 +442,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -489,9 +489,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": "quux"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -533,9 +533,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "number"
@@ -561,9 +561,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "type": "number"
@@ -591,9 +591,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "oneOf": [
                         {
@@ -631,9 +631,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "oneOf": [
                         {
@@ -671,9 +671,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "baz": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "oneOf": [
                         {
@@ -712,9 +712,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "baz": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "oneOf": [
                         {
@@ -751,9 +751,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 8
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -794,9 +794,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -838,9 +838,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "bar": 8
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -881,9 +881,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
                     "baz": "quux"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "properties": {
@@ -922,9 +922,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "oneOf": [
@@ -953,9 +953,9 @@ class SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "oneOf": [
                         {
                             "oneOf": [

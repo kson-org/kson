@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "〮실례.테스트"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "실례.테스트"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "〮실례.테스트"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -242,9 +242,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "실〮례.테스트"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -265,9 +265,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -292,9 +292,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -316,12 +316,12 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
     fun jsonSchemaSuiteTest_13() {
         
         assertKsonEnforcesSchema(
-            """
-                "-> ${'$'}1.00 <--"
+            $$"""
+                "-> $1.00 <--"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -342,9 +342,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--ihqwcrb4cv8a8dqg056pqjye"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -369,9 +369,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--X"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -396,9 +396,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "XN--aa---o47jg78q"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -423,9 +423,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "-hello"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -450,9 +450,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "hello-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -477,9 +477,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "-hello-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -504,9 +504,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ःhello"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -531,9 +531,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "̀hello"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -558,9 +558,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "҈hello"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -581,9 +581,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ßς་〇"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -604,9 +604,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "۽۾"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -631,9 +631,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ـߺ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -658,9 +658,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "〱〲〳〴〵〮〯〻"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -685,9 +685,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a·l"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -712,9 +712,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "·l"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -739,9 +739,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "l·a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -766,9 +766,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "l·"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -789,9 +789,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "l·l"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -816,9 +816,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "α͵S"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -843,9 +843,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "α͵"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -866,9 +866,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "α͵β"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -893,9 +893,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "A׳ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -920,9 +920,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "׳ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -943,9 +943,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "א׳ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -970,9 +970,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "A״ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -997,9 +997,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "״ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1020,9 +1020,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "א״ב"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1047,9 +1047,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "def・abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1074,9 +1074,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "・"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1097,9 +1097,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "・ぁ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1120,9 +1120,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "・ァ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1143,9 +1143,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "・丈"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1170,9 +1170,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ب٠۰"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1193,9 +1193,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ب٠ب"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1216,9 +1216,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "۰0"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1243,9 +1243,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "क‍ष"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1270,9 +1270,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "‍ष"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1293,9 +1293,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "क्‍ष"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1316,9 +1316,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "क्‌ष"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1339,9 +1339,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "بي‌بي"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1362,9 +1362,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "hostname"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1385,9 +1385,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "host-name"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1408,9 +1408,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "h0stn4me"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1431,9 +1431,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "1host"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1454,9 +1454,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "hostnam3"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1481,9 +1481,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1508,9 +1508,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "example.com\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1535,9 +1535,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 " example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1562,9 +1562,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ex ample.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1585,9 +1585,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "１２３"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1608,9 +1608,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a​b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1631,9 +1631,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--NXASMQ6B"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1654,9 +1654,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ب٠.ب۰"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1681,9 +1681,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "٠١"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1704,9 +1704,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "café.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1727,9 +1727,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａａ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1750,9 +1750,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "ｘｎ--nxasmq6b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1777,9 +1777,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "क्‌षx‌y"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1804,9 +1804,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "0a.א"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1831,9 +1831,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "0ا"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1858,9 +1858,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "aא"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1885,9 +1885,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "א0٠"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1912,9 +1912,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--7a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1939,9 +1939,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--0ca24w"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1966,9 +1966,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "üüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -1993,9 +1993,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a..b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2020,9 +2020,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2047,9 +2047,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn--example-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2074,9 +2074,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "xn---9uc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2101,9 +2101,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2128,9 +2128,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "。"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2155,9 +2155,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "．"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2182,9 +2182,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "｡"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2205,9 +2205,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a.b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2228,9 +2228,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a。b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2251,9 +2251,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a．b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2274,9 +2274,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "a｡b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2301,9 +2301,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 ".example"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2328,9 +2328,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "。example"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2355,9 +2355,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "．example"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2382,9 +2382,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "｡example"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2409,9 +2409,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "example."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2436,9 +2436,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "example。"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2463,9 +2463,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "example．"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2490,9 +2490,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "example｡"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2513,9 +2513,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2536,9 +2536,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα。com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2559,9 +2559,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα．com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,
@@ -2582,9 +2582,9 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
             """
                 "παράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπαράδειγμαπα｡com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "idn-hostname"
                 }
             """,

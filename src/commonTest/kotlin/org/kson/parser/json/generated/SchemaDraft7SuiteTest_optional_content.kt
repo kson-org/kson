@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "{\"foo\": \"bar\"}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "{:}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -77,9 +77,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json"
                 }
             """,
@@ -100,9 +100,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "eyJmb28iOiAiYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentEncoding": "base64"
                 }
             """,
@@ -127,9 +127,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "eyJmb28iOi%iYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentEncoding": "base64"
                 }
             """,
@@ -150,9 +150,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentEncoding": "base64"
                 }
             """,
@@ -173,9 +173,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "eyJmb28iOiAiYmFyIn0K"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -201,9 +201,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "ezp9Cg=="
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -229,9 +229,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 "{}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }
@@ -253,9 +253,9 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "contentMediaType": "application/json",
                     "contentEncoding": "base64"
                 }

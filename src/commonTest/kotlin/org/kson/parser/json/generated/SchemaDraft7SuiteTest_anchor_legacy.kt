@@ -27,17 +27,17 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#foo"
+                            "$ref": "#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "#foo",
+                            "$id": "#foo",
                             "type": "integer"
                         }
                     }
@@ -60,17 +60,17 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#foo"
+                            "$ref": "#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "#foo",
+                            "$id": "#foo",
                             "type": "integer"
                         }
                     }
@@ -93,21 +93,21 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/root",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/root",
                     "allOf": [
                         {
-                            "${'$'}ref": "http://localhost:1234/nested.json#foo"
+                            "$ref": "http://localhost:1234/nested.json#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "nested.json",
+                            "$id": "nested.json",
                             "definitions": {
                                 "B": {
-                                    "${'$'}id": "#foo",
+                                    "$id": "#foo",
                                     "type": "integer"
                                 }
                             }
@@ -132,21 +132,21 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/root",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/root",
                     "allOf": [
                         {
-                            "${'$'}ref": "http://localhost:1234/nested.json#foo"
+                            "$ref": "http://localhost:1234/nested.json#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "nested.json",
+                            "$id": "nested.json",
                             "definitions": {
                                 "B": {
-                                    "${'$'}id": "#foo",
+                                    "$id": "#foo",
                                     "type": "integer"
                                 }
                             }
@@ -171,18 +171,18 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "https://example.com/schema-with-anchor",
                     "allOf": [
                         {
-                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                            "$ref": "https://example.com/schema-with-anchor#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "#foo",
+                            "$id": "#foo",
                             "type": "integer"
                         }
                     }
@@ -205,18 +205,18 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "https://example.com/schema-with-anchor",
                     "allOf": [
                         {
-                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                            "$ref": "https://example.com/schema-with-anchor#foo"
                         }
                     ],
                     "definitions": {
                         "A": {
-                            "${'$'}id": "#foo",
+                            "$id": "#foo",
                             "type": "integer"
                         }
                     }
@@ -241,18 +241,18 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                            "$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
                         }
                     },
                     "definitions": {
                         "bar": {
-                            "${'$'}id": "#something",
+                            "$id": "#something",
                             "type": "string"
                         }
                     }
@@ -277,18 +277,18 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                            "$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
                         }
                     },
                     "definitions": {
                         "bar": {
-                            "${'$'}id": "#something",
+                            "$id": "#something",
                             "type": "string"
                         }
                     }
@@ -315,10 +315,10 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
                 }
             """,
             true,
@@ -342,10 +342,10 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
                 }
             """,
             false,
@@ -369,10 +369,10 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#/definitions/refToInteger"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#/definitions/refToInteger"
                 }
             """,
             true,
@@ -396,10 +396,10 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#/definitions/refToInteger"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#/definitions/refToInteger"
                 }
             """,
             false,
@@ -423,14 +423,14 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/detached-ref.json#/definitions/foo"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/detached-ref.json#/definitions/foo"
                 }
             """,
             true,
-            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """)
+            $$"""    schemaTestId: "anchor-legacy::$ref to $ref finds detached $anchor::number is valid"    """)
     }
 
     /**
@@ -450,13 +450,13 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/detached-ref.json#/definitions/foo"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/detached-ref.json#/definitions/foo"
                 }
             """,
             false,
-            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """)
+            $$"""    schemaTestId: "anchor-legacy::$ref to $ref finds detached $anchor::non-number is invalid"    """)
     }
 }

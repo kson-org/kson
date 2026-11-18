@@ -168,6 +168,17 @@ class JsonTestSuiteGeneratorTest {
         assertFalse(generated.draft7ClassNames.any { "proposal" in it }, "proposals should not be generated")
     }
 
+    @Test
+    fun contentWithoutADollarNeedsNoInterpolationPrefix() {
+        assertEquals("", interpolationPrefixFor("""{ "type": "string" }"""))
+    }
+
+    @Test
+    fun theInterpolationPrefixOutnumbersTheLongestDollarRun() {
+        assertEquals("$$", interpolationPrefixFor($$"""{ "$ref": "#/$defs/a" }"""))
+        assertEquals("$$$", interpolationPrefixFor($$$"""costs $$this or $${it}"""))
+    }
+
     /**
      * Generates tests from a suite in which both drafts have the tests `shared::group::test` and
      * `optional/extra::group::test`, only Draft 7 has `shared::draft7Only group::test` and `draft7Only::group::test`,

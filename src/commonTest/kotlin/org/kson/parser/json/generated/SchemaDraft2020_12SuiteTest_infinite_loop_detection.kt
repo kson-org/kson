@@ -28,10 +28,10 @@ class SchemaDraft2020_12SuiteTest_infinite_loop_detection : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "int": {
                             "type": "integer"
                         }
@@ -40,13 +40,13 @@ class SchemaDraft2020_12SuiteTest_infinite_loop_detection : JsonSchemaTest {
                         {
                             "properties": {
                                 "foo": {
-                                    "${'$'}ref": "#/${'$'}defs/int"
+                                    "$ref": "#/$defs/int"
                                 }
                             }
                         },
                         {
                             "additionalProperties": {
-                                "${'$'}ref": "#/${'$'}defs/int"
+                                "$ref": "#/$defs/int"
                             }
                         }
                     ]
@@ -71,10 +71,10 @@ class SchemaDraft2020_12SuiteTest_infinite_loop_detection : JsonSchemaTest {
                     "foo": "a string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "int": {
                             "type": "integer"
                         }
@@ -83,13 +83,13 @@ class SchemaDraft2020_12SuiteTest_infinite_loop_detection : JsonSchemaTest {
                         {
                             "properties": {
                                 "foo": {
-                                    "${'$'}ref": "#/${'$'}defs/int"
+                                    "$ref": "#/$defs/int"
                                 }
                             }
                         },
                         {
                             "additionalProperties": {
-                                "${'$'}ref": "#/${'$'}defs/int"
+                                "$ref": "#/$defs/int"
                             }
                         }
                     ]

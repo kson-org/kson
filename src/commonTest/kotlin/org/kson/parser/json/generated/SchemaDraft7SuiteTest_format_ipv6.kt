@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "12345::"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "12345::"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -238,9 +238,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::abef"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -265,9 +265,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::abcef"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -292,9 +292,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -319,9 +319,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::laptop"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -342,9 +342,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -365,9 +365,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::42:ff:1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -388,9 +388,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "d6::"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -415,9 +415,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 ":2:3:4:5:6:7:8"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -442,9 +442,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:6:7:"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -469,9 +469,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 ":2:3:4::8"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -492,9 +492,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:d6::42"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -519,9 +519,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1::d6::42"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -542,9 +542,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1::d6:192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -565,9 +565,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2::192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -592,9 +592,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1::2:192.168.256.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -619,9 +619,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1::2:192.168.ff.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -642,9 +642,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::ffff:192.168.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -669,9 +669,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:::8"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -692,9 +692,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:6:7:8"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -719,9 +719,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:6:7"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -746,9 +746,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -773,9 +773,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "127.0.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -800,9 +800,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:1.2.3"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -827,9 +827,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "  ::1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -854,9 +854,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::1  "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -881,9 +881,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "fe80::/64"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -908,9 +908,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "fe80::a%eth1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -931,9 +931,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1000:1000:1000:1000:1000:1000:255.255.255.255"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -958,9 +958,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "100:100:100:100:100:100:255.255.255.255.255"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -985,9 +985,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "100:100:100:100:100:100:100:255.255.255.255"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1012,9 +1012,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:6:7:৪"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1039,9 +1039,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2::192.16৪.0.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1066,9 +1066,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "[::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1093,9 +1093,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::ffff:192.168.0.01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1116,9 +1116,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "2001:DB8::1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1139,9 +1139,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "2001:0db8:0000:0000:0000:0000:0000:0001"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1162,9 +1162,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2::3:4:5:6"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1189,9 +1189,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1:2:3:4:5:6:7:8::"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1216,9 +1216,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::1\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1243,9 +1243,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::ffff:256.1.1.1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1266,9 +1266,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "1::2:3:4:5:6"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1289,9 +1289,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::1:2:3:4:5:6"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,
@@ -1312,9 +1312,9 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
             """
                 "::1:2:3:4:5:1.2.3.4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "ipv6"
                 }
             """,

@@ -31,13 +31,13 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}anchor": "foo",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -64,13 +64,13 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}anchor": "foo",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -97,14 +97,14 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/bar#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/bar#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "http://localhost:1234/bar",
-                            "${'$'}anchor": "foo",
+                            "$id": "http://localhost:1234/bar",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -131,14 +131,14 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/bar#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/bar#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "http://localhost:1234/bar",
-                            "${'$'}anchor": "foo",
+                            "$id": "http://localhost:1234/bar",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -165,17 +165,17 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/root",
-                    "${'$'}ref": "http://localhost:1234/nested.json#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/root",
+                    "$ref": "http://localhost:1234/nested.json#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "nested.json",
-                            "${'$'}defs": {
+                            "$id": "nested.json",
+                            "$defs": {
                                 "B": {
-                                    "${'$'}anchor": "foo",
+                                    "$anchor": "foo",
                                     "type": "integer"
                                 }
                             }
@@ -204,17 +204,17 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/root",
-                    "${'$'}ref": "http://localhost:1234/nested.json#foo",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/root",
+                    "$ref": "http://localhost:1234/nested.json#foo",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "nested.json",
-                            "${'$'}defs": {
+                            "$id": "nested.json",
+                            "$defs": {
                                 "B": {
-                                    "${'$'}anchor": "foo",
+                                    "$anchor": "foo",
                                     "type": "integer"
                                 }
                             }
@@ -243,31 +243,31 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/foobar",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/foobar",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "child1",
+                            "$id": "child1",
                             "allOf": [
                                 {
-                                    "${'$'}id": "child2",
-                                    "${'$'}anchor": "my_anchor",
+                                    "$id": "child2",
+                                    "$anchor": "my_anchor",
                                     "type": "number"
                                 },
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "string"
                                 }
                             ]
                         }
                     },
-                    "${'$'}ref": "child1#my_anchor"
+                    "$ref": "child1#my_anchor"
                 }
             """,
             true,
-            """    schemaTestId: "anchor::same ${'$'}anchor with different base uri::${'$'}ref resolves to /${'$'}defs/A/allOf/1"    """)
+            $$"""    schemaTestId: "anchor::same $anchor with different base uri::$ref resolves to /$defs/A/allOf/1"    """)
     }
 
     /**
@@ -287,31 +287,31 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/foobar",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/foobar",
+                    "$defs": {
                         "A": {
-                            "${'$'}id": "child1",
+                            "$id": "child1",
                             "allOf": [
                                 {
-                                    "${'$'}id": "child2",
-                                    "${'$'}anchor": "my_anchor",
+                                    "$id": "child2",
+                                    "$anchor": "my_anchor",
                                     "type": "number"
                                 },
                                 {
-                                    "${'$'}anchor": "my_anchor",
+                                    "$anchor": "my_anchor",
                                     "type": "string"
                                 }
                             ]
                         }
                     },
-                    "${'$'}ref": "child1#my_anchor"
+                    "$ref": "child1#my_anchor"
                 }
             """,
             false,
-            """    schemaTestId: "anchor::same ${'$'}anchor with different base uri::${'$'}ref does not resolve to /${'$'}defs/A/allOf/0"    """)
+            $$"""    schemaTestId: "anchor::same $anchor with different base uri::$ref does not resolve to /$defs/A/allOf/0"    """)
     }
 
     /**
@@ -331,18 +331,18 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://example.com/schema-with-anchor",
                     "allOf": [
                         {
-                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                            "$ref": "https://example.com/schema-with-anchor#foo"
                         }
                     ],
-                    "${'$'}defs": {
+                    "$defs": {
                         "A": {
-                            "${'$'}anchor": "foo",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -369,18 +369,18 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://example.com/schema-with-anchor",
                     "allOf": [
                         {
-                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                            "$ref": "https://example.com/schema-with-anchor#foo"
                         }
                     ],
-                    "${'$'}defs": {
+                    "$defs": {
                         "A": {
-                            "${'$'}anchor": "foo",
+                            "$anchor": "foo",
                             "type": "integer"
                         }
                     }
@@ -409,18 +409,18 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                            "$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}anchor": "something",
+                            "$anchor": "something",
                             "type": "string"
                         }
                     }
@@ -449,18 +449,18 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                            "$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}anchor": "something",
+                            "$anchor": "something",
                             "type": "string"
                         }
                     }
@@ -487,10 +487,10 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
                 }
             """,
             true,
@@ -514,10 +514,10 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#foo"
                 }
             """,
             false,
@@ -541,10 +541,10 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#/${'$'}defs/refToInteger"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#/$defs/refToInteger"
                 }
             """,
             true,
@@ -568,10 +568,10 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifier.json#/${'$'}defs/refToInteger"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/locationIndependentIdentifier.json#/$defs/refToInteger"
                 }
             """,
             false,
@@ -595,14 +595,14 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/detached-ref.json#/${'$'}defs/foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/detached-ref.json#/$defs/foo"
                 }
             """,
             true,
-            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """)
+            $$"""    schemaTestId: "anchor::$ref to $ref finds detached $anchor::number is valid"    """)
     }
 
     /**
@@ -622,13 +622,13 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/detached-ref.json#/${'$'}defs/foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/detached-ref.json#/$defs/foo"
                 }
             """,
             false,
-            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """)
+            $$"""    schemaTestId: "anchor::$ref to $ref finds detached $anchor::non-number is invalid"    """)
     }
 }

@@ -26,10 +26,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 "aaa"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -49,10 +49,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 "abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             false,
@@ -72,10 +72,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -95,10 +95,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -118,10 +118,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -141,10 +141,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -164,10 +164,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -187,10 +187,10 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "pattern": "^a*${'$'}"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "pattern": "^a*$"
                 }
             """,
             true,
@@ -210,9 +210,9 @@ class SchemaDraft7SuiteTest_pattern : JsonSchemaTest {
             """
                 "xxaayy"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "pattern": "a+"
                 }
             """,

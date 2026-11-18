@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 10
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 2
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 2
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 2
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.5
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 4.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.5
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 -4.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.5
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 35
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.5
                 }
             """,
@@ -187,9 +187,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0.0075
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.0E-4
                 }
             """,
@@ -210,9 +210,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0.00751
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.0E-4
                 }
             """,
@@ -233,9 +233,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 4.0E-8
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.0E-8
                 }
             """,
@@ -256,9 +256,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 1.5E-8
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "multipleOf": 1.0E-8
                 }
             """,
@@ -279,9 +279,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 1.0E308
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "integer",
                     "multipleOf": 0.123456789
                 }
@@ -303,9 +303,9 @@ class SchemaDraft2020_12SuiteTest_multipleOf : JsonSchemaTest {
             """
                 12391239123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "integer",
                     "multipleOf": 1.0E-8
                 }

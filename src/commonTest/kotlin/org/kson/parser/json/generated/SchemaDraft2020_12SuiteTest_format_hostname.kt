@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "-a-host-name-that-starts-with--"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "www.example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "hostname"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "h0stn4me"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -257,9 +257,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "1host"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -280,9 +280,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "hostnam3"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -307,9 +307,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -334,9 +334,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -361,9 +361,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 ".example"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -388,9 +388,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "example."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -415,9 +415,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "example．com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -438,9 +438,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "host-name"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -465,9 +465,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "-hostname"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -492,9 +492,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "hostname-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -519,9 +519,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "host_name"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -546,9 +546,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -569,9 +569,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -596,9 +596,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -623,9 +623,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "example.com\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -650,9 +650,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 " example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -677,9 +677,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "ex ample.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -704,9 +704,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "Kelvin.example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -727,9 +727,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "a--b.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -754,9 +754,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--X"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -777,9 +777,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--9n2bp8q.xn--9t4b11yi5a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -804,9 +804,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--07jt112bpxg.xn--9t4b11yi5a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -831,9 +831,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--hello-txk"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -858,9 +858,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--hello-zed"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -885,9 +885,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--hello-6bf"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -908,9 +908,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--zca29lwxobi7a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -931,9 +931,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--qmbc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -958,9 +958,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--chb89f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -985,9 +985,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--07jceefgh4c"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1012,9 +1012,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--al-0ea"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1039,9 +1039,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--l-fda"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1066,9 +1066,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--la-0ea"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1093,9 +1093,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--l-gda"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1116,9 +1116,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--ll-0ea"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1143,9 +1143,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--S-jib3p"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1170,9 +1170,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--wva3j"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1193,9 +1193,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--wva3je"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1220,9 +1220,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--A-2hc5h"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1247,9 +1247,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--5db1e"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1270,9 +1270,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--4dbc5h"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1297,9 +1297,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--A-2hc8h"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1324,9 +1324,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--5db3e"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1347,9 +1347,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--4dbc8h"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1374,9 +1374,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--defabc-k64e"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1401,9 +1401,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--vek"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1424,9 +1424,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--k8j5u"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1447,9 +1447,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--bck0j"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1470,9 +1470,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--vek778f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1497,9 +1497,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--ngb6iyr"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1520,9 +1520,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--ngba1o"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1543,9 +1543,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--0-gyc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1570,9 +1570,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--11b2er09f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1597,9 +1597,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--02b508i"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1620,9 +1620,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--11b2ezcw70k"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1643,9 +1643,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--11b2ezcs70k"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1666,9 +1666,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "xn--ngba5hb2804a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,
@@ -1693,9 +1693,9 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
             """
                 "XN--aa---o47jg78q"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "hostname"
                 }
             """,

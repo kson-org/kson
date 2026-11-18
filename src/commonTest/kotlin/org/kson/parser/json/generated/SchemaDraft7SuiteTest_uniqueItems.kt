@@ -29,9 +29,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -55,9 +55,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -82,9 +82,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -109,9 +109,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -135,9 +135,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -161,9 +161,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "baz"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -245,9 +245,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -275,9 +275,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -307,9 +307,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -345,9 +345,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -383,9 +383,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -413,9 +413,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -443,9 +443,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -476,9 +476,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -506,9 +506,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -536,9 +536,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -572,9 +572,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -608,9 +608,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -640,9 +640,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "{}"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -672,9 +672,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -704,9 +704,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -736,9 +736,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -766,9 +766,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -796,9 +796,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": true
                 }
             """,
@@ -822,9 +822,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -848,9 +848,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -875,9 +875,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -901,9 +901,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -927,9 +927,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -957,9 +957,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -987,9 +987,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1025,9 +1025,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1063,9 +1063,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     }
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1093,9 +1093,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1123,9 +1123,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1154,9 +1154,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1186,9 +1186,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "uniqueItems": false
                 }
             """,
@@ -1212,9 +1212,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1246,9 +1246,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1280,9 +1280,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1314,9 +1314,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1350,9 +1350,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1386,9 +1386,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1422,9 +1422,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1458,9 +1458,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1492,9 +1492,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1527,9 +1527,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1562,9 +1562,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1597,9 +1597,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1633,9 +1633,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1668,9 +1668,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1702,9 +1702,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1736,9 +1736,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1770,9 +1770,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1806,9 +1806,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1842,9 +1842,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1878,9 +1878,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1914,9 +1914,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1948,9 +1948,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -1983,9 +1983,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -2018,9 +2018,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -2053,9 +2053,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"
@@ -2089,9 +2089,9 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "boolean"

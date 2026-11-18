@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/?∂éœ=πîx#πîüx"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.com/blah_(wîkïpédiå)_blah#ßité-1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/?q=Test%20URL-encoded%20stuff"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -261,9 +261,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/%6G"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -288,9 +288,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/%A"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -315,9 +315,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/%"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -335,12 +335,12 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
     fun jsonSchemaSuiteTest_14() {
         
         assertKsonEnforcesSchema(
-            """
-                "http://-.~_!${'$'}&'()*+,;=:%40:80%2f::::::@example.com"
+            $$"""
+                "http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -361,9 +361,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -388,9 +388,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://2001:0db8:85a3:0000:0000:8a2e:0370:7334"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -415,9 +415,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "/abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -442,9 +442,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "\\\\WINDOWS\\filëßåré"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -469,9 +469,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "âππ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -496,9 +496,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://[::ffff:192.168.0.01]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -519,9 +519,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://[2001:db8::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -546,9 +546,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -569,9 +569,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://192.168.0.1/p"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -592,9 +592,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "urn:example:resource"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -615,9 +615,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "file:/etc/hosts"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -638,9 +638,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/𐌀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -661,9 +661,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/?q=󰀀"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -688,9 +688,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "htτp://example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -715,9 +715,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "1http://example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -742,9 +742,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "ht_tp://example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -769,9 +769,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår:abc/path"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -796,9 +796,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://â@b@ƒøø.ßår/"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,
@@ -823,9 +823,9 @@ class SchemaDraft7SuiteTest_format_iri : JsonSchemaTest {
             """
                 "http://ƒøø.ßår/[::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "iri"
                 }
             """,

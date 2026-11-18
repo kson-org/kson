@@ -31,41 +31,41 @@ class SchemaDraft2020_12SuiteTest_optional_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
                     "type": "object",
                     "properties": {
                         "bar-item": {
-                            "${'$'}ref": "bar#/${'$'}defs/item"
+                            "$ref": "bar#/$defs/item"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "item"
+                                "$ref": "item"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "item": {
-                                    "${'$'}id": "item",
+                                    "$id": "item",
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "${'$'}dynamicRef": "#content"
+                                            "$dynamicRef": "#content"
                                         }
                                     },
-                                    "${'$'}defs": {
+                                    "$defs": {
                                         "defaultContent": {
-                                            "${'$'}dynamicAnchor": "content",
+                                            "$dynamicAnchor": "content",
                                             "type": "integer"
                                         }
                                     }
                                 },
                                 "content": {
-                                    "${'$'}dynamicAnchor": "content",
+                                    "$dynamicAnchor": "content",
                                     "type": "string"
                                 }
                             }
@@ -74,7 +74,7 @@ class SchemaDraft2020_12SuiteTest_optional_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/dynamicRef::${'$'}dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::integer property passes"    """)
+            $$"""    schemaTestId: "optional/dynamicRef::$dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::integer property passes"    """)
     }
 
     /**
@@ -98,41 +98,41 @@ class SchemaDraft2020_12SuiteTest_optional_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/optional/main",
                     "type": "object",
                     "properties": {
                         "bar-item": {
-                            "${'$'}ref": "bar#/${'$'}defs/item"
+                            "$ref": "bar#/$defs/item"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "item"
+                                "$ref": "item"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "item": {
-                                    "${'$'}id": "item",
+                                    "$id": "item",
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "${'$'}dynamicRef": "#content"
+                                            "$dynamicRef": "#content"
                                         }
                                     },
-                                    "${'$'}defs": {
+                                    "$defs": {
                                         "defaultContent": {
-                                            "${'$'}dynamicAnchor": "content",
+                                            "$dynamicAnchor": "content",
                                             "type": "integer"
                                         }
                                     }
                                 },
                                 "content": {
-                                    "${'$'}dynamicAnchor": "content",
+                                    "$dynamicAnchor": "content",
                                     "type": "string"
                                 }
                             }
@@ -141,6 +141,6 @@ class SchemaDraft2020_12SuiteTest_optional_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "optional/dynamicRef::${'$'}dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::string property fails"    """)
+            $$"""    schemaTestId: "optional/dynamicRef::$dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::string property fails"    """)
     }
 }

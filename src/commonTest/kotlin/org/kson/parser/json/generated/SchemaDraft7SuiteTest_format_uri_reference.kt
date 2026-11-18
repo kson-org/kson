@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "\\\\WINDOWS\\fileshare"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "http://foo.bar/?baz=qux#quux"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "//foo.bar/?baz=qux#quux"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -261,9 +261,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "\\\\WINDOWS\\fileshare"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -284,9 +284,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -307,9 +307,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "#fragment"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -334,9 +334,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "#frag\\ment"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -361,9 +361,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/foobar®.txt"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -388,9 +388,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "https://example.org/foobar\\.txt"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -411,9 +411,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "http://087.10.0.1/"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -434,9 +434,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "http://999.999.999.999/"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -457,9 +457,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -480,9 +480,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "?query=1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -503,9 +503,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "//"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -530,9 +530,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/%zz"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -557,9 +557,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/%A"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -584,9 +584,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/%"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -611,9 +611,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/a\"b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -638,9 +638,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/[::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -665,9 +665,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "//example.com:abc/p"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -692,9 +692,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "//a@b@example.com/"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -719,9 +719,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "//[::ffff:192.168.0.01]/p"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -746,9 +746,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "1:b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -769,9 +769,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "./this:that"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,
@@ -796,9 +796,9 @@ class SchemaDraft7SuiteTest_format_uri_reference : JsonSchemaTest {
             """
                 "/p\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "uri-reference"
                 }
             """,

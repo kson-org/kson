@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06 PST"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "008:030:006Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -242,9 +242,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "8:3:6Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -269,9 +269,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "8:0030:6Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -292,9 +292,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "23:20:50.52Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -315,9 +315,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06.283185Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -338,9 +338,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06+00:20"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -361,9 +361,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06-08:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -384,9 +384,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "12:34:56-00:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -411,9 +411,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06-8:000"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -434,9 +434,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -461,9 +461,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "24:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -488,9 +488,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "00:60:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -515,9 +515,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "00:00:61Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -542,9 +542,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "01:02:03+24:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -569,9 +569,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "01:02:03+00:60"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -596,9 +596,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "01:02:03Z+00:30"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -623,9 +623,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06 PST"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -650,9 +650,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "01:01:01,1111"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -677,9 +677,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "12:00:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -704,9 +704,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "12:00:00.52"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -731,9 +731,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "1২:00:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -758,9 +758,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06#00:20"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -785,9 +785,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "ab:cd:ef"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -812,9 +812,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "2020-11-28T23:55:45Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -839,9 +839,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06+0130"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -866,9 +866,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06+01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -893,9 +893,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06Z\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -920,9 +920,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "24:59:00+01:00"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -947,9 +947,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "23:60:00+00:01"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -970,9 +970,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "00:59:59.999999999999999Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -997,9 +997,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06.Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -1024,9 +1024,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "12:00Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -1051,9 +1051,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06,5Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -1078,9 +1078,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 " 08:30:06Z"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,
@@ -1105,9 +1105,9 @@ class SchemaDraft7SuiteTest_format_time : JsonSchemaTest {
             """
                 "08:30:06Z "
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "time"
                 }
             """,

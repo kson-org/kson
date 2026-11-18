@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         1,
                         2,
@@ -53,9 +53,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 4
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         1,
                         2,
@@ -80,9 +80,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         "foo",
@@ -111,9 +111,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         "foo",
@@ -144,9 +144,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "foo": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         "foo",
@@ -177,9 +177,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         "foo",
@@ -211,9 +211,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "boo": 42
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         "foo",
@@ -242,9 +242,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         null
@@ -268,9 +268,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         null
@@ -294,9 +294,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "test"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         6,
                         null
@@ -323,9 +323,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -364,9 +364,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -405,9 +405,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "bar": "bart"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -445,9 +445,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -485,9 +485,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -523,9 +523,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -561,9 +561,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "foo\nbar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -587,9 +587,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "foo\rbar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -613,9 +613,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -639,9 +639,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         false
                     ]
@@ -664,9 +664,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         false
                     ]
@@ -689,9 +689,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 0.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         false
                     ]
@@ -716,9 +716,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             false
@@ -745,9 +745,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             false
@@ -774,9 +774,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     0.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             false
@@ -801,9 +801,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         true
                     ]
@@ -826,9 +826,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         true
                     ]
@@ -851,9 +851,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         true
                     ]
@@ -878,9 +878,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             true
@@ -907,9 +907,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             true
@@ -936,9 +936,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     1.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             true
@@ -963,9 +963,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0
                     ]
@@ -988,9 +988,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0
                     ]
@@ -1013,9 +1013,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 0.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         0
                     ]
@@ -1040,9 +1040,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             0
@@ -1069,9 +1069,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             0
@@ -1098,9 +1098,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     0.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             0
@@ -1125,9 +1125,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         1
                     ]
@@ -1150,9 +1150,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         1
                     ]
@@ -1175,9 +1175,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         1
                     ]
@@ -1202,9 +1202,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             1
@@ -1231,9 +1231,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             1
@@ -1260,9 +1260,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     1.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         [
                             1
@@ -1287,9 +1287,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "hello\u0000there"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "hello\u0000there"
                     ]
@@ -1312,9 +1312,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "hellothere"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "hello\u0000there"
                     ]
@@ -1337,9 +1337,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "μ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "μ"
                     ]
@@ -1362,9 +1362,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "µ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "μ"
                     ]
@@ -1387,9 +1387,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "ä"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "ä"
                     ]
@@ -1412,9 +1412,9 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
             """
                 "ä"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "enum": [
                         "ä"
                     ]

@@ -26,10 +26,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             true,
@@ -49,10 +49,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "🐲"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             true,
@@ -72,10 +72,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "🐲🐲"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             true,
@@ -95,10 +95,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "🐉"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             false,
@@ -118,10 +118,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "🐉🐉"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             false,
@@ -141,10 +141,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "D"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             false,
@@ -164,10 +164,10 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
             """
                 "DD"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "pattern": "^🐲*${'$'}"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "pattern": "^🐲*$"
                 }
             """,
             false,
@@ -189,11 +189,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
                     "": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^🐲*${'$'}": {
+                        "^🐲*$": {
                             "type": "integer"
                         }
                     }
@@ -218,11 +218,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
                     "🐲": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^🐲*${'$'}": {
+                        "^🐲*$": {
                             "type": "integer"
                         }
                     }
@@ -247,11 +247,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
                     "🐲🐲": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^🐲*${'$'}": {
+                        "^🐲*$": {
                             "type": "integer"
                         }
                     }
@@ -276,11 +276,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
                     "🐲": "hello"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^🐲*${'$'}": {
+                        "^🐲*$": {
                             "type": "integer"
                         }
                     }
@@ -305,11 +305,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_bmp_regex : JsonSchemaTest {
                     "🐲🐲": "hello"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^🐲*${'$'}": {
+                        "^🐲*$": {
                             "type": "integer"
                         }
                     }

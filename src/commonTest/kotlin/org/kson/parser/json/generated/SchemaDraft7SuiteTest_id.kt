@@ -35,14 +35,14 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/",
                     "items": {
-                        "${'$'}id": "baseUriChange/",
+                        "$id": "baseUriChange/",
                         "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                         }
                     }
                 }
@@ -72,14 +72,14 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/",
                     "items": {
-                        "${'$'}id": "baseUriChange/",
+                        "$id": "baseUriChange/",
                         "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                         }
                     }
                 }
@@ -103,21 +103,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                            "$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple URN base URI with ${'$'}ref via the URN::valid under the URN IDed schema"    """)
+            $$"""    schemaTestId: "id::simple URN base URI with $ref via the URN::valid under the URN IDed schema"    """)
     }
 
     /**
@@ -135,21 +135,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                            "$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple URN base URI with ${'$'}ref via the URN::invalid under the URN IDed schema"    """)
+            $$"""    schemaTestId: "id::simple URN base URI with $ref via the URN::invalid under the URN IDed schema"    """)
     }
 
     /**
@@ -167,21 +167,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "tag:foo.example,2025:bar/baz",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "tag:foo.example,2025:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "tag:foo.example,2025:bar/baz"
+                            "$ref": "tag:foo.example,2025:bar/baz"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple tag URI base URI with ${'$'}ref via the tag URI::valid under the tag URI IDed schema"    """)
+            $$"""    schemaTestId: "id::simple tag URI base URI with $ref via the tag URI::valid under the tag URI IDed schema"    """)
     }
 
     /**
@@ -199,21 +199,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "tag:foo.example,2025:bar/baz",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "tag:foo.example,2025:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "tag:foo.example,2025:bar/baz"
+                            "$ref": "tag:foo.example,2025:bar/baz"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple tag URI base URI with ${'$'}ref via the tag URI::invalid under the tag URI IDed schema"    """)
+            $$"""    schemaTestId: "id::simple tag URI base URI with $ref via the tag URI::invalid under the tag URI IDed schema"    """)
     }
 
     /**
@@ -231,21 +231,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "foo:bar/baz",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "foo:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "foo:bar/baz"
+                            "$ref": "foo:bar/baz"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple base URI using an arbitrary URI scheme with ${'$'}ref to that URI::valid under the arbitrary scheme IDed schema"    """)
+            $$"""    schemaTestId: "id::simple base URI using an arbitrary URI scheme with $ref to that URI::valid under the arbitrary scheme IDed schema"    """)
     }
 
     /**
@@ -263,21 +263,21 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "foo:bar/baz",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "foo:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "foo:bar/baz"
+                            "$ref": "foo:bar/baz"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple base URI using an arbitrary URI scheme with ${'$'}ref to that URI::invalid under the arbitrary scheme IDed schema"    """)
+            $$"""    schemaTestId: "id::simple base URI using an arbitrary URI scheme with $ref to that URI::invalid under the arbitrary scheme IDed schema"    """)
     }
 
     /**
@@ -301,19 +301,19 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/some-id",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/some-id",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "nested/foo-ref-string.json"
+                            "$ref": "nested/foo-ref-string.json"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """)
     }
 
     /**
@@ -337,18 +337,18 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/some-id",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/some-id",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "nested/foo-ref-string.json"
+                            "$ref": "nested/foo-ref-string.json"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """)
     }
 }

@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -187,9 +187,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -210,9 +210,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer"
                 }
             """,
@@ -233,9 +233,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -256,9 +256,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -279,9 +279,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -302,9 +302,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -325,9 +325,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -348,9 +348,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -371,9 +371,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -394,9 +394,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -417,9 +417,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number"
                 }
             """,
@@ -440,9 +440,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -463,9 +463,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -486,9 +486,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -509,9 +509,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -532,9 +532,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -555,9 +555,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -578,9 +578,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -601,9 +601,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -624,9 +624,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "string"
                 }
             """,
@@ -647,9 +647,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -670,9 +670,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -693,9 +693,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -716,9 +716,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -739,9 +739,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -762,9 +762,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -785,9 +785,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object"
                 }
             """,
@@ -808,9 +808,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -831,9 +831,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -854,9 +854,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -877,9 +877,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -900,9 +900,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -923,9 +923,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -946,9 +946,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array"
                 }
             """,
@@ -969,9 +969,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -992,9 +992,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1015,9 +1015,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1038,9 +1038,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1061,9 +1061,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1084,9 +1084,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1107,9 +1107,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1130,9 +1130,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1153,9 +1153,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1176,9 +1176,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "boolean"
                 }
             """,
@@ -1199,9 +1199,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1222,9 +1222,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1245,9 +1245,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1268,9 +1268,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1291,9 +1291,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1314,9 +1314,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1337,9 +1337,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1360,9 +1360,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1383,9 +1383,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1406,9 +1406,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "null"
                 }
             """,
@@ -1429,9 +1429,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "string"
                     ]
@@ -1454,9 +1454,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "string"
                     ]
@@ -1479,9 +1479,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1505,9 +1505,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1531,9 +1531,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1557,9 +1557,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1583,9 +1583,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1609,9 +1609,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1635,9 +1635,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "integer",
                         "string"
@@ -1665,9 +1665,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object"
@@ -1693,9 +1693,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
                     "foo": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object"
@@ -1719,9 +1719,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object"
@@ -1745,9 +1745,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object"
@@ -1771,9 +1771,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object"
@@ -1801,9 +1801,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object",
@@ -1830,9 +1830,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
                     "foo": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object",
@@ -1857,9 +1857,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object",
@@ -1884,9 +1884,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object",
@@ -1911,9 +1911,9 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": [
                         "array",
                         "object",

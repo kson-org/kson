@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_optional_float_overflow : JsonSchemaTest {
             """
                 1.0E308
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "number",
                     "multipleOf": 0.5
                 }

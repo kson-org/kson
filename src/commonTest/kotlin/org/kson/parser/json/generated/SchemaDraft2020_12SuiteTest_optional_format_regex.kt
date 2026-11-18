@@ -31,9 +31,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "\\a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -58,9 +58,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?P<name>x)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -85,9 +85,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?P<n>a)(?P=n)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -112,9 +112,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?#comment)a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -139,9 +139,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?i)abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -166,9 +166,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?ims)abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -189,9 +189,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<name>x)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -212,9 +212,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<n>a)\\k<n>"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -235,9 +235,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "(?<=a+)b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -258,9 +258,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "[]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -281,9 +281,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "[^]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,
@@ -304,9 +304,9 @@ class SchemaDraft2020_12SuiteTest_optional_format_regex : JsonSchemaTest {
             """
                 "\\cA"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "regex"
                 }
             """,

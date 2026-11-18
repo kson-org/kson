@@ -35,14 +35,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/",
                     "items": {
-                        "${'$'}id": "baseUriChange/",
+                        "$id": "baseUriChange/",
                         "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                         }
                     }
                 }
@@ -72,14 +72,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/",
                     "items": {
-                        "${'$'}id": "baseUriChange/",
+                        "$id": "baseUriChange/",
                         "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                         }
                     }
                 }
@@ -105,22 +105,22 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/scope_change_defs1.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "baseUriChangeFolder/"
+                            "$ref": "baseUriChangeFolder/"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolder/",
+                            "$id": "baseUriChangeFolder/",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "folderInteger.json"
+                                "$ref": "folderInteger.json"
                             }
                         }
                     }
@@ -151,22 +151,22 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/scope_change_defs1.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "baseUriChangeFolder/"
+                            "$ref": "baseUriChangeFolder/"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolder/",
+                            "$id": "baseUriChangeFolder/",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "folderInteger.json"
+                                "$ref": "folderInteger.json"
                             }
                         }
                     }
@@ -193,24 +193,24 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/scope_change_defs2.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "baseUriChangeFolderInSubschema/#/${'$'}defs/bar"
+                            "$ref": "baseUriChangeFolderInSubschema/#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolderInSubschema/",
-                            "${'$'}defs": {
+                            "$id": "baseUriChangeFolderInSubschema/",
+                            "$defs": {
                                 "bar": {
                                     "type": "array",
                                     "items": {
-                                        "${'$'}ref": "folderInteger.json"
+                                        "$ref": "folderInteger.json"
                                     }
                                 }
                             }
@@ -243,24 +243,24 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/scope_change_defs2.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "baseUriChangeFolderInSubschema/#/${'$'}defs/bar"
+                            "$ref": "baseUriChangeFolderInSubschema/#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolderInSubschema/",
-                            "${'$'}defs": {
+                            "$id": "baseUriChangeFolderInSubschema/",
+                            "$defs": {
                                 "bar": {
                                     "type": "array",
                                     "items": {
-                                        "${'$'}ref": "folderInteger.json"
+                                        "$ref": "folderInteger.json"
                                     }
                                 }
                             }
@@ -290,14 +290,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "schema-relative-uri-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -306,10 +306,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-relative-uri-defs2.json"
+                    "$ref": "schema-relative-uri-defs2.json"
                 }
             """,
             false,
@@ -334,14 +334,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "schema-relative-uri-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -350,10 +350,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-relative-uri-defs2.json"
+                    "$ref": "schema-relative-uri-defs2.json"
                 }
             """,
             false,
@@ -382,14 +382,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "schema-relative-uri-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -398,10 +398,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-relative-uri-defs2.json"
+                    "$ref": "schema-relative-uri-defs2.json"
                 }
             """,
             true,
@@ -426,14 +426,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -442,10 +442,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                    "$ref": "schema-refs-absolute-uris-defs2.json"
                 }
             """,
             false,
@@ -470,14 +470,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -486,10 +486,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                    "$ref": "schema-refs-absolute-uris-defs2.json"
                 }
             """,
             false,
@@ -518,14 +518,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
-                            "${'$'}defs": {
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$defs": {
                                 "inner": {
                                     "properties": {
                                         "bar": {
@@ -534,10 +534,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                                     }
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/inner"
+                            "$ref": "#/$defs/inner"
                         }
                     },
-                    "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                    "$ref": "schema-refs-absolute-uris-defs2.json"
                 }
             """,
             true,
@@ -557,17 +557,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/a.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/a.json",
+                    "$defs": {
                         "x": {
-                            "${'$'}id": "http://example.com/b/c.json",
+                            "$id": "http://example.com/b/c.json",
                             "not": {
-                                "${'$'}defs": {
+                                "$defs": {
                                     "y": {
-                                        "${'$'}id": "d.json",
+                                        "$id": "d.json",
                                         "type": "number"
                                     }
                                 }
@@ -576,13 +576,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "http://example.com/b/d.json"
+                            "$ref": "http://example.com/b/d.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "id::${'$'}id must be resolved against nearest parent, not just immediate parent::number is valid"    """)
+            $$"""    schemaTestId: "id::$id must be resolved against nearest parent, not just immediate parent::number is valid"    """)
     }
 
     /**
@@ -598,17 +598,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/a.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/a.json",
+                    "$defs": {
                         "x": {
-                            "${'$'}id": "http://example.com/b/c.json",
+                            "$id": "http://example.com/b/c.json",
                             "not": {
-                                "${'$'}defs": {
+                                "$defs": {
                                     "y": {
-                                        "${'$'}id": "d.json",
+                                        "$id": "d.json",
                                         "type": "number"
                                     }
                                 }
@@ -617,13 +617,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "http://example.com/b/d.json"
+                            "$ref": "http://example.com/b/d.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "id::${'$'}id must be resolved against nearest parent, not just immediate parent::non-number is invalid"    """)
+            $$"""    schemaTestId: "id::$id must be resolved against nearest parent, not just immediate parent::non-number is invalid"    """)
     }
 
     /**
@@ -639,28 +639,28 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id1/base.json",
-                    "${'$'}ref": "int.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id1/base.json",
+                    "$ref": "int.json",
+                    "$defs": {
                         "bigint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id1/int.json",
-                            "${'$'}id": "int.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id1/int.json",
+                            "$id": "int.json",
                             "maximum": 10
                         },
                         "smallint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id1-int.json",
-                            "${'$'}id": "/ref-and-id1-int.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id1-int.json",
+                            "$id": "/ref-and-id1-int.json",
                             "maximum": 2
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}ref::data is valid against first definition"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $ref::data is valid against first definition"    """)
     }
 
     /**
@@ -676,28 +676,28 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 50
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id1/base.json",
-                    "${'$'}ref": "int.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id1/base.json",
+                    "$ref": "int.json",
+                    "$defs": {
                         "bigint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id1/int.json",
-                            "${'$'}id": "int.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id1/int.json",
+                            "$id": "int.json",
                             "maximum": 10
                         },
                         "smallint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id1-int.json",
-                            "${'$'}id": "/ref-and-id1-int.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id1-int.json",
+                            "$id": "/ref-and-id1-int.json",
                             "maximum": 2
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}ref::data is invalid against first definition"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $ref::data is invalid against first definition"    """)
     }
 
     /**
@@ -717,29 +717,29 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id2/base.json",
-                    "${'$'}ref": "#bigint",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id2/base.json",
+                    "$ref": "#bigint",
+                    "$defs": {
                         "bigint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id2/base.json#/${'$'}defs/bigint; another valid uri for this location: https://example.com/ref-and-id2/base.json#bigint",
-                            "${'$'}anchor": "bigint",
+                            "$comment": "canonical uri: https://example.com/ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: https://example.com/ref-and-id2/base.json#bigint",
+                            "$anchor": "bigint",
                             "maximum": 10
                         },
                         "smallint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id2/#/${'$'}defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
-                            "${'$'}id": "/ref-and-id2/",
-                            "${'$'}anchor": "bigint",
+                            "$comment": "canonical uri: https://example.com/ref-and-id2/#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
+                            "$id": "/ref-and-id2/",
+                            "$anchor": "bigint",
                             "maximum": 2
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is valid against first definition"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $anchor and $ref::data is valid against first definition"    """)
     }
 
     /**
@@ -759,29 +759,29 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 50
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id2/base.json",
-                    "${'$'}ref": "#bigint",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id2/base.json",
+                    "$ref": "#bigint",
+                    "$defs": {
                         "bigint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id2/base.json#/${'$'}defs/bigint; another valid uri for this location: https://example.com/ref-and-id2/base.json#bigint",
-                            "${'$'}anchor": "bigint",
+                            "$comment": "canonical uri: https://example.com/ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: https://example.com/ref-and-id2/base.json#bigint",
+                            "$anchor": "bigint",
                             "maximum": 10
                         },
                         "smallint": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id2/#/${'$'}defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
-                            "${'$'}id": "/ref-and-id2/",
-                            "${'$'}anchor": "bigint",
+                            "$comment": "canonical uri: https://example.com/ref-and-id2/#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
+                            "$id": "/ref-and-id2/",
+                            "$anchor": "bigint",
                             "maximum": 2
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is invalid against first definition"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $anchor and $ref::data is invalid against first definition"    """)
     }
 
     /**
@@ -801,28 +801,28 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id3/base.json",
-                    "${'$'}ref": "nested/foo.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id3/base.json",
+                    "$ref": "nested/foo.json",
+                    "$defs": {
                         "foo": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id3/nested/foo.json",
-                            "${'$'}id": "nested/foo.json",
-                            "${'$'}ref": "./bar.json"
+                            "$comment": "canonical uri: https://example.com/ref-and-id3/nested/foo.json",
+                            "$id": "nested/foo.json",
+                            "$ref": "./bar.json"
                         },
                         "bar": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id3/nested/bar.json",
-                            "${'$'}id": "nested/bar.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id3/nested/bar.json",
+                            "$id": "nested/bar.json",
                             "type": "number"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is valid against nested sibling"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $ref on nested schema::data is valid against nested sibling"    """)
     }
 
     /**
@@ -838,28 +838,28 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "${'$'}id must be evaluated before ${'$'}ref to get the proper ${'$'}ref destination",
-                    "${'$'}id": "https://example.com/ref-and-id3/base.json",
-                    "${'$'}ref": "nested/foo.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
+                    "$id": "https://example.com/ref-and-id3/base.json",
+                    "$ref": "nested/foo.json",
+                    "$defs": {
                         "foo": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id3/nested/foo.json",
-                            "${'$'}id": "nested/foo.json",
-                            "${'$'}ref": "./bar.json"
+                            "$comment": "canonical uri: https://example.com/ref-and-id3/nested/foo.json",
+                            "$id": "nested/foo.json",
+                            "$ref": "./bar.json"
                         },
                         "bar": {
-                            "${'$'}comment": "canonical uri: https://example.com/ref-and-id3/nested/bar.json",
-                            "${'$'}id": "nested/bar.json",
+                            "$comment": "canonical uri: https://example.com/ref-and-id3/nested/bar.json",
+                            "$id": "nested/bar.json",
                             "type": "number"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is invalid against nested sibling"    """)
+            $$"""    schemaTestId: "id::order of evaluation: $id and $ref on nested schema::data is invalid against nested sibling"    """)
     }
 
     /**
@@ -877,21 +877,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                            "$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple URN base URI with ${'$'}ref via the URN::valid under the URN IDed schema"    """)
+            $$"""    schemaTestId: "id::simple URN base URI with $ref via the URN::valid under the URN IDed schema"    """)
     }
 
     /**
@@ -909,21 +909,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                            "$ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple URN base URI with ${'$'}ref via the URN::invalid under the URN IDed schema"    """)
+            $$"""    schemaTestId: "id::simple URN base URI with $ref via the URN::invalid under the URN IDed schema"    """)
     }
 
     /**
@@ -941,21 +941,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "tag:foo.example,2025:bar/baz",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "tag:foo.example,2025:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "tag:foo.example,2025:bar/baz"
+                            "$ref": "tag:foo.example,2025:bar/baz"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple tag URI base URI with ${'$'}ref via the tag URI::valid under the tag URI IDed schema"    """)
+            $$"""    schemaTestId: "id::simple tag URI base URI with $ref via the tag URI::valid under the tag URI IDed schema"    """)
     }
 
     /**
@@ -973,21 +973,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "tag:foo.example,2025:bar/baz",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "tag:foo.example,2025:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "tag:foo.example,2025:bar/baz"
+                            "$ref": "tag:foo.example,2025:bar/baz"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple tag URI base URI with ${'$'}ref via the tag URI::invalid under the tag URI IDed schema"    """)
+            $$"""    schemaTestId: "id::simple tag URI base URI with $ref via the tag URI::invalid under the tag URI IDed schema"    """)
     }
 
     /**
@@ -1005,21 +1005,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 37
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "foo:bar/baz",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "foo:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "foo:bar/baz"
+                            "$ref": "foo:bar/baz"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::simple base URI using an arbitrary URI scheme with ${'$'}ref to that URI::valid under the arbitrary scheme IDed schema"    """)
+            $$"""    schemaTestId: "id::simple base URI using an arbitrary URI scheme with $ref to that URI::valid under the arbitrary scheme IDed schema"    """)
     }
 
     /**
@@ -1037,21 +1037,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "foo:bar/baz",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "foo:bar/baz",
                     "minimum": 30,
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "foo:bar/baz"
+                            "$ref": "foo:bar/baz"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::simple base URI using an arbitrary URI scheme with ${'$'}ref to that URI::invalid under the arbitrary scheme IDed schema"    """)
+            $$"""    schemaTestId: "id::simple base URI using an arbitrary URI scheme with $ref to that URI::invalid under the arbitrary scheme IDed schema"    """)
     }
 
     /**
@@ -1069,17 +1069,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1105,17 +1105,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1141,17 +1141,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.2",
-                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.2",
+                    "$id": "urn:example:1/406/47452/2",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1177,17 +1177,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.2",
-                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.2",
+                    "$id": "urn:example:1/406/47452/2",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1213,17 +1213,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.3.1",
-                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.3.1",
+                    "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1249,17 +1249,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.3.1",
-                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.3.1",
+                    "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1285,17 +1285,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.3.2",
-                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.3.2",
+                    "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1321,17 +1321,17 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}comment": "RFC 8141 §2.3.2",
-                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$comment": "RFC 8141 §2.3.2",
+                    "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1357,16 +1357,16 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/${'$'}defs/bar"
+                            "$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1392,16 +1392,16 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/${'$'}defs/bar"
+                            "$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/$defs/bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
                             "type": "string"
                         }
@@ -1425,21 +1425,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/ref/absref.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/ref/absref.json",
+                    "$defs": {
                         "a": {
-                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "$id": "http://example.com/ref/absref/foobar.json",
                             "type": "number"
                         },
                         "b": {
-                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "$id": "http://example.com/absref/foobar.json",
                             "type": "string"
                         }
                     },
-                    "${'$'}ref": "/absref/foobar.json"
+                    "$ref": "/absref/foobar.json"
                 }
             """,
             true,
@@ -1459,21 +1459,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://example.com/ref/absref.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://example.com/ref/absref.json",
+                    "$defs": {
                         "a": {
-                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "$id": "http://example.com/ref/absref/foobar.json",
                             "type": "number"
                         },
                         "b": {
-                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "$id": "http://example.com/absref/foobar.json",
                             "type": "string"
                         }
                     },
-                    "${'$'}ref": "/absref/foobar.json"
+                    "$ref": "/absref/foobar.json"
                 }
             """,
             false,
@@ -1493,20 +1493,20 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "file:///folder/file.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "file:///folder/file.json",
+                    "$defs": {
                         "foo": {
                             "type": "number"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/foo"
+                    "$ref": "#/$defs/foo"
                 }
             """,
             true,
-            """    schemaTestId: "id::${'$'}id with file URI still resolves pointers - *nix::number is valid"    """)
+            $$"""    schemaTestId: "id::$id with file URI still resolves pointers - *nix::number is valid"    """)
     }
 
     /**
@@ -1522,20 +1522,20 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "file:///folder/file.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "file:///folder/file.json",
+                    "$defs": {
                         "foo": {
                             "type": "number"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/foo"
+                    "$ref": "#/$defs/foo"
                 }
             """,
             false,
-            """    schemaTestId: "id::${'$'}id with file URI still resolves pointers - *nix::non-number is invalid"    """)
+            $$"""    schemaTestId: "id::$id with file URI still resolves pointers - *nix::non-number is invalid"    """)
     }
 
     /**
@@ -1551,20 +1551,20 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "file:///c:/folder/file.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "file:///c:/folder/file.json",
+                    "$defs": {
                         "foo": {
                             "type": "number"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/foo"
+                    "$ref": "#/$defs/foo"
                 }
             """,
             true,
-            """    schemaTestId: "id::${'$'}id with file URI still resolves pointers - windows::number is valid"    """)
+            $$"""    schemaTestId: "id::$id with file URI still resolves pointers - windows::number is valid"    """)
     }
 
     /**
@@ -1580,20 +1580,20 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "file:///c:/folder/file.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "file:///c:/folder/file.json",
+                    "$defs": {
                         "foo": {
                             "type": "number"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/foo"
+                    "$ref": "#/$defs/foo"
                 }
             """,
             false,
-            """    schemaTestId: "id::${'$'}id with file URI still resolves pointers - windows::non-number is invalid"    """)
+            $$"""    schemaTestId: "id::$id with file URI still resolves pointers - windows::non-number is invalid"    """)
     }
 
     /**
@@ -1613,19 +1613,19 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                    "$defs": {
                         "foo": {
-                            "${'$'}id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-                            "${'$'}defs": {
+                            "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                            "$defs": {
                                 "bar": {
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     }
                 }
@@ -1647,19 +1647,19 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                    "$defs": {
                         "foo": {
-                            "${'$'}id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-                            "${'$'}defs": {
+                            "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                            "$defs": {
                                 "bar": {
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "#/${'$'}defs/bar"
+                            "$ref": "#/$defs/bar"
                         }
                     }
                 }
@@ -1689,19 +1689,19 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/some-id",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/some-id",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "nested/foo-ref-string.json"
+                            "$ref": "nested/foo-ref-string.json"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """)
     }
 
     /**
@@ -1725,19 +1725,19 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/some-id",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/some-id",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "nested/foo-ref-string.json"
+                            "$ref": "nested/foo-ref-string.json"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """)
     }
 
     /**
@@ -1757,14 +1757,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/different-id-ref-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/different-id-ref-string.json"
                 }
             """,
             false,
-            """    schemaTestId: "id::remote HTTP ref with different ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different $id::number is invalid"    """)
     }
 
     /**
@@ -1784,14 +1784,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/different-id-ref-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/different-id-ref-string.json"
                 }
             """,
             true,
-            """    schemaTestId: "id::remote HTTP ref with different ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different $id::string is valid"    """)
     }
 
     /**
@@ -1811,14 +1811,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/urn-ref-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/urn-ref-string.json"
                 }
             """,
             false,
-            """    schemaTestId: "id::remote HTTP ref with different URN ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::number is invalid"    """)
     }
 
     /**
@@ -1838,14 +1838,14 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/urn-ref-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/urn-ref-string.json"
                 }
             """,
             true,
-            """    schemaTestId: "id::remote HTTP ref with different URN ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::string is valid"    """)
     }
 
     /**
@@ -1865,10 +1865,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
                 }
             """,
             false,
@@ -1892,10 +1892,10 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
                 }
             """,
             true,

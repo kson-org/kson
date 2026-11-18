@@ -33,9 +33,9 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                     "foo": "any value"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "allOf": [
                         {
@@ -44,7 +44,7 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "http://localhost:1234/draft2019-09/dependentRequired.json"
+                            "$ref": "http://localhost:1234/draft2019-09/dependentRequired.json"
                         }
                     ]
                 }
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                     "bar": "also any value"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "object",
                     "allOf": [
                         {
@@ -84,7 +84,7 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "http://localhost:1234/draft2019-09/dependentRequired.json"
+                            "$ref": "http://localhost:1234/draft2019-09/dependentRequired.json"
                         }
                     ]
                 }
@@ -114,11 +114,11 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array",
-                    "${'$'}ref": "http://localhost:1234/draft2020-12/prefixItems.json"
+                    "$ref": "http://localhost:1234/draft2020-12/prefixItems.json"
                 }
             """,
             false,
@@ -147,11 +147,11 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array",
-                    "${'$'}ref": "http://localhost:1234/draft2020-12/prefixItems.json"
+                    "$ref": "http://localhost:1234/draft2020-12/prefixItems.json"
                 }
             """,
             true,

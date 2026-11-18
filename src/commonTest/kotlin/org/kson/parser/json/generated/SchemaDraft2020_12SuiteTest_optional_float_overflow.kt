@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_optional_float_overflow : JsonSchemaTest {
             """
                 1.0E308
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "number",
                     "multipleOf": 0.5
                 }

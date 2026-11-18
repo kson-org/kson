@@ -29,12 +29,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -61,12 +61,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -91,12 +91,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "bar": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -123,12 +123,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -153,15 +153,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "type": "integer"
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo"
+                            "$ref": "#/properties/foo"
                         }
                     }
                 }
@@ -185,15 +185,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo": {
                             "type": "integer"
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo"
+                            "$ref": "#/properties/foo"
                         }
                     }
                 }
@@ -218,15 +218,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
                         {
                             "type": "integer"
                         },
                         {
-                            "${'$'}ref": "#/prefixItems/0"
+                            "$ref": "#/prefixItems/0"
                         }
                     ]
                 }
@@ -255,15 +255,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
                         {
                             "type": "integer"
                         },
                         {
-                            "${'$'}ref": "#/prefixItems/0"
+                            "$ref": "#/prefixItems/0"
                         }
                     ]
                 }
@@ -287,10 +287,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "slash": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -303,13 +303,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -333,10 +333,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "tilde": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -349,13 +349,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -379,10 +379,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "percent": "aoeu"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -395,13 +395,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -425,10 +425,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "slash": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -441,13 +441,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -471,10 +471,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "tilde": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -487,13 +487,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -517,10 +517,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "percent": 123
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "tilde~field": {
                             "type": "integer"
                         },
@@ -533,13 +533,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "properties": {
                         "tilde": {
-                            "${'$'}ref": "#/${'$'}defs/tilde~0field"
+                            "$ref": "#/$defs/tilde~0field"
                         },
                         "slash": {
-                            "${'$'}ref": "#/${'$'}defs/slash~1field"
+                            "$ref": "#/$defs/slash~1field"
                         },
                         "percent": {
-                            "${'$'}ref": "#/${'$'}defs/percent%25field"
+                            "$ref": "#/$defs/percent%25field"
                         }
                     }
                 }
@@ -561,21 +561,21 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "a": {
                             "type": "integer"
                         },
                         "b": {
-                            "${'$'}ref": "#/${'$'}defs/a"
+                            "$ref": "#/$defs/a"
                         },
                         "c": {
-                            "${'$'}ref": "#/${'$'}defs/b"
+                            "$ref": "#/$defs/b"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/c"
+                    "$ref": "#/$defs/c"
                 }
             """,
             true,
@@ -595,21 +595,21 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "a": {
                             "type": "integer"
                         },
                         "b": {
-                            "${'$'}ref": "#/${'$'}defs/a"
+                            "$ref": "#/$defs/a"
                         },
                         "c": {
-                            "${'$'}ref": "#/${'$'}defs/b"
+                            "$ref": "#/$defs/b"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/c"
+                    "$ref": "#/$defs/c"
                 }
             """,
             false,
@@ -631,17 +631,17 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo": []
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "reffed": {
                             "type": "array"
                         }
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/reffed",
+                            "$ref": "#/$defs/reffed",
                             "maxItems": 2
                         }
                     }
@@ -674,17 +674,17 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "reffed": {
                             "type": "array"
                         }
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/reffed",
+                            "$ref": "#/$defs/reffed",
                             "maxItems": 2
                         }
                     }
@@ -709,17 +709,17 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo": "string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "reffed": {
                             "type": "array"
                         }
                     },
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/${'$'}defs/reffed",
+                            "$ref": "#/$defs/reffed",
                             "maxItems": 2
                         }
                     }
@@ -739,23 +739,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_20() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "a"
+                    "$ref": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "${'$'}ref": {
+                        "$ref": {
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "ref::property named ${'$'}ref that is not a reference::property named ${'$'}ref valid"    """)
+            $$"""    schemaTestId: "ref::property named $ref that is not a reference::property named $ref valid"    """)
     }
 
     /**
@@ -768,23 +768,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_21() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": 2
+                    "$ref": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "${'$'}ref": {
+                        "$ref": {
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "ref::property named ${'$'}ref that is not a reference::property named ${'$'}ref invalid"    """)
+            $$"""    schemaTestId: "ref::property named $ref that is not a reference::property named $ref invalid"    """)
     }
 
     /**
@@ -797,20 +797,20 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_22() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "a"
+                    "$ref": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "${'$'}ref": {
-                            "${'$'}ref": "#/${'$'}defs/is-string"
+                        "$ref": {
+                            "$ref": "#/$defs/is-string"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "is-string": {
                             "type": "string"
                         }
@@ -818,7 +818,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::property named ${'$'}ref, containing an actual ${'$'}ref::property named ${'$'}ref valid"    """)
+            $$"""    schemaTestId: "ref::property named $ref, containing an actual $ref::property named $ref valid"    """)
     }
 
     /**
@@ -831,20 +831,20 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_23() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": 2
+                    "$ref": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "${'$'}ref": {
-                            "${'$'}ref": "#/${'$'}defs/is-string"
+                        "$ref": {
+                            "$ref": "#/$defs/is-string"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "is-string": {
                             "type": "string"
                         }
@@ -852,7 +852,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::property named ${'$'}ref, containing an actual ${'$'}ref::property named ${'$'}ref invalid"    """)
+            $$"""    schemaTestId: "ref::property named $ref, containing an actual $ref::property named $ref invalid"    """)
     }
 
     /**
@@ -868,23 +868,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "this is a string"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "a_string": {
                             "type": "string"
                         }
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/a_string"
+                            "$ref": "#/$defs/a_string"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "ref::naive replacement of ${'$'}ref with its destination is not correct::do not evaluate the ${'$'}ref inside the enum, matching any string"    """)
+            $$"""    schemaTestId: "ref::naive replacement of $ref with its destination is not correct::do not evaluate the $ref inside the enum, matching any string"    """)
     }
 
     /**
@@ -902,23 +902,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "type": "string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "a_string": {
                             "type": "string"
                         }
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/a_string"
+                            "$ref": "#/$defs/a_string"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "ref::naive replacement of ${'$'}ref with its destination is not correct::do not evaluate the ${'$'}ref inside the enum, definition exact match"    """)
+            $$"""    schemaTestId: "ref::naive replacement of $ref with its destination is not correct::do not evaluate the $ref inside the enum, definition exact match"    """)
     }
 
     /**
@@ -931,28 +931,28 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_26() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "#/${'$'}defs/a_string"
+                    "$ref": "#/$defs/a_string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "a_string": {
                             "type": "string"
                         }
                     },
                     "enum": [
                         {
-                            "${'$'}ref": "#/${'$'}defs/a_string"
+                            "$ref": "#/$defs/a_string"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "ref::naive replacement of ${'$'}ref with its destination is not correct::match the enum exactly"    """)
+            $$"""    schemaTestId: "ref::naive replacement of $ref with its destination is not correct::match the enum exactly"    """)
     }
 
     /**
@@ -968,17 +968,17 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "#/${'$'}defs/bool",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "#/$defs/bool",
+                    "$defs": {
                         "bool": true
                     }
                 }
             """,
             true,
-            """    schemaTestId: "ref::${'$'}ref to boolean schema true::any value is valid"    """)
+            $$"""    schemaTestId: "ref::$ref to boolean schema true::any value is valid"    """)
     }
 
     /**
@@ -994,17 +994,17 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "#/${'$'}defs/bool",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "#/$defs/bool",
+                    "$defs": {
                         "bool": false
                     }
                 }
             """,
             false,
-            """    schemaTestId: "ref::${'$'}ref to boolean schema false::any value is invalid"    """)
+            $$"""    schemaTestId: "ref::$ref to boolean schema false::any value is invalid"    """)
     }
 
     /**
@@ -1056,10 +1056,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/tree"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/tree"
                 }
             """,
             true,
@@ -1115,10 +1115,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/tree"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/tree"
                 }
             """,
             false,
@@ -1140,15 +1140,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo\"bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo\"bar": {
-                            "${'$'}ref": "#/${'$'}defs/foo%22bar"
+                            "$ref": "#/$defs/foo%22bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo\"bar": {
                             "type": "number"
                         }
@@ -1174,15 +1174,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "foo\"bar": "1"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "foo\"bar": {
-                            "${'$'}ref": "#/${'$'}defs/foo%22bar"
+                            "$ref": "#/$defs/foo%22bar"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo\"bar": {
                             "type": "number"
                         }
@@ -1212,10 +1212,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "prop1": "match"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "A": {
                             "unevaluatedProperties": false
                         }
@@ -1225,7 +1225,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                             "type": "string"
                         }
                     },
-                    "${'$'}ref": "#/${'$'}defs/A"
+                    "$ref": "#/$defs/A"
                 }
             """,
             false,
@@ -1245,12 +1245,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/if"
+                            "$ref": "#/if"
                         }
                     ],
                     "if": {
@@ -1259,7 +1259,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to if::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to if::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -1275,12 +1275,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/if"
+                            "$ref": "#/if"
                         }
                     ],
                     "if": {
@@ -1305,12 +1305,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/then"
+                            "$ref": "#/then"
                         }
                     ],
                     "then": {
@@ -1319,7 +1319,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to then::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to then::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -1335,12 +1335,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/then"
+                            "$ref": "#/then"
                         }
                     ],
                     "then": {
@@ -1365,12 +1365,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/else"
+                            "$ref": "#/else"
                         }
                     ],
                     "else": {
@@ -1379,7 +1379,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to else::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to else::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -1395,12 +1395,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/else"
+                            "$ref": "#/else"
                         }
                     ],
                     "else": {
@@ -1425,12 +1425,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "": {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "": {
                                     "type": "number"
                                 }
@@ -1439,13 +1439,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs//${'$'}defs/"
+                            "$ref": "#/$defs//$defs/"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "ref::empty tokens in ${'$'}ref json-pointer::number is valid"    """)
+            $$"""    schemaTestId: "ref::empty tokens in $ref json-pointer::number is valid"    """)
     }
 
     /**
@@ -1461,12 +1461,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "": {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "": {
                                     "type": "number"
                                 }
@@ -1475,13 +1475,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/${'$'}defs//${'$'}defs/"
+                            "$ref": "#/$defs//$defs/"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "ref::empty tokens in ${'$'}ref json-pointer::non-number is invalid"    """)
+            $$"""    schemaTestId: "ref::empty tokens in $ref json-pointer::non-number is invalid"    """)
     }
 
     /**
@@ -1501,10 +1501,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/integer.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/integer.json"
                 }
             """,
             true,
@@ -1528,10 +1528,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/integer.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/integer.json"
                 }
             """,
             false,
@@ -1555,10 +1555,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/${'$'}defs/integer"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/subSchemas.json#/$defs/integer"
                 }
             """,
             true,
@@ -1582,10 +1582,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/${'$'}defs/integer"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/subSchemas.json#/$defs/integer"
                 }
             """,
             false,
@@ -1609,10 +1609,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/${'$'}defs/refToInteger"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/subSchemas.json#/$defs/refToInteger"
                 }
             """,
             true,
@@ -1636,10 +1636,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/${'$'}defs/refToInteger"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/subSchemas.json#/$defs/refToInteger"
                 }
             """,
             false,
@@ -1665,13 +1665,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "name": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name-defs.json#/${'$'}defs/orNull"
+                            "$ref": "http://localhost:1234/name-defs.json#/$defs/orNull"
                         }
                     }
                 }
@@ -1699,13 +1699,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "name": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name-defs.json#/${'$'}defs/orNull"
+                            "$ref": "http://localhost:1234/name-defs.json#/$defs/orNull"
                         }
                     }
                 }
@@ -1735,13 +1735,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "${'$'}ref": "http://localhost:1234/name-defs.json#/${'$'}defs/orNull"
+                            "$ref": "http://localhost:1234/name-defs.json#/$defs/orNull"
                         }
                     }
                 }
@@ -1769,10 +1769,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/ref-and-defs.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/ref-and-defs.json"
                 }
             """,
             false,
@@ -1798,10 +1798,10 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/ref-and-defs.json"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/ref-and-defs.json"
                 }
             """,
             true,

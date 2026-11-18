@@ -29,9 +29,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "properties": {
@@ -75,9 +75,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "foo": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "properties": {
@@ -121,9 +121,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "properties": {
@@ -168,9 +168,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "bar": "quux"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "properties": {
@@ -216,9 +216,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "baz": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "bar": {
                             "type": "integer"
@@ -271,9 +271,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "baz": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "bar": {
                             "type": "integer"
@@ -326,9 +326,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "baz": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "bar": {
                             "type": "integer"
@@ -381,9 +381,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "bar": {
                             "type": "integer"
@@ -435,9 +435,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
                         "bar": {
                             "type": "integer"
@@ -487,9 +487,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 25
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "maximum": 30
@@ -517,9 +517,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 35
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "maximum": 30
@@ -547,9 +547,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         true,
                         true
@@ -573,9 +573,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         true,
                         false
@@ -599,9 +599,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         false,
                         false
@@ -625,9 +625,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {}
                     ]
@@ -650,9 +650,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {},
                         {}
@@ -676,9 +676,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {},
                         {
@@ -704,9 +704,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {},
                         {
@@ -732,9 +732,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "type": "number"
@@ -760,9 +760,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "type": "number"
@@ -788,9 +788,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "allOf": [
@@ -819,9 +819,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "allOf": [
@@ -850,9 +850,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -887,9 +887,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -924,9 +924,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 3
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -961,9 +961,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 15
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -998,9 +998,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 2
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -1035,9 +1035,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 10
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -1072,9 +1072,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2
@@ -1109,9 +1109,9 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
             """
                 30
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
                         {
                             "multipleOf": 2

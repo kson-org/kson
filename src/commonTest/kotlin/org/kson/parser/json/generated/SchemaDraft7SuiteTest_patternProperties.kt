@@ -28,9 +28,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -58,9 +58,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foooooo": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -88,9 +88,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "fooooo": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -118,9 +118,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foooooo": "baz"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -147,9 +147,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -174,9 +174,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -201,9 +201,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*o": {
                             "type": "integer"
@@ -230,9 +230,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "a": 21
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -262,9 +262,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "aaaa": 18
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -295,9 +295,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "aaaa": 18
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -327,9 +327,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "a": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -359,9 +359,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "aaaa": 31
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -392,9 +392,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "aaaa": 31
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "a*": {
                             "type": "integer"
@@ -424,9 +424,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "answer 1": "42"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "[0-9]{2,}": {
                             "type": "boolean"
@@ -456,9 +456,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "a31b": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "[0-9]{2,}": {
                             "type": "boolean"
@@ -488,9 +488,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "a_x_3": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "[0-9]{2,}": {
                             "type": "boolean"
@@ -520,9 +520,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "a_X_3": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "[0-9]{2,}": {
                             "type": "boolean"
@@ -552,9 +552,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*": true,
                         "b.*": false
@@ -580,9 +580,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*": true,
                         "b.*": false
@@ -609,9 +609,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "bar": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*": true,
                         "b.*": false
@@ -637,9 +637,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foobar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*": true,
                         "b.*": false
@@ -663,9 +663,9 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
                         "f.*": true,
                         "b.*": false
@@ -691,11 +691,11 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
                     "foobar": null
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "patternProperties": {
-                        "^.*bar${'$'}": {
+                        "^.*bar$": {
                             "type": "null"
                         }
                     }

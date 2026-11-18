@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "fo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "💩💩"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2.0
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft2020_12SuiteTest_maxLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "maxLength": 2.0
                 }
             """,

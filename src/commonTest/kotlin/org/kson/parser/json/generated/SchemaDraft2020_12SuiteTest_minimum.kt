@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 2.6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": 1.1
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": 1.1
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 0.6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": 1.1
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 "x"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": 1.1
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 -1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 -2
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -187,9 +187,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 -2.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -210,9 +210,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 -2.0001
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -233,9 +233,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 -3
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -256,9 +256,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 "x"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minimum": -2
                 }
             """,
@@ -279,9 +279,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 1.2
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "exclusiveMinimum": 1.1
                 }
             """,
@@ -302,9 +302,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 1.1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "exclusiveMinimum": 1.1
                 }
             """,
@@ -325,9 +325,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 0.6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "exclusiveMinimum": 1.1
                 }
             """,
@@ -348,9 +348,9 @@ class SchemaDraft2020_12SuiteTest_minimum : JsonSchemaTest {
             """
                 "x"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "exclusiveMinimum": 1.1
                 }
             """,

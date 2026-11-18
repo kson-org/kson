@@ -30,9 +30,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     }
@@ -58,9 +58,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "x"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     }
@@ -85,9 +85,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     }
@@ -113,9 +113,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "length": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     }
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -174,9 +174,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -206,9 +206,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -240,9 +240,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -270,9 +270,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -304,9 +304,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "length": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -338,9 +338,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": true
                 }
             """,
@@ -361,9 +361,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": true
                 }
             """,
@@ -388,9 +388,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": false
                 }
             """,
@@ -411,9 +411,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": false
                 }
             """,
@@ -436,9 +436,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         true,
                         false
@@ -465,9 +465,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "foo"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         true,
                         false
@@ -491,9 +491,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         true,
                         false
@@ -542,19 +542,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -571,13 +571,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -632,19 +632,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -661,13 +661,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -717,19 +717,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -746,13 +746,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -794,19 +794,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -823,13 +823,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -876,19 +876,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -905,13 +905,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -944,19 +944,19 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "item": {
                             "type": "array",
                             "additionalItems": false,
                             "items": [
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 },
                                 {
-                                    "${'$'}ref": "#/definitions/sub-item"
+                                    "$ref": "#/definitions/sub-item"
                                 }
                             ]
                         },
@@ -973,13 +973,13 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "additionalItems": false,
                     "items": [
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         },
                         {
-                            "${'$'}ref": "#/definitions/item"
+                            "$ref": "#/definitions/item"
                         }
                     ]
                 }
@@ -1030,9 +1030,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -1094,9 +1094,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -1152,9 +1152,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -1189,9 +1189,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "null"
                     }
@@ -1216,9 +1216,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "null"
@@ -1247,9 +1247,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     },
@@ -1279,9 +1279,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "3"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {
                         "type": "integer"
                     },
@@ -1313,9 +1313,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     5
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": {},
                     "additionalItems": false
                 }
@@ -1337,9 +1337,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {},
                         {},
@@ -1367,9 +1367,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {},
                         {},
@@ -1398,9 +1398,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {},
                         {},
@@ -1430,9 +1430,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {},
                         {},
@@ -1463,9 +1463,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     4
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {},
                         {},
@@ -1497,9 +1497,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     5
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "additionalItems": false
                 }
             """,
@@ -1522,9 +1522,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "additionalItems": false
                 }
             """,
@@ -1549,9 +1549,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "integer"
@@ -1579,9 +1579,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "hello"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
                             "items": [
@@ -1625,9 +1625,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "string"
@@ -1658,9 +1658,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     "y"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {
                             "type": "string"
@@ -1692,9 +1692,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     37
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {}
                     ],
@@ -1720,9 +1720,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "items": [
                         {}
                     ],
@@ -1748,9 +1748,9 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
                     null
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "additionalItems": {
                         "type": "null"
                     }

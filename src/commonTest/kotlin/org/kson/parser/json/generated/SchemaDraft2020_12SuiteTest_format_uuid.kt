@@ -27,9 +27,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d1638"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2EB8AA08-AA98-11EA-B4AA-73B441D16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-AA98-11ea-B4Aa-73B441D16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -257,9 +257,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "00000000-0000-0000-0000-000000000000"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -284,9 +284,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d1638"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -311,9 +311,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -338,9 +338,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4ga-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -365,9 +365,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08aa9811eab4aa73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -392,9 +392,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08aa98-11ea-b4aa73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -419,9 +419,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8-aa08-aa98-11ea-b4aa73b44-1d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -446,9 +446,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08aa9811eab4aa73b441d16380----"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -473,9 +473,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa0-8aa98-11e-ab4aa7-3b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -496,9 +496,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "98d80576-482e-427f-8434-7f86890ab222"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -519,9 +519,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "99c17cbb-656f-564a-940f-1a4568f03487"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -542,9 +542,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "99c17cbb-656f-664a-940f-1a4568f03487"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -565,9 +565,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "99c17cbb-656f-f64a-940f-1a4568f03487"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -592,9 +592,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "urn:uuid:2eb8aa08-aa98-11ea-b4aa-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -619,9 +619,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "{2eb8aa08-aa98-11ea-b4aa-73b441d16380}"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -646,9 +646,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d16380-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -673,9 +673,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "২eb8aa08-aa98-11ea-b4aa-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -700,9 +700,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d1_380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -727,9 +727,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-b4aa-73b441d16380\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,
@@ -750,9 +750,9 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
             """
                 "2eb8aa08-aa98-11ea-f4aa-73b441d16380"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "format": "uuid"
                 }
             """,

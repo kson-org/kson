@@ -29,12 +29,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     "foo": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -61,12 +61,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -91,12 +91,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     "bar": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -123,12 +123,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#"
+                            "$ref": "#"
                         }
                     },
                     "additionalProperties": false
@@ -153,15 +153,15 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     "bar": 3
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
                             "type": "integer"
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo"
+                            "$ref": "#/properties/foo"
                         }
                     }
                 }
@@ -185,15 +185,15 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     "bar": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
                         "foo": {
                             "type": "integer"
                         },
                         "bar": {
-                            "${'$'}ref": "#/properties/foo"
+                            "$ref": "#/properties/foo"
                         }
                     }
                 }
@@ -212,23 +212,23 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_7() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": "a"
+                    "$ref": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
-                        "${'$'}ref": {
+                        "$ref": {
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "ref::property named ${'$'}ref that is not a reference::property named ${'$'}ref valid"    """)
+            $$"""    schemaTestId: "ref::property named $ref that is not a reference::property named $ref valid"    """)
     }
 
     /**
@@ -241,23 +241,23 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
     fun jsonSchemaSuiteTest_8() {
         
         assertKsonEnforcesSchema(
-            """
+            $$"""
                 {
-                    "${'$'}ref": 2
+                    "$ref": 2
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "properties": {
-                        "${'$'}ref": {
+                        "$ref": {
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "ref::property named ${'$'}ref that is not a reference::property named ${'$'}ref invalid"    """)
+            $$"""    schemaTestId: "ref::property named $ref that is not a reference::property named $ref invalid"    """)
     }
 
     /**
@@ -309,10 +309,10 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/tree"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/tree"
                 }
             """,
             true,
@@ -368,10 +368,10 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/tree"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/tree"
                 }
             """,
             false,
@@ -391,12 +391,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/if"
+                            "$ref": "#/if"
                         }
                     ],
                     "if": {
@@ -405,7 +405,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to if::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to if::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -421,12 +421,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/if"
+                            "$ref": "#/if"
                         }
                     ],
                     "if": {
@@ -451,12 +451,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/then"
+                            "$ref": "#/then"
                         }
                     ],
                     "then": {
@@ -465,7 +465,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to then::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to then::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -481,12 +481,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/then"
+                            "$ref": "#/then"
                         }
                     ],
                     "then": {
@@ -511,12 +511,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/else"
+                            "$ref": "#/else"
                         }
                     ],
                     "else": {
@@ -525,7 +525,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref to else::a non-integer is invalid due to the ${'$'}ref"    """)
+            $$"""    schemaTestId: "ref::ref to else::a non-integer is invalid due to the $ref"    """)
     }
 
     /**
@@ -541,12 +541,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "#/else"
+                            "$ref": "#/else"
                         }
                     ],
                     "else": {
@@ -575,10 +575,10 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/integer.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/integer.json"
                 }
             """,
             true,
@@ -602,10 +602,10 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/integer.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/integer.json"
                 }
             """,
             false,

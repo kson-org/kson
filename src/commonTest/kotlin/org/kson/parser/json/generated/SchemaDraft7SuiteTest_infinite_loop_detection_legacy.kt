@@ -28,9 +28,9 @@ class SchemaDraft7SuiteTest_infinite_loop_detection_legacy : JsonSchemaTest {
                     "foo": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "int": {
                             "type": "integer"
@@ -40,13 +40,13 @@ class SchemaDraft7SuiteTest_infinite_loop_detection_legacy : JsonSchemaTest {
                         {
                             "properties": {
                                 "foo": {
-                                    "${'$'}ref": "#/definitions/int"
+                                    "$ref": "#/definitions/int"
                                 }
                             }
                         },
                         {
                             "additionalProperties": {
-                                "${'$'}ref": "#/definitions/int"
+                                "$ref": "#/definitions/int"
                             }
                         }
                     ]
@@ -71,9 +71,9 @@ class SchemaDraft7SuiteTest_infinite_loop_detection_legacy : JsonSchemaTest {
                     "foo": "a string"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "definitions": {
                         "int": {
                             "type": "integer"
@@ -83,13 +83,13 @@ class SchemaDraft7SuiteTest_infinite_loop_detection_legacy : JsonSchemaTest {
                         {
                             "properties": {
                                 "foo": {
-                                    "${'$'}ref": "#/definitions/int"
+                                    "$ref": "#/definitions/int"
                                 }
                             }
                         },
                         {
                             "additionalProperties": {
-                                "${'$'}ref": "#/definitions/int"
+                                "$ref": "#/definitions/int"
                             }
                         }
                     ]

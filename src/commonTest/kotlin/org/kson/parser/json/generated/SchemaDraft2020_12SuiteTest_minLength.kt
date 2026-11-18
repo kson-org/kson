@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "fo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "💩"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2.0
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft2020_12SuiteTest_minLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "minLength": 2.0
                 }
             """,

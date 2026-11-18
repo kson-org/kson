@@ -33,9 +33,9 @@ class SchemaDraft2020_12SuiteTest_optional_cross_draft : JsonSchemaTest {
                     "foo": "any value"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "allOf": [
                         {
@@ -44,7 +44,7 @@ class SchemaDraft2020_12SuiteTest_optional_cross_draft : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "http://localhost:1234/draft7/ignore-dependentRequired.json"
+                            "$ref": "http://localhost:1234/draft7/ignore-dependentRequired.json"
                         }
                     ]
                 }
@@ -74,11 +74,11 @@ class SchemaDraft2020_12SuiteTest_optional_cross_draft : JsonSchemaTest {
                     3
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
-                    "${'$'}ref": "http://localhost:1234/draft2019-09/ignore-prefixItems.json"
+                    "$ref": "http://localhost:1234/draft2019-09/ignore-prefixItems.json"
                 }
             """,
             true,

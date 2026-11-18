@@ -29,9 +29,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1
                 }
             """,
@@ -54,9 +54,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1
                 }
             """,
@@ -77,9 +77,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1
                 }
             """,
@@ -100,9 +100,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1
                 }
             """,
@@ -126,9 +126,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
                     2
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1.0
                 }
             """,
@@ -149,9 +149,9 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "minItems": 1.0
                 }
             """,

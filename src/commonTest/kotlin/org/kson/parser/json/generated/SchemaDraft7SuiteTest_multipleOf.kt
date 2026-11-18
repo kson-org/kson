@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 10
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 2
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 2
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 2
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.5
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 4.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.5
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 -4.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.5
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 35
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.5
                 }
             """,
@@ -187,9 +187,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0.0075
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.0E-4
                 }
             """,
@@ -210,9 +210,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 0.00751
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.0E-4
                 }
             """,
@@ -233,9 +233,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 4.0E-8
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.0E-8
                 }
             """,
@@ -256,9 +256,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 1.5E-8
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "multipleOf": 1.0E-8
                 }
             """,
@@ -279,9 +279,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 1.0E308
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer",
                     "multipleOf": 0.123456789
                 }
@@ -303,9 +303,9 @@ class SchemaDraft7SuiteTest_multipleOf : JsonSchemaTest {
             """
                 12391239123
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "type": "integer",
                     "multipleOf": 1.0E-8
                 }

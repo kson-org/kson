@@ -29,9 +29,9 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                     "badProperty": "this property should not exist"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                    "$schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
                     "properties": {
                         "badProperty": false,
                         "numberProperty": {
@@ -59,9 +59,9 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                     "numberProperty": 20
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                    "$schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
                     "properties": {
                         "badProperty": false,
                         "numberProperty": {
@@ -93,9 +93,9 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                     "numberProperty": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                    "$schema": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
                     "properties": {
                         "badProperty": false,
                         "numberProperty": {
@@ -121,9 +121,9 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
             """
                 "foobar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+                    "$schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
                     "type": "number"
                 }
             """,
@@ -144,9 +144,9 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
             """
                 20
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+                    "$schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
                     "type": "number"
                 }
             """,

@@ -30,23 +30,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}dynamicRef": "#items"
+                        "$dynamicRef": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef to a ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor (2020)::An array of strings is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor (2020)::An array of strings is valid"    """)
     }
 
     /**
@@ -69,23 +69,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}dynamicRef": "#items"
+                        "$dynamicRef": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef to a ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor (2020)::An array containing non-strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor (2020)::An array containing non-strings is invalid"    """)
     }
 
     /**
@@ -104,26 +104,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/typical-dynamic-resolution/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/typical-dynamic-resolution/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items"
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items"
                                 }
                             }
                         }
@@ -131,7 +131,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef resolves to the first ${'$'}dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid"    """)
     }
 
     /**
@@ -154,26 +154,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/typical-dynamic-resolution/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/typical-dynamic-resolution/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items"
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items"
                                 }
                             }
                         }
@@ -181,7 +181,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef resolves to the first ${'$'}dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array containing non-strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array containing non-strings is invalid"    """)
     }
 
     /**
@@ -200,30 +200,30 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
-                    "${'$'}ref": "intermediate-scope",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
+                    "$ref": "intermediate-scope",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "intermediate-scope": {
-                            "${'$'}id": "intermediate-scope",
-                            "${'$'}ref": "list"
+                            "$id": "intermediate-scope",
+                            "$ref": "list"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items"
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items"
                                 }
                             }
                         }
@@ -231,7 +231,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef with intermediate scopes that don't include a matching ${'$'}dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid"    """)
     }
 
     /**
@@ -254,30 +254,30 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
-                    "${'$'}ref": "intermediate-scope",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root",
+                    "$ref": "intermediate-scope",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "intermediate-scope": {
-                            "${'$'}id": "intermediate-scope",
-                            "${'$'}ref": "list"
+                            "$id": "intermediate-scope",
+                            "$ref": "list"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items"
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items"
                                 }
                             }
                         }
@@ -285,7 +285,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef with intermediate scopes that don't include a matching ${'$'}dynamicAnchor does not affect dynamic scope resolution (2020)::An array containing non-strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array containing non-strings is invalid"    """)
     }
 
     /**
@@ -304,26 +304,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-resolution-ignores-anchors/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-resolution-ignores-anchors/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}anchor": "items",
+                            "$anchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items"
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items"
                                 }
                             }
                         }
@@ -331,7 +331,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::An ${'$'}anchor with the same name as a ${'$'}dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid"    """)
     }
 
     /**
@@ -351,48 +351,48 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 "a string"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
                     "if": {
-                        "${'$'}id": "first_scope",
-                        "${'$'}defs": {
+                        "$id": "first_scope",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is first_scope#thingy",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is first_scope#thingy",
+                                "$dynamicAnchor": "thingy",
                                 "type": "number"
                             }
                         }
                     },
                     "then": {
-                        "${'$'}id": "second_scope",
-                        "${'$'}ref": "start",
-                        "${'$'}defs": {
+                        "$id": "second_scope",
+                        "$ref": "start",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is second_scope#thingy, the final destination of the ${'$'}dynamicRef",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is second_scope#thingy, the final destination of the $dynamicRef",
+                                "$dynamicAnchor": "thingy",
                                 "type": "null"
                             }
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "start": {
-                            "${'$'}comment": "this is the landing spot from ${'$'}ref",
-                            "${'$'}id": "start",
-                            "${'$'}dynamicRef": "inner_scope#thingy"
+                            "$comment": "this is the landing spot from $ref",
+                            "$id": "start",
+                            "$dynamicRef": "inner_scope#thingy"
                         },
                         "thingy": {
-                            "${'$'}comment": "this is the first stop for the ${'$'}dynamicRef",
-                            "${'$'}id": "inner_scope",
-                            "${'$'}dynamicAnchor": "thingy",
+                            "$comment": "this is the first stop for the $dynamicRef",
+                            "$id": "inner_scope",
+                            "$dynamicAnchor": "thingy",
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::string matches /${'$'}defs/thingy, but the ${'$'}dynamicRef does not stop here"    """)
+            $$"""    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::string matches /$defs/thingy, but the $dynamicRef does not stop here"    """)
     }
 
     /**
@@ -412,48 +412,48 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 42
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
                     "if": {
-                        "${'$'}id": "first_scope",
-                        "${'$'}defs": {
+                        "$id": "first_scope",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is first_scope#thingy",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is first_scope#thingy",
+                                "$dynamicAnchor": "thingy",
                                 "type": "number"
                             }
                         }
                     },
                     "then": {
-                        "${'$'}id": "second_scope",
-                        "${'$'}ref": "start",
-                        "${'$'}defs": {
+                        "$id": "second_scope",
+                        "$ref": "start",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is second_scope#thingy, the final destination of the ${'$'}dynamicRef",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is second_scope#thingy, the final destination of the $dynamicRef",
+                                "$dynamicAnchor": "thingy",
                                 "type": "null"
                             }
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "start": {
-                            "${'$'}comment": "this is the landing spot from ${'$'}ref",
-                            "${'$'}id": "start",
-                            "${'$'}dynamicRef": "inner_scope#thingy"
+                            "$comment": "this is the landing spot from $ref",
+                            "$id": "start",
+                            "$dynamicRef": "inner_scope#thingy"
                         },
                         "thingy": {
-                            "${'$'}comment": "this is the first stop for the ${'$'}dynamicRef",
-                            "${'$'}id": "inner_scope",
-                            "${'$'}dynamicAnchor": "thingy",
+                            "$comment": "this is the first stop for the $dynamicRef",
+                            "$id": "inner_scope",
+                            "$dynamicAnchor": "thingy",
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::first_scope is not in dynamic scope for the ${'$'}dynamicRef"    """)
+            $$"""    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::first_scope is not in dynamic scope for the $dynamicRef"    """)
     }
 
     /**
@@ -469,48 +469,48 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main",
                     "if": {
-                        "${'$'}id": "first_scope",
-                        "${'$'}defs": {
+                        "$id": "first_scope",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is first_scope#thingy",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is first_scope#thingy",
+                                "$dynamicAnchor": "thingy",
                                 "type": "number"
                             }
                         }
                     },
                     "then": {
-                        "${'$'}id": "second_scope",
-                        "${'$'}ref": "start",
-                        "${'$'}defs": {
+                        "$id": "second_scope",
+                        "$ref": "start",
+                        "$defs": {
                             "thingy": {
-                                "${'$'}comment": "this is second_scope#thingy, the final destination of the ${'$'}dynamicRef",
-                                "${'$'}dynamicAnchor": "thingy",
+                                "$comment": "this is second_scope#thingy, the final destination of the $dynamicRef",
+                                "$dynamicAnchor": "thingy",
                                 "type": "null"
                             }
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "start": {
-                            "${'$'}comment": "this is the landing spot from ${'$'}ref",
-                            "${'$'}id": "start",
-                            "${'$'}dynamicRef": "inner_scope#thingy"
+                            "$comment": "this is the landing spot from $ref",
+                            "$id": "start",
+                            "$dynamicRef": "inner_scope#thingy"
                         },
                         "thingy": {
-                            "${'$'}comment": "this is the first stop for the ${'$'}dynamicRef",
-                            "${'$'}id": "inner_scope",
-                            "${'$'}dynamicAnchor": "thingy",
+                            "$comment": "this is the first stop for the $dynamicRef",
+                            "$id": "inner_scope",
+                            "$dynamicAnchor": "thingy",
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::/then/${'$'}defs/thingy is the final stop for the ${'$'}dynamicRef"    """)
+            $$"""    schemaTestId: "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::/then/$defs/thingy is the final stop for the $dynamicRef"    """)
     }
 
     /**
@@ -536,12 +536,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-tree.json",
-                    "${'$'}dynamicAnchor": "node",
-                    "${'$'}ref": "tree.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-tree.json",
+                    "$dynamicAnchor": "node",
+                    "$ref": "tree.json",
                     "unevaluatedProperties": false
                 }
             """,
@@ -572,12 +572,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-tree.json",
-                    "${'$'}dynamicAnchor": "node",
-                    "${'$'}ref": "tree.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-tree.json",
+                    "$dynamicAnchor": "node",
+                    "$ref": "tree.json",
                     "unevaluatedProperties": false
                 }
             """,
@@ -604,14 +604,14 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "a": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible.json",
-                    "${'$'}ref": "extendible-dynamic-ref.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible.json",
+                    "$ref": "extendible-dynamic-ref.json",
+                    "$defs": {
                         "elements": {
-                            "${'$'}dynamicAnchor": "elements",
+                            "$dynamicAnchor": "elements",
                             "properties": {
                                 "a": true
                             },
@@ -650,14 +650,14 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible.json",
-                    "${'$'}ref": "extendible-dynamic-ref.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible.json",
+                    "$ref": "extendible-dynamic-ref.json",
+                    "$defs": {
                         "elements": {
-                            "${'$'}dynamicAnchor": "elements",
+                            "$dynamicAnchor": "elements",
                             "properties": {
                                 "a": true
                             },
@@ -696,14 +696,14 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible.json",
-                    "${'$'}ref": "extendible-dynamic-ref.json",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible.json",
+                    "$ref": "extendible-dynamic-ref.json",
+                    "$defs": {
                         "elements": {
-                            "${'$'}dynamicAnchor": "elements",
+                            "$dynamicAnchor": "elements",
                             "properties": {
                                 "a": true
                             },
@@ -738,18 +738,18 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "a": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
                     "allOf": [
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         },
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -764,7 +764,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect parent schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect parent schema"    """)
     }
 
     /**
@@ -790,18 +790,18 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
                     "allOf": [
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         },
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -816,7 +816,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect extended schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect extended schema"    """)
     }
 
     /**
@@ -842,18 +842,18 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-defs-first.json",
                     "allOf": [
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         },
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -868,7 +868,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::correct extended schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::correct extended schema"    """)
     }
 
     /**
@@ -890,15 +890,15 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "a": true
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
                     "allOf": [
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -910,13 +910,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect parent schema"    """)
     }
 
     /**
@@ -942,15 +942,15 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
                     "allOf": [
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -962,13 +962,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect extended schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect extended schema"    """)
     }
 
     /**
@@ -994,15 +994,15 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "http://localhost:1234/strict-extendible-allof-ref-first.json",
                     "allOf": [
                         {
-                            "${'$'}defs": {
+                            "$defs": {
                                 "elements": {
-                                    "${'$'}dynamicAnchor": "elements",
+                                    "$dynamicAnchor": "elements",
                                     "properties": {
                                         "a": true
                                     },
@@ -1014,13 +1014,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                             }
                         },
                         {
-                            "${'$'}ref": "extendible-dynamic-ref.json"
+                            "$ref": "extendible-dynamic-ref.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::correct extended schema"    """)
     }
 
     /**
@@ -1040,14 +1040,14 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/detached-dynamicref.json#/${'$'}defs/foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/detached-dynamicref.json#/$defs/foo"
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::number is valid"    """)
     }
 
     /**
@@ -1067,14 +1067,14 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}ref": "http://localhost:1234/detached-dynamicref.json#/${'$'}defs/foo"
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$ref": "http://localhost:1234/detached-dynamicref.json#/$defs/foo"
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::non-number is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::non-number is invalid"    """)
     }
 
     /**
@@ -1094,41 +1094,41 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
                     "type": "object",
                     "properties": {
                         "bar-item": {
-                            "${'$'}ref": "item"
+                            "$ref": "item"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "item"
+                                "$ref": "item"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "item": {
-                                    "${'$'}id": "item",
+                                    "$id": "item",
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "${'$'}dynamicRef": "#content"
+                                            "$dynamicRef": "#content"
                                         }
                                     },
-                                    "${'$'}defs": {
+                                    "$defs": {
                                         "defaultContent": {
-                                            "${'$'}dynamicAnchor": "content",
+                                            "$dynamicAnchor": "content",
                                             "type": "integer"
                                         }
                                     }
                                 },
                                 "content": {
-                                    "${'$'}dynamicAnchor": "content",
+                                    "$dynamicAnchor": "content",
                                     "type": "string"
                                 }
                             }
@@ -1137,7 +1137,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef skips over intermediate resources - direct reference (2020)::integer property passes"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::integer property passes"    """)
     }
 
     /**
@@ -1161,41 +1161,41 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-skips-intermediate-resource/main",
                     "type": "object",
                     "properties": {
                         "bar-item": {
-                            "${'$'}ref": "item"
+                            "$ref": "item"
                         }
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "item"
+                                "$ref": "item"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "item": {
-                                    "${'$'}id": "item",
+                                    "$id": "item",
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "${'$'}dynamicRef": "#content"
+                                            "$dynamicRef": "#content"
                                         }
                                     },
-                                    "${'$'}defs": {
+                                    "$defs": {
                                         "defaultContent": {
-                                            "${'$'}dynamicAnchor": "content",
+                                            "$dynamicAnchor": "content",
                                             "type": "integer"
                                         }
                                     }
                                 },
                                 "content": {
-                                    "${'$'}dynamicAnchor": "content",
+                                    "$dynamicAnchor": "content",
                                     "type": "string"
                                 }
                             }
@@ -1204,7 +1204,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef skips over intermediate resources - direct reference (2020)::string property fails"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::string property fails"    """)
     }
 
     /**
@@ -1220,44 +1220,44 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 "hi"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
-                    "${'$'}ref": "first#/${'$'}defs/stuff",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
+                    "$ref": "first#/$defs/stuff",
+                    "$defs": {
                         "first": {
-                            "${'$'}id": "first",
-                            "${'$'}defs": {
+                            "$id": "first",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}ref": "second#/${'$'}defs/stuff"
+                                    "$ref": "second#/$defs/stuff"
                                 },
                                 "length": {
-                                    "${'$'}comment": "unused, because there is no ${'$'}dynamicAnchor here",
+                                    "$comment": "unused, because there is no $dynamicAnchor here",
                                     "maxLength": 1
                                 }
                             }
                         },
                         "second": {
-                            "${'$'}id": "second",
-                            "${'$'}defs": {
+                            "$id": "second",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}ref": "third#/${'$'}defs/stuff"
+                                    "$ref": "third#/$defs/stuff"
                                 },
                                 "length": {
-                                    "${'$'}dynamicAnchor": "length",
+                                    "$dynamicAnchor": "length",
                                     "maxLength": 2
                                 }
                             }
                         },
                         "third": {
-                            "${'$'}id": "third",
-                            "${'$'}defs": {
+                            "$id": "third",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}dynamicRef": "#length"
+                                    "$dynamicRef": "#length"
                                 },
                                 "length": {
-                                    "${'$'}dynamicAnchor": "length",
+                                    "$dynamicAnchor": "length",
                                     "maxLength": 3
                                 }
                             }
@@ -1266,7 +1266,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/${'$'}defs/length"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/$defs/length"    """)
     }
 
     /**
@@ -1286,44 +1286,44 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
             """
                 "hey"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
-                    "${'$'}ref": "first#/${'$'}defs/stuff",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-avoids-root-of-each-schema/base",
+                    "$ref": "first#/$defs/stuff",
+                    "$defs": {
                         "first": {
-                            "${'$'}id": "first",
-                            "${'$'}defs": {
+                            "$id": "first",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}ref": "second#/${'$'}defs/stuff"
+                                    "$ref": "second#/$defs/stuff"
                                 },
                                 "length": {
-                                    "${'$'}comment": "unused, because there is no ${'$'}dynamicAnchor here",
+                                    "$comment": "unused, because there is no $dynamicAnchor here",
                                     "maxLength": 1
                                 }
                             }
                         },
                         "second": {
-                            "${'$'}id": "second",
-                            "${'$'}defs": {
+                            "$id": "second",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}ref": "third#/${'$'}defs/stuff"
+                                    "$ref": "third#/$defs/stuff"
                                 },
                                 "length": {
-                                    "${'$'}dynamicAnchor": "length",
+                                    "$dynamicAnchor": "length",
                                     "maxLength": 2
                                 }
                             }
                         },
                         "third": {
-                            "${'$'}id": "third",
-                            "${'$'}defs": {
+                            "$id": "third",
+                            "$defs": {
                                 "stuff": {
-                                    "${'$'}dynamicRef": "#length"
+                                    "$dynamicRef": "#length"
                                 },
                                 "length": {
-                                    "${'$'}dynamicAnchor": "length",
+                                    "$dynamicAnchor": "length",
                                     "maxLength": 3
                                 }
                             }
@@ -1332,7 +1332,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/${'$'}defs/length"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/$defs/length"    """)
     }
 
     /**
@@ -1351,23 +1351,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}dynamicRef": "#items"
+                        "$dynamicRef": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}anchor": "items",
+                            "$anchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef to an ${'$'}anchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor::An array of strings is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor::An array of strings is valid"    """)
     }
 
     /**
@@ -1390,23 +1390,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}dynamicRef": "#items"
+                        "$dynamicRef": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}anchor": "items",
+                            "$anchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef to an ${'$'}anchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor::An array containing non-strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid"    """)
     }
 
     /**
@@ -1429,23 +1429,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}ref": "#items"
+                        "$ref": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}ref to a ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor::An array of strings is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array of strings is valid"    """)
     }
 
     /**
@@ -1468,23 +1468,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "array",
                     "items": {
-                        "${'$'}ref": "#items"
+                        "$ref": "#items"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}ref to a ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor::An array containing non-strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid"    """)
     }
 
     /**
@@ -1507,26 +1507,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "bar"
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#/${'$'}defs/items"
+                                "$dynamicRef": "#/$defs/items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items",
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items",
                                     "type": "number"
                                 }
                             }
@@ -1535,7 +1535,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef without anchor in fragment behaves identical to ${'$'}ref::An array of strings is invalid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of strings is invalid"    """)
     }
 
     /**
@@ -1554,26 +1554,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#/${'$'}defs/items"
+                                "$dynamicRef": "#/$defs/items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to satisfy the bookending requirement",
-                                    "${'$'}dynamicAnchor": "items",
+                                    "$comment": "This is only needed to satisfy the bookending requirement",
+                                    "$dynamicAnchor": "items",
                                     "type": "number"
                                 }
                             }
@@ -1582,7 +1582,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef without anchor in fragment behaves identical to ${'$'}ref::An array of numbers is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of numbers is valid"    """)
     }
 
     /**
@@ -1601,26 +1601,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-resolution-without-bookend/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-resolution-without-bookend/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to give the reference somewhere to resolve to when it behaves like ${'$'}ref",
-                                    "${'$'}anchor": "items"
+                                    "$comment": "This is only needed to give the reference somewhere to resolve to when it behaves like $ref",
+                                    "$anchor": "items"
                                 }
                             }
                         }
@@ -1628,7 +1628,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef without a matching ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to ${'$'}anchor::Any array is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid"    """)
     }
 
     /**
@@ -1647,27 +1647,27 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     42
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/unmatched-dynamic-anchor/root",
-                    "${'$'}ref": "list",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/unmatched-dynamic-anchor/root",
+                    "$ref": "list",
+                    "$defs": {
                         "foo": {
-                            "${'$'}dynamicAnchor": "items",
+                            "$dynamicAnchor": "items",
                             "type": "string"
                         },
                         "list": {
-                            "${'$'}id": "list",
+                            "$id": "list",
                             "type": "array",
                             "items": {
-                                "${'$'}dynamicRef": "#items"
+                                "$dynamicRef": "#items"
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "items": {
-                                    "${'$'}comment": "This is only needed to give the reference somewhere to resolve to when it behaves like ${'$'}ref",
-                                    "${'$'}anchor": "items",
-                                    "${'$'}dynamicAnchor": "foo"
+                                    "$comment": "This is only needed to give the reference somewhere to resolve to when it behaves like $ref",
+                                    "$anchor": "items",
+                                    "$dynamicAnchor": "foo"
                                 }
                             }
                         }
@@ -1675,7 +1675,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef with a non-matching ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to ${'$'}anchor::Any array is valid"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid"    """)
     }
 
     /**
@@ -1698,35 +1698,35 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/relative-dynamic-reference/root",
-                    "${'$'}dynamicAnchor": "meta",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/relative-dynamic-reference/root",
+                    "$dynamicAnchor": "meta",
                     "type": "object",
                     "properties": {
                         "foo": {
                             "const": "pass"
                         }
                     },
-                    "${'$'}ref": "extended",
-                    "${'$'}defs": {
+                    "$ref": "extended",
+                    "$defs": {
                         "extended": {
-                            "${'$'}id": "extended",
-                            "${'$'}dynamicAnchor": "meta",
+                            "$id": "extended",
+                            "$dynamicAnchor": "meta",
                             "type": "object",
                             "properties": {
                                 "bar": {
-                                    "${'$'}ref": "bar"
+                                    "$ref": "bar"
                                 }
                             }
                         },
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "object",
                             "properties": {
                                 "baz": {
-                                    "${'$'}dynamicRef": "extended#meta"
+                                    "$dynamicRef": "extended#meta"
                                 }
                             }
                         }
@@ -1734,7 +1734,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema with a matching ${'$'}dynamicAnchor resolves to the first ${'$'}dynamicAnchor in the dynamic scope::The recursive part is valid against the root"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is valid against the root"    """)
     }
 
     /**
@@ -1761,35 +1761,35 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/relative-dynamic-reference/root",
-                    "${'$'}dynamicAnchor": "meta",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/relative-dynamic-reference/root",
+                    "$dynamicAnchor": "meta",
                     "type": "object",
                     "properties": {
                         "foo": {
                             "const": "pass"
                         }
                     },
-                    "${'$'}ref": "extended",
-                    "${'$'}defs": {
+                    "$ref": "extended",
+                    "$defs": {
                         "extended": {
-                            "${'$'}id": "extended",
-                            "${'$'}dynamicAnchor": "meta",
+                            "$id": "extended",
+                            "$dynamicAnchor": "meta",
                             "type": "object",
                             "properties": {
                                 "bar": {
-                                    "${'$'}ref": "bar"
+                                    "$ref": "bar"
                                 }
                             }
                         },
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "object",
                             "properties": {
                                 "baz": {
-                                    "${'$'}dynamicRef": "extended#meta"
+                                    "$dynamicRef": "extended#meta"
                                 }
                             }
                         }
@@ -1797,7 +1797,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema with a matching ${'$'}dynamicAnchor resolves to the first ${'$'}dynamicAnchor in the dynamic scope::The recursive part is not valid against the root"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is not valid against the root"    """)
     }
 
     /**
@@ -1820,35 +1820,35 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/relative-dynamic-reference-without-bookend/root",
-                    "${'$'}dynamicAnchor": "meta",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/relative-dynamic-reference-without-bookend/root",
+                    "$dynamicAnchor": "meta",
                     "type": "object",
                     "properties": {
                         "foo": {
                             "const": "pass"
                         }
                     },
-                    "${'$'}ref": "extended",
-                    "${'$'}defs": {
+                    "$ref": "extended",
+                    "$defs": {
                         "extended": {
-                            "${'$'}id": "extended",
-                            "${'$'}anchor": "meta",
+                            "$id": "extended",
+                            "$anchor": "meta",
                             "type": "object",
                             "properties": {
                                 "bar": {
-                                    "${'$'}ref": "bar"
+                                    "$ref": "bar"
                                 }
                             }
                         },
                         "bar": {
-                            "${'$'}id": "bar",
+                            "$id": "bar",
                             "type": "object",
                             "properties": {
                                 "baz": {
-                                    "${'$'}dynamicRef": "extended#meta"
+                                    "$dynamicRef": "extended#meta"
                                 }
                             }
                         }
@@ -1856,7 +1856,7 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema without a matching ${'$'}dynamicAnchor behaves like a normal ${'$'}ref to ${'$'}anchor::The recursive part doesn't need to validate against the root"    """)
+            $$"""    schemaTestId: "dynamicRef::A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor::The recursive part doesn't need to validate against the root"    """)
     }
 
     /**
@@ -1877,10 +1877,10 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
                     "if": {
                         "properties": {
                             "kindOfList": {
@@ -1892,53 +1892,53 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                         ]
                     },
                     "then": {
-                        "${'$'}ref": "numberList"
+                        "$ref": "numberList"
                     },
                     "else": {
-                        "${'$'}ref": "stringList"
+                        "$ref": "stringList"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "genericList": {
-                            "${'$'}id": "genericList",
+                            "$id": "genericList",
                             "properties": {
                                 "list": {
                                     "items": {
-                                        "${'$'}dynamicRef": "#itemType"
+                                        "$dynamicRef": "#itemType"
                                     }
                                 }
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "defaultItemType": {
-                                    "${'$'}comment": "Only needed to satisfy bookending requirement",
-                                    "${'$'}dynamicAnchor": "itemType"
+                                    "$comment": "Only needed to satisfy bookending requirement",
+                                    "$dynamicAnchor": "itemType"
                                 }
                             }
                         },
                         "numberList": {
-                            "${'$'}id": "numberList",
-                            "${'$'}defs": {
+                            "$id": "numberList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "number"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         },
                         "stringList": {
-                            "${'$'}id": "stringList",
-                            "${'$'}defs": {
+                            "$id": "stringList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::number list with number values"    """)
+            $$"""    schemaTestId: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::number list with number values"    """)
     }
 
     /**
@@ -1963,10 +1963,10 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
                     "if": {
                         "properties": {
                             "kindOfList": {
@@ -1978,53 +1978,53 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                         ]
                     },
                     "then": {
-                        "${'$'}ref": "numberList"
+                        "$ref": "numberList"
                     },
                     "else": {
-                        "${'$'}ref": "stringList"
+                        "$ref": "stringList"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "genericList": {
-                            "${'$'}id": "genericList",
+                            "$id": "genericList",
                             "properties": {
                                 "list": {
                                     "items": {
-                                        "${'$'}dynamicRef": "#itemType"
+                                        "$dynamicRef": "#itemType"
                                     }
                                 }
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "defaultItemType": {
-                                    "${'$'}comment": "Only needed to satisfy bookending requirement",
-                                    "${'$'}dynamicAnchor": "itemType"
+                                    "$comment": "Only needed to satisfy bookending requirement",
+                                    "$dynamicAnchor": "itemType"
                                 }
                             }
                         },
                         "numberList": {
-                            "${'$'}id": "numberList",
-                            "${'$'}defs": {
+                            "$id": "numberList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "number"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         },
                         "stringList": {
-                            "${'$'}id": "stringList",
-                            "${'$'}defs": {
+                            "$id": "stringList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::number list with string values"    """)
+            $$"""    schemaTestId: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::number list with string values"    """)
     }
 
     /**
@@ -2049,10 +2049,10 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
                     "if": {
                         "properties": {
                             "kindOfList": {
@@ -2064,53 +2064,53 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                         ]
                     },
                     "then": {
-                        "${'$'}ref": "numberList"
+                        "$ref": "numberList"
                     },
                     "else": {
-                        "${'$'}ref": "stringList"
+                        "$ref": "stringList"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "genericList": {
-                            "${'$'}id": "genericList",
+                            "$id": "genericList",
                             "properties": {
                                 "list": {
                                     "items": {
-                                        "${'$'}dynamicRef": "#itemType"
+                                        "$dynamicRef": "#itemType"
                                     }
                                 }
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "defaultItemType": {
-                                    "${'$'}comment": "Only needed to satisfy bookending requirement",
-                                    "${'$'}dynamicAnchor": "itemType"
+                                    "$comment": "Only needed to satisfy bookending requirement",
+                                    "$dynamicAnchor": "itemType"
                                 }
                             }
                         },
                         "numberList": {
-                            "${'$'}id": "numberList",
-                            "${'$'}defs": {
+                            "$id": "numberList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "number"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         },
                         "stringList": {
-                            "${'$'}id": "stringList",
-                            "${'$'}defs": {
+                            "$id": "stringList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::string list with number values"    """)
+            $$"""    schemaTestId: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::string list with number values"    """)
     }
 
     /**
@@ -2131,10 +2131,10 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
                     "if": {
                         "properties": {
                             "kindOfList": {
@@ -2146,53 +2146,53 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                         ]
                     },
                     "then": {
-                        "${'$'}ref": "numberList"
+                        "$ref": "numberList"
                     },
                     "else": {
-                        "${'$'}ref": "stringList"
+                        "$ref": "stringList"
                     },
-                    "${'$'}defs": {
+                    "$defs": {
                         "genericList": {
-                            "${'$'}id": "genericList",
+                            "$id": "genericList",
                             "properties": {
                                 "list": {
                                     "items": {
-                                        "${'$'}dynamicRef": "#itemType"
+                                        "$dynamicRef": "#itemType"
                                     }
                                 }
                             },
-                            "${'$'}defs": {
+                            "$defs": {
                                 "defaultItemType": {
-                                    "${'$'}comment": "Only needed to satisfy bookending requirement",
-                                    "${'$'}dynamicAnchor": "itemType"
+                                    "$comment": "Only needed to satisfy bookending requirement",
+                                    "$dynamicAnchor": "itemType"
                                 }
                             }
                         },
                         "numberList": {
-                            "${'$'}id": "numberList",
-                            "${'$'}defs": {
+                            "$id": "numberList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "number"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         },
                         "stringList": {
-                            "${'$'}id": "stringList",
-                            "${'$'}defs": {
+                            "$id": "stringList",
+                            "$defs": {
                                 "itemType": {
-                                    "${'$'}dynamicAnchor": "itemType",
+                                    "$dynamicAnchor": "itemType",
                                     "type": "string"
                                 }
                             },
-                            "${'$'}ref": "genericList"
+                            "$ref": "genericList"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::string list with string values"    """)
+            $$"""    schemaTestId: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::string list with string values"    """)
     }
 
     /**
@@ -2210,25 +2210,25 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "true": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "true": true,
                         "false": false
                     },
                     "properties": {
                         "true": {
-                            "${'$'}dynamicRef": "#/${'$'}defs/true"
+                            "$dynamicRef": "#/$defs/true"
                         },
                         "false": {
-                            "${'$'}dynamicRef": "#/${'$'}defs/false"
+                            "$dynamicRef": "#/$defs/false"
                         }
                     }
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef points to a boolean schema::follow ${'$'}dynamicRef to a true schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef points to a boolean schema::follow $dynamicRef to a true schema"    """)
     }
 
     /**
@@ -2250,24 +2250,24 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                     "false": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                    "${'$'}defs": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$defs": {
                         "true": true,
                         "false": false
                     },
                     "properties": {
                         "true": {
-                            "${'$'}dynamicRef": "#/${'$'}defs/true"
+                            "$dynamicRef": "#/$defs/true"
                         },
                         "false": {
-                            "${'$'}dynamicRef": "#/${'$'}defs/false"
+                            "$dynamicRef": "#/$defs/false"
                         }
                     }
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}dynamicRef points to a boolean schema::follow ${'$'}dynamicRef to a false schema"    """)
+            $$"""    schemaTestId: "dynamicRef::$dynamicRef points to a boolean schema::follow $dynamicRef to a false schema"    """)
     }
 }

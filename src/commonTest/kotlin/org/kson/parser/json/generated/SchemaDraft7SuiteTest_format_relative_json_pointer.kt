@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -211,9 +211,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -234,9 +234,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "2/0/baz/1/zip"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -257,9 +257,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0#"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -284,9 +284,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -311,9 +311,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "1foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -338,9 +338,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "-1/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -365,9 +365,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "+1/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -392,9 +392,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "١/foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -419,9 +419,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0##"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -446,9 +446,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "01/a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -473,9 +473,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "01#"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -500,9 +500,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -523,9 +523,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "120/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -546,9 +546,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "100"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -573,9 +573,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/~2"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -600,9 +600,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/foo/bar~"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -627,9 +627,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "1#/foo/bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -650,9 +650,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0//"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -673,9 +673,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/a~1b"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -696,9 +696,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/m~0n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -719,9 +719,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/~1~0~0~1~1"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -742,9 +742,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "1/foo/-"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -769,9 +769,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "0/~~"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,
@@ -796,9 +796,9 @@ class SchemaDraft7SuiteTest_format_relative_json_pointer : JsonSchemaTest {
             """
                 "1\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "relative-json-pointer"
                 }
             """,

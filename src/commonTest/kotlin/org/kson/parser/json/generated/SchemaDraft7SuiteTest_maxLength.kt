@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "fo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 100
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "💩💩"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "f"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2.0
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft7SuiteTest_maxLength : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maxLength": 2.0
                 }
             """,

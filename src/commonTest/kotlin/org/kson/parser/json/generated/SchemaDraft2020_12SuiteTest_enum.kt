@@ -26,9 +26,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         1,
                         2,
@@ -53,9 +53,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 4
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         1,
                         2,
@@ -80,9 +80,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         "foo",
@@ -111,9 +111,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         "foo",
@@ -144,9 +144,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "foo": false
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         "foo",
@@ -177,9 +177,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         "foo",
@@ -211,9 +211,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "boo": 42
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         "foo",
@@ -242,9 +242,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         null
@@ -268,9 +268,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         null
@@ -294,9 +294,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "test"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         6,
                         null
@@ -323,9 +323,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -364,9 +364,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -405,9 +405,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "bar": "bart"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -445,9 +445,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "bar": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -485,9 +485,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "foo": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -523,9 +523,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "type": "object",
                     "properties": {
                         "foo": {
@@ -561,9 +561,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "foo\nbar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -587,9 +587,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "foo\rbar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -613,9 +613,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "abc"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "foo\nbar",
                         "foo\rbar"
@@ -639,9 +639,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         false
                     ]
@@ -664,9 +664,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         false
                     ]
@@ -689,9 +689,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 0.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         false
                     ]
@@ -716,9 +716,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             false
@@ -745,9 +745,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             false
@@ -774,9 +774,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     0.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             false
@@ -801,9 +801,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         true
                     ]
@@ -826,9 +826,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         true
                     ]
@@ -851,9 +851,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         true
                     ]
@@ -878,9 +878,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             true
@@ -907,9 +907,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             true
@@ -936,9 +936,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     1.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             true
@@ -963,9 +963,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         0
                     ]
@@ -988,9 +988,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         0
                     ]
@@ -1013,9 +1013,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 0.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         0
                     ]
@@ -1040,9 +1040,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     false
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             0
@@ -1069,9 +1069,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             0
@@ -1098,9 +1098,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     0.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             0
@@ -1125,9 +1125,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 true
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         1
                     ]
@@ -1150,9 +1150,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         1
                     ]
@@ -1175,9 +1175,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 1.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         1
                     ]
@@ -1202,9 +1202,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     true
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             1
@@ -1231,9 +1231,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     1
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             1
@@ -1260,9 +1260,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     1.0
                 ]
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         [
                             1
@@ -1287,9 +1287,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "hello\u0000there"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "hello\u0000there"
                     ]
@@ -1312,9 +1312,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "hellothere"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "hello\u0000there"
                     ]
@@ -1337,9 +1337,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1360,9 +1360,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 42
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1383,9 +1383,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1406,9 +1406,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1429,9 +1429,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1452,9 +1452,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": []
                 }
             """,
@@ -1475,9 +1475,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "μ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "μ"
                     ]
@@ -1500,9 +1500,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "µ"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "μ"
                     ]
@@ -1525,9 +1525,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "ä"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "ä"
                     ]
@@ -1550,9 +1550,9 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
             """
                 "ä"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                     "enum": [
                         "ä"
                     ]

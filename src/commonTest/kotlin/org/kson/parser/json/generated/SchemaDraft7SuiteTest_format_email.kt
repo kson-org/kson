@@ -27,9 +27,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -50,9 +50,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 13.7
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -73,9 +73,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 {}
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -96,9 +96,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 []
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -119,9 +119,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 false
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -142,9 +142,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 null
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -165,9 +165,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "2962"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -188,9 +188,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "joe.bloggs@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -215,9 +215,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "2962"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -238,9 +238,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "te~st@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -261,9 +261,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "~test@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -284,9 +284,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test~@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -307,9 +307,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"joe bloggs\"@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -330,9 +330,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"joe..bloggs\"@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -353,9 +353,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"joe@bloggs\"@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -376,9 +376,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "joe.bloggs@[127.0.0.1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -399,9 +399,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "joe.bloggs@[IPv6:::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -426,9 +426,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 ".test@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -453,9 +453,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test.@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -476,9 +476,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "te.s.t@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -503,9 +503,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "te..st@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -530,9 +530,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "user1@oceania.org, user2@oceania.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -557,9 +557,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"Winston Smith\" <winston.smith@recdep.minitrue> (Records Department)"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -584,9 +584,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -611,9 +611,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "joe.bloggs@"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -638,9 +638,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "joe bloggs@example.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -661,9 +661,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@255.255.255.255"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -684,9 +684,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -707,9 +707,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\" \"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -730,9 +730,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@c--n.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -753,9 +753,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@123.com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -780,9 +780,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "aé@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -807,9 +807,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a@é.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -834,9 +834,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a＠iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -861,9 +861,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"test\\©\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -888,9 +888,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@iana.org\n"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -915,9 +915,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@iana.org\r"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -942,9 +942,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a\tb@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -969,9 +969,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -992,9 +992,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"test\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1015,9 +1015,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"\\a\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1038,9 +1038,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"\\\"\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1061,9 +1061,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"\\\\\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1088,9 +1088,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test\"@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1115,9 +1115,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"test\"test@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1142,9 +1142,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "\"test@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1169,9 +1169,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a@b@c.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1196,9 +1196,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test\\@test@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1223,9 +1223,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "[1.2.3.4]@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1250,9 +1250,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 ""
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1277,9 +1277,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@.iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1304,9 +1304,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@iana.org."
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1331,9 +1331,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@iana..com"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1354,9 +1354,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@io"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1381,9 +1381,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@[1.2.3.4"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1408,9 +1408,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "test@a[255.255.255.255]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1431,9 +1431,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a@[ipv6:::1]"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1458,9 +1458,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a,b@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1485,9 +1485,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a;b@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,
@@ -1512,9 +1512,9 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
             """
                 "a:b@iana.org"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "format": "email"
                 }
             """,

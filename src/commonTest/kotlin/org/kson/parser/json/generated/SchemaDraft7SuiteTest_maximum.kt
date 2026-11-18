@@ -26,9 +26,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 2.6
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 3.0
                 }
             """,
@@ -49,9 +49,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 3.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 3.0
                 }
             """,
@@ -72,9 +72,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 3.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 3.0
                 }
             """,
@@ -95,9 +95,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 "x"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 3.0
                 }
             """,
@@ -118,9 +118,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 299.97
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 300
                 }
             """,
@@ -141,9 +141,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 300
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 300
                 }
             """,
@@ -164,9 +164,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 300.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 300
                 }
             """,
@@ -187,9 +187,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 300.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "maximum": 300
                 }
             """,
@@ -210,9 +210,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 2.2
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 3.0
                 }
             """,
@@ -233,9 +233,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 3.0
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 3.0
                 }
             """,
@@ -256,9 +256,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 3.5
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 3.0
                 }
             """,
@@ -279,9 +279,9 @@ class SchemaDraft7SuiteTest_maximum : JsonSchemaTest {
             """
                 "x"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "exclusiveMaximum": 3.0
                 }
             """,

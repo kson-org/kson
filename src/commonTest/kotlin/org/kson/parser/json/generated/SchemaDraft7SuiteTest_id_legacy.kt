@@ -35,22 +35,22 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/scope_change_defs1.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "#/definitions/baz"
+                            "$ref": "#/definitions/baz"
                         }
                     },
                     "definitions": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolder/",
+                            "$id": "baseUriChangeFolder/",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "folderInteger.json"
+                                "$ref": "folderInteger.json"
                             }
                         }
                     }
@@ -81,22 +81,22 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/scope_change_defs1.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "#/definitions/baz"
+                            "$ref": "#/definitions/baz"
                         }
                     },
                     "definitions": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolder/",
+                            "$id": "baseUriChangeFolder/",
                             "type": "array",
                             "items": {
-                                "${'$'}ref": "folderInteger.json"
+                                "$ref": "folderInteger.json"
                             }
                         }
                     }
@@ -127,24 +127,24 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/scope_change_defs2.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "#/definitions/baz/definitions/bar"
+                            "$ref": "#/definitions/baz/definitions/bar"
                         }
                     },
                     "definitions": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolderInSubschema/",
+                            "$id": "baseUriChangeFolderInSubschema/",
                             "definitions": {
                                 "bar": {
                                     "type": "array",
                                     "items": {
-                                        "${'$'}ref": "folderInteger.json"
+                                        "$ref": "folderInteger.json"
                                     }
                                 }
                             }
@@ -177,24 +177,24 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/scope_change_defs2.json",
                     "type": "object",
                     "properties": {
                         "list": {
-                            "${'$'}ref": "#/definitions/baz/definitions/bar"
+                            "$ref": "#/definitions/baz/definitions/bar"
                         }
                     },
                     "definitions": {
                         "baz": {
-                            "${'$'}id": "baseUriChangeFolderInSubschema/",
+                            "$id": "baseUriChangeFolderInSubschema/",
                             "definitions": {
                                 "bar": {
                                     "type": "array",
                                     "items": {
-                                        "${'$'}ref": "folderInteger.json"
+                                        "$ref": "folderInteger.json"
                                     }
                                 }
                             }
@@ -219,32 +219,32 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/sibling_id/base/",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/sibling_id/base/",
                     "definitions": {
                         "foo": {
-                            "${'$'}id": "http://localhost:1234/sibling_id/foo.json",
+                            "$id": "http://localhost:1234/sibling_id/foo.json",
                             "type": "string"
                         },
                         "base_foo": {
-                            "${'$'}comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
-                            "${'$'}id": "foo.json",
+                            "$comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
+                            "$id": "foo.json",
                             "type": "number"
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}comment": "${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
-                            "${'$'}id": "http://localhost:1234/sibling_id/",
-                            "${'$'}ref": "foo.json"
+                            "$comment": "$ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
+                            "$id": "http://localhost:1234/sibling_id/",
+                            "$ref": "foo.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::${'$'}ref prevents a sibling ${'$'}id from changing the base uri::${'$'}ref resolves to /definitions/base_foo, data does not validate"    """)
+            $$"""    schemaTestId: "id-legacy::$ref prevents a sibling $id from changing the base uri::$ref resolves to /definitions/base_foo, data does not validate"    """)
     }
 
     /**
@@ -260,32 +260,32 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://localhost:1234/sibling_id/base/",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://localhost:1234/sibling_id/base/",
                     "definitions": {
                         "foo": {
-                            "${'$'}id": "http://localhost:1234/sibling_id/foo.json",
+                            "$id": "http://localhost:1234/sibling_id/foo.json",
                             "type": "string"
                         },
                         "base_foo": {
-                            "${'$'}comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
-                            "${'$'}id": "foo.json",
+                            "$comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
+                            "$id": "foo.json",
                             "type": "number"
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}comment": "${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
-                            "${'$'}id": "http://localhost:1234/sibling_id/",
-                            "${'$'}ref": "foo.json"
+                            "$comment": "$ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
+                            "$id": "http://localhost:1234/sibling_id/",
+                            "$ref": "foo.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::${'$'}ref prevents a sibling ${'$'}id from changing the base uri::${'$'}ref resolves to /definitions/base_foo, data validates"    """)
+            $$"""    schemaTestId: "id-legacy::$ref prevents a sibling $id from changing the base uri::$ref resolves to /definitions/base_foo, data validates"    """)
     }
 
     /**
@@ -306,13 +306,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "$id": "schema-relative-uri-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -324,14 +324,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                            "$ref": "schema-relative-uri-defs2.json"
                         }
                     ]
                 }
@@ -358,13 +358,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "$id": "schema-relative-uri-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -376,14 +376,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                            "$ref": "schema-relative-uri-defs2.json"
                         }
                     ]
                 }
@@ -410,13 +410,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-relative-uri-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "$id": "schema-relative-uri-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -428,14 +428,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                            "$ref": "schema-relative-uri-defs2.json"
                         }
                     ]
                 }
@@ -462,13 +462,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -480,14 +480,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                            "$ref": "schema-refs-absolute-uris-defs2.json"
                         }
                     ]
                 }
@@ -514,13 +514,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -532,14 +532,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                            "$ref": "schema-refs-absolute-uris-defs2.json"
                         }
                     ]
                 }
@@ -566,13 +566,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
                     "properties": {
                         "foo": {
-                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
                             "definitions": {
                                 "inner": {
                                     "properties": {
@@ -584,14 +584,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/inner"
+                                    "$ref": "#/definitions/inner"
                                 }
                             ]
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                            "$ref": "schema-refs-absolute-uris-defs2.json"
                         }
                     ]
                 }
@@ -613,17 +613,17 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/a.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/a.json",
                     "definitions": {
                         "x": {
-                            "${'$'}id": "http://example.com/b/c.json",
+                            "$id": "http://example.com/b/c.json",
                             "not": {
                                 "definitions": {
                                     "y": {
-                                        "${'$'}id": "d.json",
+                                        "$id": "d.json",
                                         "type": "number"
                                     }
                                 }
@@ -632,13 +632,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "http://example.com/b/d.json"
+                            "$ref": "http://example.com/b/d.json"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::${'$'}id must be resolved against nearest parent, not just immediate parent::number is valid"    """)
+            $$"""    schemaTestId: "id-legacy::$id must be resolved against nearest parent, not just immediate parent::number is valid"    """)
     }
 
     /**
@@ -654,17 +654,17 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/a.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/a.json",
                     "definitions": {
                         "x": {
-                            "${'$'}id": "http://example.com/b/c.json",
+                            "$id": "http://example.com/b/c.json",
                             "not": {
                                 "definitions": {
                                     "y": {
-                                        "${'$'}id": "d.json",
+                                        "$id": "d.json",
                                         "type": "number"
                                     }
                                 }
@@ -673,13 +673,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "http://example.com/b/d.json"
+                            "$ref": "http://example.com/b/d.json"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::${'$'}id must be resolved against nearest parent, not just immediate parent::non-number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::$id must be resolved against nearest parent, not just immediate parent::non-number is invalid"    """)
     }
 
     /**
@@ -697,14 +697,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -733,14 +733,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "URIs do not have to have HTTP(s) schemes",
+                    "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -769,14 +769,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.2",
-                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.2",
+                    "$id": "urn:example:1/406/47452/2",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -805,14 +805,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.2",
-                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.2",
+                    "$id": "urn:example:1/406/47452/2",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -841,14 +841,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.3.1",
-                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.3.1",
+                    "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -877,14 +877,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.3.1",
-                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.3.1",
+                    "$id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -913,14 +913,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.3.2",
-                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.3.2",
+                    "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -949,14 +949,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}comment": "RFC 8141 §2.3.2",
-                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$comment": "RFC 8141 §2.3.2",
+                    "$id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "#/definitions/bar"
+                            "$ref": "#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -985,13 +985,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": "bar"
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
+                            "$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -1020,13 +1020,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     "foo": 12
                 }
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
                     "properties": {
                         "foo": {
-                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
+                            "$ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
                         }
                     },
                     "definitions": {
@@ -1053,23 +1053,23 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/ref/absref.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/ref/absref.json",
                     "definitions": {
                         "a": {
-                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "$id": "http://example.com/ref/absref/foobar.json",
                             "type": "number"
                         },
                         "b": {
-                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "$id": "http://example.com/absref/foobar.json",
                             "type": "string"
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "/absref/foobar.json"
+                            "$ref": "/absref/foobar.json"
                         }
                     ]
                 }
@@ -1091,23 +1091,23 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "http://example.com/ref/absref.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "http://example.com/ref/absref.json",
                     "definitions": {
                         "a": {
-                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "$id": "http://example.com/ref/absref/foobar.json",
                             "type": "number"
                         },
                         "b": {
-                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "$id": "http://example.com/absref/foobar.json",
                             "type": "string"
                         }
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "/absref/foobar.json"
+                            "$ref": "/absref/foobar.json"
                         }
                     ]
                 }
@@ -1129,10 +1129,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "file:///folder/file.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "file:///folder/file.json",
                     "definitions": {
                         "foo": {
                             "type": "number"
@@ -1140,13 +1140,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/foo"
+                            "$ref": "#/definitions/foo"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::${'$'}id with file URI still resolves pointers - *nix::number is valid"    """)
+            $$"""    schemaTestId: "id-legacy::$id with file URI still resolves pointers - *nix::number is valid"    """)
     }
 
     /**
@@ -1162,10 +1162,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "file:///folder/file.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "file:///folder/file.json",
                     "definitions": {
                         "foo": {
                             "type": "number"
@@ -1173,13 +1173,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/foo"
+                            "$ref": "#/definitions/foo"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::${'$'}id with file URI still resolves pointers - *nix::non-number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::$id with file URI still resolves pointers - *nix::non-number is invalid"    """)
     }
 
     /**
@@ -1195,10 +1195,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "file:///c:/folder/file.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "file:///c:/folder/file.json",
                     "definitions": {
                         "foo": {
                             "type": "number"
@@ -1206,13 +1206,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/foo"
+                            "$ref": "#/definitions/foo"
                         }
                     ]
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::${'$'}id with file URI still resolves pointers - windows::number is valid"    """)
+            $$"""    schemaTestId: "id-legacy::$id with file URI still resolves pointers - windows::number is valid"    """)
     }
 
     /**
@@ -1228,10 +1228,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}id": "file:///c:/folder/file.json",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$id": "file:///c:/folder/file.json",
                     "definitions": {
                         "foo": {
                             "type": "number"
@@ -1239,13 +1239,13 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                     },
                     "allOf": [
                         {
-                            "${'$'}ref": "#/definitions/foo"
+                            "$ref": "#/definitions/foo"
                         }
                     ]
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::${'$'}id with file URI still resolves pointers - windows::non-number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::$id with file URI still resolves pointers - windows::non-number is invalid"    """)
     }
 
     /**
@@ -1261,17 +1261,17 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "bar"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed"
+                            "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed"
                         }
                     ],
                     "definitions": {
                         "foo": {
-                            "${'$'}id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                            "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
                             "definitions": {
                                 "bar": {
                                     "type": "string"
@@ -1279,7 +1279,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/bar"
+                                    "$ref": "#/definitions/bar"
                                 }
                             ]
                         }
@@ -1303,17 +1303,17 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 12
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                    "$schema": "http://json-schema.org/draft-07/schema#",
                     "allOf": [
                         {
-                            "${'$'}ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed"
+                            "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed"
                         }
                     ],
                     "definitions": {
                         "foo": {
-                            "${'$'}id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
+                            "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
                             "definitions": {
                                 "bar": {
                                     "type": "string"
@@ -1321,7 +1321,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                             },
                             "allOf": [
                                 {
-                                    "${'$'}ref": "#/definitions/bar"
+                                    "$ref": "#/definitions/bar"
                                 }
                             ]
                         }
@@ -1349,14 +1349,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/different-id-ref-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/different-id-ref-string.json"
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::remote HTTP ref with different ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::number is invalid"    """)
     }
 
     /**
@@ -1376,14 +1376,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/different-id-ref-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/different-id-ref-string.json"
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::remote HTTP ref with different ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::string is valid"    """)
     }
 
     /**
@@ -1403,14 +1403,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/urn-ref-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/urn-ref-string.json"
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::remote HTTP ref with different URN ${'$'}id::number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::number is invalid"    """)
     }
 
     /**
@@ -1430,14 +1430,14 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/urn-ref-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/urn-ref-string.json"
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::remote HTTP ref with different URN ${'$'}id::string is valid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::string is valid"    """)
     }
 
     /**
@@ -1457,10 +1457,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
                 }
             """,
             false,
@@ -1484,10 +1484,10 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                    "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                    "${'$'}ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
                 }
             """,
             true,
