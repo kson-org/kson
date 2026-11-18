@@ -8,6 +8,7 @@ import org.kson.schema.SchemaDecisions.narrowOnDiscriminators
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -126,7 +127,7 @@ class SchemaDecisionsTest {
     fun compileThrowsOnAMalformedRefPointer() {
         val malformedPointer = kson($$"'$ref': '#/$defs/a~2b'")
 
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<InvalidJsonPointerException> {
             SchemaDecisions.compile(malformedPointer, "", SchemaIdLookup(malformedPointer))
         }
     }
@@ -869,7 +870,14 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, kson("kind: Z")), "kind" to listOf("A", "B"))
+        val document = kson(
+            """
+                kind: Z
+                extra: 1
+            """.trimIndent()
+        )
+
+        assertNoBranchFits(narrowBranches(branches, document), "kind" to listOf("A", "B"))
     }
 
     @Test

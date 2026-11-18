@@ -6,6 +6,7 @@ import org.kson.parser.MessageSink
 import org.kson.schema.*
 import org.kson.schema.SchemaIdLookup.Companion.parseUri
 import org.kson.validation.SourceContext
+import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import org.kson.value.navigation.json_pointer.JsonPointer
 
 /**
@@ -47,7 +48,7 @@ internal class RefValidator(
     override fun pinnedValues(): Set<KsonValue>? =
         try {
             targetPins
-        } catch (_: IllegalArgumentException) {
+        } catch (_: InvalidJsonPointerException) {
             // a wrong `type` can stop validation short of a property's malformed `$ref`,
             // so reading that property's pin mustn't be what throws
             null

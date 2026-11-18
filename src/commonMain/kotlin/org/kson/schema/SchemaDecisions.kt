@@ -6,6 +6,7 @@ import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 
 /**
  * What the pins of a `oneOf` / `anyOf` decide about a document, with branches as indices into its list.
@@ -31,7 +32,7 @@ object SchemaDecisions {
      * The schema [node] denotes, or `null` when it is no schema or a `$ref` that doesn't resolve.
      * A malformed keyword further inside goes unreported and doesn't constrain.
      *
-     * @throws IllegalArgumentException on a `$ref` whose JSON Pointer is malformed
+     * @throws InvalidJsonPointerException on a `$ref` whose JSON Pointer is malformed
      */
     fun compile(node: KsonValue, baseUri: String, idLookup: SchemaIdLookup): JsonSchema? =
         SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, idLookup)
@@ -57,7 +58,7 @@ object SchemaDecisions {
      * What the pins of [branches] alone say about [value].  A branch that [compile] couldn't build (`null`) pins
      * nothing and stays open, and a [value] that isn't an object rules out no branch.
      *
-     * @throws IllegalArgumentException when [value] is an object and a branch's own `$ref` or `allOf` reaches a
+     * @throws InvalidJsonPointerException when [value] is an object and a branch's own `$ref` or `allOf` reaches a
      *   `$ref` whose JSON Pointer is malformed
      */
     internal fun narrowBranches(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
