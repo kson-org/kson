@@ -9,21 +9,21 @@ import org.kson.value.KsonValue
 import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 
 /**
- * What the pins of a `oneOf` / `anyOf` decide about a document, with branches as indices into its list.
- * A *pin* is a property a branch fixes by `const` or `enum` (see [JsonObjectSchema.pinnedProperties]).
+ * A *pin* is a property a `oneOf` / `anyOf` branch fixes by `const` or `enum` (see [JsonObjectSchema.pinnedProperties]).
+ * [Pins] is what a document's pins say about those branches, given as indices into the list.
  */
-internal sealed interface PinDecision {
+internal sealed interface Pins {
     /**
      * No branch survives.  [rejected] holds each property all of several branches reject, with every value
      * pinned for it, ordered as the first branch pins them.  It may be empty.
      */
-    class NoBranchFits(val rejected: Map<String, Set<KsonValue>>) : PinDecision
+    class None(val rejected: Map<String, Set<KsonValue>>) : Pins
 
-    /** Pins picked [chosen]. */
-    class Selected(val chosen: List<Int>) : PinDecision
+    /** The [branches] the pins pick. */
+    class Pinned(val branches: List<Int>) : Pins
 
-    /** Pins didn't pick a branch.  [survivors] are the branches they didn't rule out. */
-    class Open(val survivors: List<Int>) : PinDecision
+    /** The pins pick no branch.  [branches] are those they don't rule out. */
+    class Candidates(val branches: List<Int>) : Pins
 }
 
 /** What a schema says about a document that may still be half written. */
@@ -55,17 +55,17 @@ object SchemaDecisions {
     }
 
     /** What the pins in [value] decide among [branches].  Every pin counts. */
-    internal fun narrowByAllPins(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
+    internal fun narrowByAllPins(branches: List<JsonSchema?>, value: KsonValue): Pins =
         narrow(branches, value, onlyDiscriminators = false)
 
     /** What the pins in [value] decide among [branches].  Only [discriminators] count. */
-    internal fun narrowByDiscriminators(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
+    internal fun narrowByDiscriminators(branches: List<JsonSchema?>, value: KsonValue): Pins =
         narrow(branches, value, onlyDiscriminators = true)
 
-    private fun narrow(branches: List<JsonSchema?>, value: KsonValue, onlyDiscriminators: Boolean): PinDecision {
+    private fun narrow(branches: List<JsonSchema?>, value: KsonValue, onlyDiscriminators: Boolean): Pins {
         val document = (value as? KsonObject)?.propertyLookup
         if (document == null || branches.isEmpty()) {
-            return PinDecision.Open(branches.indices.toList())
+            return Pins.Candidates(branches.indices.toList())
         }
         val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties(document.keys).orEmpty() }
         val pins = if (onlyDiscriminators) discriminators(branches, allPins) else allPins
@@ -78,7 +78,7 @@ object SchemaDecisions {
             // a lone branch keeps its own errors, which say more
             val rejected =
                 if (branches.size > 1) contradicted.reduce { shared, next -> shared intersect next } else emptySet()
-            return PinDecision.NoBranchFits(
+            return Pins.None(
                 rejected.associateWith { property -> pins.flatMapTo(LinkedHashSet()) { it.getValue(property) } }
             )
         }
@@ -87,9 +87,9 @@ object SchemaDecisions {
             pins[branch].keys.any { property -> survivors.count { property in pins[it] } == 1 }
         }
         return if (chosen.isNotEmpty()) {
-            PinDecision.Selected(chosen)
+            Pins.Pinned(chosen)
         } else {
-            PinDecision.Open(survivors)
+            Pins.Candidates(survivors)
         }
     }
 

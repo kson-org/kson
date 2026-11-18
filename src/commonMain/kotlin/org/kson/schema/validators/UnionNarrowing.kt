@@ -10,7 +10,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_OTHER_SUB_SCHEMA_ERRORS
 import org.kson.parser.messages.MessageType.SCHEMA_SUB_SCHEMA_ERRORS
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
-import org.kson.schema.PinDecision
+import org.kson.schema.Pins
 import org.kson.schema.SchemaDecisions
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
@@ -18,10 +18,10 @@ import org.kson.validation.ValidationMode
 /**
  * Reports a document that matched no branch of a `oneOf` / `anyOf`, led by the branches that
  * matter by what the pins decide for an object document:
- *  - [PinDecision.NoBranchFits]: each rejected property gets one enum error listing the pinned values,
+ *  - [Pins.None]: each rejected property gets one enum error listing the pinned values,
  *    and these lead instead of any branch.  With no such property, every branch leads.
- *  - [PinDecision.Selected]: the chosen branches lead.
- *  - [PinDecision.Open]: the survivors that lead are those that know a property the document has and
+ *  - [Pins.Pinned]: the chosen branches lead.
+ *  - [Pins.Candidates]: the candidates that lead are those that know a property the document has and
  *    not every branch knows, or all of them if none do.  A branch *knows* a property it declares or
  *    requires, read through `$ref` and `allOf` by [JsonObjectSchema.knownProperties].
  *
@@ -101,22 +101,22 @@ private fun leadingBranches(
         return branches.indices.toList()
     }
     val document = ksonValue.propertyLookup
-    val decision = if (mode == ValidationMode.FULL) {
+    val pins = if (mode == ValidationMode.FULL) {
         SchemaDecisions.narrowByDiscriminators(branches, ksonValue)
     } else {
         SchemaDecisions.narrowByAllPins(branches, ksonValue)
     }
-    return when (decision) {
-        is PinDecision.NoBranchFits -> {
-            decision.rejected.forEach { (property, allowedValues) ->
+    return when (pins) {
+        is Pins.None -> {
+            pins.rejected.forEach { (property, allowedValues) ->
                 reportEnumValueNotAllowed(document.getValue(property), enumErrors, allowedValues)
             }
-            if (decision.rejected.isEmpty()) branches.indices.toList() else emptyList()
+            if (pins.rejected.isEmpty()) branches.indices.toList() else emptyList()
         }
-        is PinDecision.Selected -> decision.chosen
-        is PinDecision.Open -> {
+        is Pins.Pinned -> pins.branches
+        is Pins.Candidates -> {
             val known = branches.map { (it as? JsonObjectSchema)?.knownProperties() ?: emptySet() }
-            presenceMatchedBranches(known, document.keys).filter { it in decision.survivors }.ifEmpty { decision.survivors }
+            presenceMatchedBranches(known, document.keys).filter { it in pins.branches }.ifEmpty { pins.branches }
         }
     }
 }
