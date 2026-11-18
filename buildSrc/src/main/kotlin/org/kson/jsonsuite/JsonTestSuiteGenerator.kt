@@ -293,8 +293,11 @@ private fun generateSchemaSuiteTestClass(
     draftExclusions: Set<String>
 ): String {
     var testNum = 1
+    fun isExcluded(group: SchemaTestGroup, test: SchemaTestSpec) =
+        draftExclusions.contains(tests.idWithinDraft(group, test))
+
     val hasExcludedTests = tests.schemaTestGroups.any { group ->
-        group.tests.any { test -> draftExclusions.contains(tests.idWithinDraft(group, test)) }
+        group.tests.any { test -> isExcluded(group, test) }
     }
     val imports = listOfNotNull(
         "org.kson.schema.JsonSchemaTest",
@@ -322,8 +325,8 @@ ${    run {
             for (test in schema.tests) {
                 // construct a unique ID for this test
                 val schemaTestId = tests.idWithinDraft(schema, test)
-                val isExcluded = draftExclusions.contains(schemaTestId)
-                val exclusionTodo = if (isExcluded) {
+                val excluded = isExcluded(schema, test)
+                val exclusionTodo = if (excluded) {
                     """
                     |
                     |     *
@@ -332,7 +335,7 @@ ${    run {
                 } else {
                     ""
                 }
-                val ignoreAnnotation = if (isExcluded) "\n    @Ignore" else ""
+                val ignoreAnnotation = if (excluded) "\n    @Ignore" else ""
                 val dataJson = formatForTest(test.data, "                ")
                 val schemaJson = formatForTest(schemaForDraft(schema.schema, draft), "                ")
                 val testCode = """
