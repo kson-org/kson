@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> illegal first char U+302E Hangul single dot tone mark"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::illegal first char U+302E Hangul single dot tone mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::illegal first char U+302E Hangul single dot tone mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -231,15 +230,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> contains illegal char U+302E Hangul single dot tone mark"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::contains illegal char U+302E Hangul single dot tone mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::contains illegal char U+302E Hangul single dot tone mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -283,15 +280,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> a single label of 64 characters is too long"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::a single label of 64 characters is too long"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::a single label of 64 characters is too long" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -312,15 +307,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> invalid label, correct Punycode"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::invalid label, correct Punycode"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::invalid label, correct Punycode" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -364,15 +357,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> invalid Punycode"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::invalid Punycode"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::invalid Punycode" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -393,15 +384,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> U-label contains "--" in the 3rd and 4th position"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::U-label contains "--" in the 3rd and 4th position"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::U-label contains "--" in the 3rd and 4th position" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -422,15 +411,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> U-label starts with a dash"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::U-label starts with a dash"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::U-label starts with a dash" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -451,15 +438,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> U-label ends with a dash"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::U-label ends with a dash"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::U-label ends with a dash" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -480,15 +465,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> U-label starts and ends with a dash"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::U-label starts and ends with a dash"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::U-label starts and ends with a dash" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -509,15 +492,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Begins with a Spacing Combining Mark"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Begins with a Spacing Combining Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Begins with a Spacing Combining Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -538,15 +519,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Begins with a Nonspacing Mark"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Begins with a Nonspacing Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Begins with a Nonspacing Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -567,15 +546,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Begins with an Enclosing Mark"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Begins with an Enclosing Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Begins with an Enclosing Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -642,15 +619,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Exceptions that are DISALLOWED, right-to-left chars"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Exceptions that are DISALLOWED, right-to-left chars"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Exceptions that are DISALLOWED, right-to-left chars" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -671,15 +646,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Exceptions that are DISALLOWED, left-to-right chars"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Exceptions that are DISALLOWED, left-to-right chars"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Exceptions that are DISALLOWED, left-to-right chars" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -700,15 +673,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> MIDDLE DOT with no preceding 'l'"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with no preceding 'l'"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with no preceding 'l'" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -729,15 +700,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> MIDDLE DOT with nothing preceding"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with nothing preceding"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with nothing preceding" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -758,15 +727,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> MIDDLE DOT with no following 'l'"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with no following 'l'"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with no following 'l'" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -787,15 +754,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> MIDDLE DOT with nothing following"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with nothing following"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::MIDDLE DOT with nothing following" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -839,15 +804,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Greek KERAIA not followed by Greek"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Greek KERAIA not followed by Greek"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Greek KERAIA not followed by Greek" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -868,15 +831,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Greek KERAIA not followed by anything"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Greek KERAIA not followed by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Greek KERAIA not followed by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -920,15 +881,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Hebrew GERESH not preceded by Hebrew"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Hebrew GERESH not preceded by Hebrew"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Hebrew GERESH not preceded by Hebrew" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -949,15 +908,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Hebrew GERESH not preceded by anything"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Hebrew GERESH not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Hebrew GERESH not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1001,15 +958,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Hebrew GERSHAYIM not preceded by Hebrew"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Hebrew GERSHAYIM not preceded by Hebrew"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Hebrew GERSHAYIM not preceded by Hebrew" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1030,15 +985,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Hebrew GERSHAYIM not preceded by anything"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Hebrew GERSHAYIM not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Hebrew GERSHAYIM not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1082,15 +1035,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1111,15 +1062,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> KATAKANA MIDDLE DOT with no other characters"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::KATAKANA MIDDLE DOT with no other characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::KATAKANA MIDDLE DOT with no other characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1209,15 +1158,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Arabic-Indic digits mixed with Extended Arabic-Indic digits"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Arabic-Indic digits mixed with Extended Arabic-Indic digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Arabic-Indic digits mixed with Extended Arabic-Indic digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1284,15 +1231,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> ZERO WIDTH JOINER not preceded by Virama"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::ZERO WIDTH JOINER not preceded by Virama"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::ZERO WIDTH JOINER not preceded by Virama" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1313,15 +1258,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> ZERO WIDTH JOINER not preceded by anything"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::ZERO WIDTH JOINER not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::ZERO WIDTH JOINER not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1526,15 +1469,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> empty string"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::empty string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_59() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::empty string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1555,15 +1496,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> trailing newline is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::trailing newline is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::trailing newline is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1584,15 +1523,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> leading space is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::leading space is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_61() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::leading space is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1613,15 +1550,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> space inside a label is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::space inside a label is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_62() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::space inside a label is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1734,15 +1669,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> a label of only Arabic-Indic digits is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::a label of only Arabic-Indic digits is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_67() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::a label of only Arabic-Indic digits is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1832,15 +1765,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> zero width non-joiner must pass at every occurrence"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::zero width non-joiner must pass at every occurrence"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_71() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::zero width non-joiner must pass at every occurrence" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1861,15 +1792,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> Bidi domain name with a digit-first label is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::Bidi domain name with a digit-first label is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_72() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::Bidi domain name with a digit-first label is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1890,15 +1819,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> label starting with a digit before a right-to-left letter is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::label starting with a digit before a right-to-left letter is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_73() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::label starting with a digit before a right-to-left letter is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1919,15 +1846,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> left-to-right label containing a right-to-left letter is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::left-to-right label containing a right-to-left letter is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_74() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::left-to-right label containing a right-to-left letter is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1948,15 +1873,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> right-to-left label mixing both digit types is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::right-to-left label mixing both digit types is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_75() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::right-to-left label mixing both digit types is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1977,15 +1900,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> A-label that decodes to a disallowed code point is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::A-label that decodes to a disallowed code point is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_76() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::A-label that decodes to a disallowed code point is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2006,15 +1927,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> A-label that decodes to a Bidi rule violation is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::A-label that decodes to a Bidi rule violation is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_77() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::A-label that decodes to a Bidi rule violation is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2035,15 +1954,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> a U-label whose A-label form is longer than 63 octets is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::a U-label whose A-label form is longer than 63 octets is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_78() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::a U-label whose A-label form is longer than 63 octets is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2064,15 +1981,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> empty label between two dots is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::empty label between two dots is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_79() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::empty label between two dots is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2093,15 +2008,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> a name longer than 253 characters is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::a name longer than 253 characters is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_80() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::a name longer than 253 characters is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2122,15 +2035,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> A-label that decodes to only ASCII is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::A-label that decodes to only ASCII is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_81() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::A-label that decodes to only ASCII is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2151,15 +2062,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of internationalized host names -> non-canonical Punycode that does not re-encode to itself is invalid"
      *
      * Test ID: "format-idn-hostname::validation of internationalized host names::non-canonical Punycode that does not re-encode to itself is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_82() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of internationalized host names::non-canonical Punycode that does not re-encode to itself is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2180,15 +2089,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> single dot"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::single dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_83() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::single dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2209,15 +2116,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> single ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::single ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_84() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::single ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2238,15 +2143,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> single fullwidth full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::single fullwidth full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_85() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::single fullwidth full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2267,15 +2170,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> single halfwidth ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::single halfwidth ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_86() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::single halfwidth ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2388,15 +2289,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> leading dot"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::leading dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_91() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::leading dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2417,15 +2316,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> leading ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::leading ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_92() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::leading ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2446,15 +2343,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> leading fullwidth full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::leading fullwidth full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_93() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::leading fullwidth full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2475,15 +2370,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> leading halfwidth ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::leading halfwidth ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_94() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::leading halfwidth ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2504,15 +2397,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> trailing dot"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::trailing dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_95() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::trailing dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2533,15 +2424,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> trailing ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::trailing ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_96() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::trailing ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2562,15 +2451,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> trailing fullwidth full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::trailing fullwidth full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_97() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::trailing fullwidth full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2591,15 +2478,13 @@ class SchemaDraft7SuiteTest_format_idn_hostname : JsonSchemaTest {
      *     "validation of separators in internationalized host names -> trailing halfwidth ideographic full stop"
      *
      * Test ID: "format-idn-hostname::validation of separators in internationalized host names::trailing halfwidth ideographic full stop"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_98() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-hostname::validation of separators in internationalized host names::trailing halfwidth ideographic full stop" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

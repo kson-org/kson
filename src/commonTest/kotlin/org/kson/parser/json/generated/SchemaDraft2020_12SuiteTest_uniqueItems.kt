@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
 
     /**
@@ -1481,15 +1482,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems with prefixItems and items=false -> [false, true] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems with prefixItems and items=false::[false, true] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems with prefixItems and items=false::[false, true] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1522,15 +1521,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems with prefixItems and items=false -> [true, false] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems with prefixItems and items=false::[true, false] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems with prefixItems and items=false::[true, false] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1949,15 +1946,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems=false with prefixItems and items=false -> [false, true] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems=false with prefixItems and items=false::[false, true] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_61() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems=false with prefixItems and items=false::[false, true] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1990,15 +1985,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems=false with prefixItems and items=false -> [true, false] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems=false with prefixItems and items=false::[true, false] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_62() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems=false with prefixItems and items=false::[true, false] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2031,15 +2024,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems=false with prefixItems and items=false -> [false, false] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems=false with prefixItems and items=false::[false, false] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_63() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems=false with prefixItems and items=false::[false, false] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2072,15 +2063,13 @@ class SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest {
      *     "uniqueItems=false with prefixItems and items=false -> [true, true] from items array is valid"
      *
      * Test ID: "uniqueItems::uniqueItems=false with prefixItems and items=false::[true, true] from items array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_64() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "uniqueItems::uniqueItems=false with prefixItems and items=false::[true, true] from items array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
 
     /**
@@ -294,15 +295,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> empty string"
      *
      * Test ID: "format-hostname::validation of host names::empty string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::empty string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -323,15 +322,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> single dot"
      *
      * Test ID: "format-hostname::validation of host names::single dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::single dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -352,15 +349,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> leading dot"
      *
      * Test ID: "format-hostname::validation of host names::leading dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::leading dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -381,15 +376,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> trailing dot"
      *
      * Test ID: "format-hostname::validation of host names::trailing dot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::trailing dot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -410,15 +403,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> IDN label separator"
      *
      * Test ID: "format-hostname::validation of host names::IDN label separator"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::IDN label separator" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -462,15 +453,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> starts with hyphen"
      *
      * Test ID: "format-hostname::validation of host names::starts with hyphen"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::starts with hyphen" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -491,15 +480,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> ends with hyphen"
      *
      * Test ID: "format-hostname::validation of host names::ends with hyphen"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::ends with hyphen" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -520,15 +507,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> contains underscore"
      *
      * Test ID: "format-hostname::validation of host names::contains underscore"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::contains underscore" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -549,15 +534,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> exceeds maximum overall length (256)"
      *
      * Test ID: "format-hostname::validation of host names::exceeds maximum overall length (256)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::exceeds maximum overall length (256)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -601,15 +584,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> exceeds maximum label length (63)"
      *
      * Test ID: "format-hostname::validation of host names::exceeds maximum label length (63)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::exceeds maximum label length (63)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -630,15 +611,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> trailing newline is invalid"
      *
      * Test ID: "format-hostname::validation of host names::trailing newline is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::trailing newline is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -659,15 +638,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> leading space is invalid"
      *
      * Test ID: "format-hostname::validation of host names::leading space is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::leading space is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -688,15 +665,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> space inside a label is invalid"
      *
      * Test ID: "format-hostname::validation of host names::space inside a label is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::space inside a label is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -717,15 +692,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of host names -> invalid non-ASCII KELVIN SIGN (U+212A)"
      *
      * Test ID: "format-hostname::validation of host names::invalid non-ASCII KELVIN SIGN (U+212A)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of host names::invalid non-ASCII KELVIN SIGN (U+212A)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -769,15 +742,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> invalid Punycode"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::invalid Punycode"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::invalid Punycode" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -821,15 +792,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> contains illegal char U+302E Hangul single dot tone mark"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::contains illegal char U+302E Hangul single dot tone mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::contains illegal char U+302E Hangul single dot tone mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -850,15 +819,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Begins with a Spacing Combining Mark"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Begins with a Spacing Combining Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Begins with a Spacing Combining Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -879,15 +846,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Begins with a Nonspacing Mark"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Begins with a Nonspacing Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Begins with a Nonspacing Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -908,15 +873,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Begins with an Enclosing Mark"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Begins with an Enclosing Mark"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Begins with an Enclosing Mark" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -983,15 +946,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Exceptions that are DISALLOWED, right-to-left chars"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Exceptions that are DISALLOWED, right-to-left chars"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Exceptions that are DISALLOWED, right-to-left chars" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1012,15 +973,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Exceptions that are DISALLOWED, left-to-right chars"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Exceptions that are DISALLOWED, left-to-right chars"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Exceptions that are DISALLOWED, left-to-right chars" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1041,15 +1000,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> MIDDLE DOT with no preceding 'l'"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with no preceding 'l'"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with no preceding 'l'" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1070,15 +1027,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> MIDDLE DOT with nothing preceding"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with nothing preceding"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with nothing preceding" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1099,15 +1054,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> MIDDLE DOT with no following 'l'"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with no following 'l'"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with no following 'l'" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1128,15 +1081,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> MIDDLE DOT with nothing following"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with nothing following"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::MIDDLE DOT with nothing following" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1180,15 +1131,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Greek KERAIA not followed by Greek"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Greek KERAIA not followed by Greek"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Greek KERAIA not followed by Greek" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1209,15 +1158,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Greek KERAIA not followed by anything"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Greek KERAIA not followed by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Greek KERAIA not followed by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1261,15 +1208,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Hebrew GERESH not preceded by Hebrew"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Hebrew GERESH not preceded by Hebrew"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Hebrew GERESH not preceded by Hebrew" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1290,15 +1235,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Hebrew GERESH not preceded by anything"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Hebrew GERESH not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Hebrew GERESH not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1342,15 +1285,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Hebrew GERSHAYIM not preceded by Hebrew"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Hebrew GERSHAYIM not preceded by Hebrew"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Hebrew GERSHAYIM not preceded by Hebrew" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1371,15 +1312,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Hebrew GERSHAYIM not preceded by anything"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Hebrew GERSHAYIM not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Hebrew GERSHAYIM not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1423,15 +1362,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_54() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::KATAKANA MIDDLE DOT with no Hiragana, Katakana, or Han" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1452,15 +1389,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> KATAKANA MIDDLE DOT with no other characters"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::KATAKANA MIDDLE DOT with no other characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_55() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::KATAKANA MIDDLE DOT with no other characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1550,15 +1485,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> Arabic-Indic digits mixed with Extended Arabic-Indic digits"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::Arabic-Indic digits mixed with Extended Arabic-Indic digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_59() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::Arabic-Indic digits mixed with Extended Arabic-Indic digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1625,15 +1558,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> ZERO WIDTH JOINER not preceded by Virama"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::ZERO WIDTH JOINER not preceded by Virama"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_62() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::ZERO WIDTH JOINER not preceded by Virama" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1654,15 +1585,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> ZERO WIDTH JOINER not preceded by anything"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::ZERO WIDTH JOINER not preceded by anything"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_63() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::ZERO WIDTH JOINER not preceded by anything" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1752,15 +1681,13 @@ class SchemaDraft2020_12SuiteTest_format_hostname : JsonSchemaTest {
      *     "validation of A-label (punycode) host names -> contains "--" in the 3rd and 4th position"
      *
      * Test ID: "format-hostname::validation of A-label (punycode) host names::contains "--" in the 3rd and 4th position"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_67() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-hostname::validation of A-label (punycode) host names::contains "--" in the 3rd and 4th position" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

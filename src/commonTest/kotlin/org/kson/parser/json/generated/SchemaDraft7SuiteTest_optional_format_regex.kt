@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
 
     /**
@@ -18,15 +19,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "\a is not an ECMA 262 control escape -> when used as a pattern"
      *
      * Test ID: "optional/format-regex::\a is not an ECMA 262 control escape::when used as a pattern"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::\a is not an ECMA 262 control escape::when used as a pattern" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -47,15 +46,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "Python-specific regular expression syntax is not valid ECMA 262 -> Python named group (?P<name>...) is not ECMA 262"
      *
      * Test ID: "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named group (?P<name>...) is not ECMA 262"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named group (?P<name>...) is not ECMA 262" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -76,15 +73,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "Python-specific regular expression syntax is not valid ECMA 262 -> Python named backreference (?P=name) is not ECMA 262"
      *
      * Test ID: "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named backreference (?P=name) is not ECMA 262"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named backreference (?P=name) is not ECMA 262" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -105,15 +100,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "Python-specific regular expression syntax is not valid ECMA 262 -> inline comment group (?#...) is not ECMA 262"
      *
      * Test ID: "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::inline comment group (?#...) is not ECMA 262"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::inline comment group (?#...) is not ECMA 262" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -134,15 +127,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "global inline flag groups are not valid ECMA 262 -> a single global inline flag (?i)"
      *
      * Test ID: "optional/format-regex::global inline flag groups are not valid ECMA 262::a single global inline flag (?i)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::global inline flag groups are not valid ECMA 262::a single global inline flag (?i)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -163,15 +154,13 @@ class SchemaDraft7SuiteTest_optional_format_regex : JsonSchemaTest {
      *     "global inline flag groups are not valid ECMA 262 -> multiple global inline flags (?ims)"
      *
      * Test ID: "optional/format-regex::global inline flag groups are not valid ECMA 262::multiple global inline flags (?ims)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-regex::global inline flag groups are not valid ECMA 262::multiple global inline flags (?ims)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_patternProperties : JsonSchemaTest {
 
     /**
@@ -710,15 +711,13 @@ class SchemaDraft2020_12SuiteTest_patternProperties : JsonSchemaTest {
      *     "patternProperties with Unicode property escape -> Unicode letter property name matches"
      *
      * Test ID: "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -746,15 +745,13 @@ class SchemaDraft2020_12SuiteTest_patternProperties : JsonSchemaTest {
      *     "patternProperties with Unicode property escape -> Unicode letter property name matches but value type is incorrect"
      *
      * Test ID: "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches but value type is incorrect"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches but value type is incorrect" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -782,15 +779,13 @@ class SchemaDraft2020_12SuiteTest_patternProperties : JsonSchemaTest {
      *     "patternProperties with Unicode property escape -> Non-letter property name does not match pattern"
      *
      * Test ID: "patternProperties::patternProperties with Unicode property escape::Non-letter property name does not match pattern"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "patternProperties::patternProperties with Unicode property escape::Non-letter property name does not match pattern" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
 
     /**
@@ -225,15 +226,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape requires unicode mode -> ASCII letters match"
      *
      * Test ID: "pattern::pattern with Unicode property escape requires unicode mode::ASCII letters match"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape requires unicode mode::ASCII letters match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -255,15 +254,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape requires unicode mode -> Non-ASCII letters match"
      *
      * Test ID: "pattern::pattern with Unicode property escape requires unicode mode::Non-ASCII letters match"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape requires unicode mode::Non-ASCII letters match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -285,15 +282,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape requires unicode mode -> Digits do not match"
      *
      * Test ID: "pattern::pattern with Unicode property escape requires unicode mode::Digits do not match"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape requires unicode mode::Digits do not match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -315,15 +310,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape -> a valid case with a Unicode letter"
      *
      * Test ID: "pattern::pattern with Unicode property escape::a valid case with a Unicode letter"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape::a valid case with a Unicode letter" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -345,15 +338,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape -> another valid case with multiple Unicode letters"
      *
      * Test ID: "pattern::pattern with Unicode property escape::another valid case with multiple Unicode letters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape::another valid case with multiple Unicode letters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -375,15 +366,13 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
      *     "pattern with Unicode property escape -> an invalid case where the string contains digits"
      *
      * Test ID: "pattern::pattern with Unicode property escape::an invalid case where the string contains digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "pattern::pattern with Unicode property escape::an invalid case where the string contains digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

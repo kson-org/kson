@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
 
     /**
@@ -41,15 +42,13 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
      *     "validation of string-encoded content based on media type -> an invalid JSON document"
      *
      * Test ID: "optional/content::validation of string-encoded content based on media type::an invalid JSON document"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/content::validation of string-encoded content based on media type::an invalid JSON document" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -116,15 +115,13 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
      *     "validation of binary string-encoding -> an invalid base64 string (% is not a valid character)"
      *
      * Test ID: "optional/content::validation of binary string-encoding::an invalid base64 string (% is not a valid character)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/content::validation of binary string-encoding::an invalid base64 string (% is not a valid character)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -192,15 +189,13 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
      *     "validation of binary-encoded media type documents -> a validly-encoded invalid JSON document"
      *
      * Test ID: "optional/content::validation of binary-encoded media type documents::a validly-encoded invalid JSON document"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/content::validation of binary-encoded media type documents::a validly-encoded invalid JSON document" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -222,15 +217,13 @@ class SchemaDraft7SuiteTest_optional_content : JsonSchemaTest {
      *     "validation of binary-encoded media type documents -> an invalid base64 string that is valid JSON"
      *
      * Test ID: "optional/content::validation of binary-encoded media type documents::an invalid base64 string that is valid JSON"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/content::validation of binary-encoded media type documents::an invalid base64 string that is valid JSON" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

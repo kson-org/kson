@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
 
     /**
@@ -78,15 +79,13 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
      *     "schema that uses custom metaschema with no validation vocabulary -> no validation: invalid number, but it still validates"
      *
      * Test ID: "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

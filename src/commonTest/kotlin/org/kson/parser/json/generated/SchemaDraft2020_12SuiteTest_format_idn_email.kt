@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> an invalid e-mail/idn e-mail address"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::an invalid e-mail/idn e-mail address"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::an invalid e-mail/idn e-mail address" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -415,15 +414,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> a fullwidth commercial at is not a local-part separator"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::a fullwidth commercial at is not a local-part separator"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::a fullwidth commercial at is not a local-part separator" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -467,15 +464,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> a domain label starting with a hyphen is not valid"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::a domain label starting with a hyphen is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::a domain label starting with a hyphen is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -496,15 +491,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> a domain label ending with a hyphen is not valid"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::a domain label ending with a hyphen is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::a domain label ending with a hyphen is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -525,15 +518,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> a domain starting with a dot is not valid"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::a domain starting with a dot is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::a domain starting with a dot is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -554,15 +545,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> a domain ending with a dot is not valid"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::a domain ending with a dot is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::a domain ending with a dot is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -583,15 +572,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> two subsequent dots inside the domain are not valid"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::two subsequent dots inside the domain are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::two subsequent dots inside the domain are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -612,15 +599,13 @@ class SchemaDraft2020_12SuiteTest_format_idn_email : JsonSchemaTest {
      *     "validation of an internationalized e-mail addresses -> domain is required"
      *
      * Test ID: "format-idn-email::validation of an internationalized e-mail addresses::domain is required"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-idn-email::validation of an internationalized e-mail addresses::domain is required" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
 
     /**
@@ -53,15 +54,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor (2020) -> An array containing non-strings is invalid"
      *
      * Test ID: "dynamicRef::A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor (2020)::An array containing non-strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor (2020)::An array containing non-strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -140,15 +139,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020) -> An array containing non-strings is invalid"
      *
      * Test ID: "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array containing non-strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array containing non-strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -242,15 +239,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020) -> An array containing non-strings is invalid"
      *
      * Test ID: "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array containing non-strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array containing non-strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -344,15 +339,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "after leaving a dynamic scope, it is not used by a $dynamicRef (2020) -> string matches /$defs/thingy, but the $dynamicRef does not stop here"
      *
      * Test ID: "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::string matches /$defs/thingy, but the $dynamicRef does not stop here"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::string matches /$defs/thingy, but the $dynamicRef does not stop here" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -407,15 +400,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "after leaving a dynamic scope, it is not used by a $dynamicRef (2020) -> first_scope is not in dynamic scope for the $dynamicRef"
      *
      * Test ID: "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::first_scope is not in dynamic scope for the $dynamicRef"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::first_scope is not in dynamic scope for the $dynamicRef" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -527,15 +518,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "strict-tree schema, guards against misspelled properties (2020) -> instance with misspelled field"
      *
      * Test ID: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -565,15 +554,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "strict-tree schema, guards against misspelled properties (2020) -> instance with correct field"
      *
      * Test ID: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -603,15 +590,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "tests for implementation dynamic anchor and reference link (2020) -> incorrect parent schema"
      *
      * Test ID: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -647,15 +632,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "tests for implementation dynamic anchor and reference link (2020) -> incorrect extended schema"
      *
      * Test ID: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -695,15 +678,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "tests for implementation dynamic anchor and reference link (2020) -> correct extended schema"
      *
      * Test ID: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -743,15 +724,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $defs first (2020) -> incorrect parent schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect parent schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect parent schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -793,15 +772,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $defs first (2020) -> incorrect extended schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::incorrect extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -847,15 +824,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $defs first (2020) -> correct extended schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::correct extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $defs first (2020)::correct extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -901,15 +876,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $ref first (2020) -> incorrect parent schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect parent schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect parent schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -951,15 +924,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $ref first (2020) -> incorrect extended schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::incorrect extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1005,15 +976,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref and $dynamicAnchor are independent of order - $ref first (2020) -> correct extended schema"
      *
      * Test ID: "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::correct extended schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref and $dynamicAnchor are independent of order - $ref first (2020)::correct extended schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1059,15 +1028,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref to $dynamicRef finds detached $dynamicAnchor (2020) -> number is valid"
      *
      * Test ID: "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::number is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::number is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1088,15 +1055,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$ref to $dynamicRef finds detached $dynamicAnchor (2020) -> non-number is invalid"
      *
      * Test ID: "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::non-number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$ref to $dynamicRef finds detached $dynamicAnchor (2020)::non-number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1180,15 +1145,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$dynamicRef skips over intermediate resources - direct reference (2020) -> string property fails"
      *
      * Test ID: "dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::string property fails"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::string property fails" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1311,15 +1274,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$dynamicRef avoids the root of each schema, but scopes are still registered (2020) -> data is not sufficient for schema at second#/$defs/length"
      *
      * Test ID: "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/$defs/length"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/$defs/length" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1414,15 +1375,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor -> An array containing non-strings is invalid"
      *
      * Test ID: "dynamicRef::A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1455,15 +1414,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor -> An array of strings is valid"
      *
      * Test ID: "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array of strings is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array of strings is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1496,15 +1453,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor -> An array containing non-strings is invalid"
      *
      * Test ID: "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $ref to a $dynamicAnchor in the same schema resource behaves like a normal $ref to an $anchor::An array containing non-strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1537,15 +1492,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef without anchor in fragment behaves identical to $ref -> An array of strings is invalid"
      *
      * Test ID: "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of strings is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of strings is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1789,15 +1742,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope -> The recursive part is not valid against the root"
      *
      * Test ID: "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is not valid against the root"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is not valid against the root" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1995,15 +1946,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "multiple dynamic paths to the $dynamicRef keyword (2020) -> number list with string values"
      *
      * Test ID: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::number list with string values"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::number list with string values" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2083,15 +2032,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "multiple dynamic paths to the $dynamicRef keyword (2020) -> string list with number values"
      *
      * Test ID: "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::string list with number values"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::string list with number values" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2289,15 +2236,13 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$dynamicRef points to a boolean schema -> follow $dynamicRef to a false schema"
      *
      * Test ID: "dynamicRef::$dynamicRef points to a boolean schema::follow $dynamicRef to a false schema"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "dynamicRef::$dynamicRef points to a boolean schema::follow $dynamicRef to a false schema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

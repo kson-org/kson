@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest {
 
     /**
@@ -271,15 +272,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> an invalid RJP that is a valid JSON Pointer"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::an invalid RJP that is a valid JSON Pointer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::an invalid RJP that is a valid JSON Pointer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -300,15 +299,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> a json-pointer part that does not start with a slash is invalid"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::a json-pointer part that does not start with a slash is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::a json-pointer part that does not start with a slash is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -329,15 +326,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> negative prefix"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::negative prefix"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::negative prefix" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -358,15 +353,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> explicit positive prefix"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::explicit positive prefix"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::explicit positive prefix" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -387,15 +380,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> non-ASCII digit in the prefix is not allowed"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::non-ASCII digit in the prefix is not allowed"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::non-ASCII digit in the prefix is not allowed" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -416,15 +407,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> ## is not a valid json-pointer"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::## is not a valid json-pointer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::## is not a valid json-pointer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -445,15 +434,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> zero cannot be followed by other digits, plus json-pointer"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::zero cannot be followed by other digits, plus json-pointer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::zero cannot be followed by other digits, plus json-pointer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -474,15 +461,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> zero cannot be followed by other digits, plus octothorpe"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::zero cannot be followed by other digits, plus octothorpe"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::zero cannot be followed by other digits, plus octothorpe" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -503,15 +488,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> empty string"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::empty string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::empty string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -578,15 +561,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> tilde not followed by 0 or 1 in the json-pointer part"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::tilde not followed by 0 or 1 in the json-pointer part"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::tilde not followed by 0 or 1 in the json-pointer part" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -607,15 +588,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> unescaped tilde at the end of the json-pointer part"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::unescaped tilde at the end of the json-pointer part"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::unescaped tilde at the end of the json-pointer part" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -636,15 +615,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> octothorpe followed by a json-pointer"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::octothorpe followed by a json-pointer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::octothorpe followed by a json-pointer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -780,15 +757,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> multiple unescaped tildes in the json-pointer part"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::multiple unescaped tildes in the json-pointer part"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::multiple unescaped tildes in the json-pointer part" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -809,15 +784,13 @@ class SchemaDraft2020_12SuiteTest_format_relative_json_pointer : JsonSchemaTest 
      *     "validation of Relative JSON Pointers (RJP) -> trailing newline after the non-negative integer"
      *
      * Test ID: "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::trailing newline after the non-negative integer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-relative-json-pointer::validation of Relative JSON Pointers (RJP)::trailing newline after the non-negative integer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

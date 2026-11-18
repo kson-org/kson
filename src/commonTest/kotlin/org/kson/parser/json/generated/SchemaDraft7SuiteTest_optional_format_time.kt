@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
 
     /**
@@ -41,15 +42,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, Zulu (wrong hour)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong hour)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong hour)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -70,15 +69,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, Zulu (wrong minute)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong minute)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong minute)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -122,15 +119,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, zero time-offset (wrong hour)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong hour)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong hour)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -151,15 +146,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, zero time-offset (wrong minute)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong minute)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong minute)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -226,15 +219,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, positive time-offset (wrong hour)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong hour)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong hour)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -255,15 +246,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, positive time-offset (wrong minute)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong minute)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong minute)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -330,15 +319,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, negative time-offset (wrong hour)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong hour)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong hour)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -359,15 +346,13 @@ class SchemaDraft7SuiteTest_optional_format_time : JsonSchemaTest {
      *     "validation of time strings -> invalid leap second, negative time-offset (wrong minute)"
      *
      * Test ID: "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong minute)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong minute)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

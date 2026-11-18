@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> an invalid duration string"
      *
      * Test ID: "format-duration::validation of duration strings::an invalid duration string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::an invalid duration string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -231,15 +230,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> must start with P"
      *
      * Test ID: "format-duration::validation of duration strings::must start with P"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::must start with P" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -260,15 +257,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> no elements present"
      *
      * Test ID: "format-duration::validation of duration strings::no elements present"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::no elements present" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -289,15 +284,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> no time elements present"
      *
      * Test ID: "format-duration::validation of duration strings::no time elements present"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::no time elements present" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -318,15 +311,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> no date or time elements present"
      *
      * Test ID: "format-duration::validation of duration strings::no date or time elements present"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::no date or time elements present" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -347,15 +338,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> elements out of order"
      *
      * Test ID: "format-duration::validation of duration strings::elements out of order"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::elements out of order" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -376,15 +365,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> missing time separator"
      *
      * Test ID: "format-duration::validation of duration strings::missing time separator"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::missing time separator" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -405,15 +392,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> time element in the date position"
      *
      * Test ID: "format-duration::validation of duration strings::time element in the date position"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::time element in the date position" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -618,15 +603,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> weeks cannot be combined with other units"
      *
      * Test ID: "format-duration::validation of duration strings::weeks cannot be combined with other units"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::weeks cannot be combined with other units" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -647,15 +630,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> invalid non-ASCII '২' (a Bengali 2)"
      *
      * Test ID: "format-duration::validation of duration strings::invalid non-ASCII '২' (a Bengali 2)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::invalid non-ASCII '২' (a Bengali 2)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -676,15 +657,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> element without unit"
      *
      * Test ID: "format-duration::validation of duration strings::element without unit"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::element without unit" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -843,15 +822,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> fractional duration is not allowed by RFC 3339 ABNF"
      *
      * Test ID: "format-duration::validation of duration strings::fractional duration is not allowed by RFC 3339 ABNF"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::fractional duration is not allowed by RFC 3339 ABNF" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -872,15 +849,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> leading whitespace is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::leading whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::leading whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -901,15 +876,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> trailing whitespace is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::trailing whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::trailing whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -930,15 +903,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> empty string is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::empty string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::empty string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -982,15 +953,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> years and days cannot appear without months"
      *
      * Test ID: "format-duration::validation of duration strings::years and days cannot appear without months"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::years and days cannot appear without months" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1034,15 +1003,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> hours and seconds cannot appear without minutes"
      *
      * Test ID: "format-duration::validation of duration strings::hours and seconds cannot appear without minutes"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::hours and seconds cannot appear without minutes" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1086,15 +1053,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> a leading sign is not allowed"
      *
      * Test ID: "format-duration::validation of duration strings::a leading sign is not allowed"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::a leading sign is not allowed" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1115,15 +1080,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> a number before the time separator has no unit"
      *
      * Test ID: "format-duration::validation of duration strings::a number before the time separator has no unit"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::a number before the time separator has no unit" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1144,15 +1107,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> exponent notation is not allowed in a component"
      *
      * Test ID: "format-duration::validation of duration strings::exponent notation is not allowed in a component"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::exponent notation is not allowed in a component" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1173,15 +1134,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> a trailing newline is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::a trailing newline is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::a trailing newline is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1202,15 +1161,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> weeks cannot be combined with a time component"
      *
      * Test ID: "format-duration::validation of duration strings::weeks cannot be combined with a time component"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::weeks cannot be combined with a time component" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1231,15 +1188,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> weeks cannot be combined with a zero-valued component"
      *
      * Test ID: "format-duration::validation of duration strings::weeks cannot be combined with a zero-valued component"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::weeks cannot be combined with a zero-valued component" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1306,15 +1261,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> a comma as the decimal separator is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::a comma as the decimal separator is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::a comma as the decimal separator is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """
@@ -1335,15 +1288,13 @@ class SchemaDraft2020_12SuiteTest_format_duration : JsonSchemaTest {
      *     "validation of duration strings -> a sign inside a component is invalid"
      *
      * Test ID: "format-duration::validation of duration strings::a sign inside a component is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-duration::validation of duration strings::a sign inside a component is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 3339 Appendix A defines the ABNF grammar for ISO-8601 durations used by JSON Schema format 'duration'. These tests enforce only the syntax defined by that grammar.
         assertKsonEnforcesSchema(
             """

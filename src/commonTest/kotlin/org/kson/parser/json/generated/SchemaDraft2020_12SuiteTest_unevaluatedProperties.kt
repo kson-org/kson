@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
 
     /**
@@ -124,15 +125,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties schema -> with invalid unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties schema::with invalid unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties schema::with invalid unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -183,15 +182,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties false -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties false::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_7() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties false::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -246,15 +243,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with adjacent properties -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with adjacent properties::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with adjacent properties::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -315,15 +310,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with adjacent patternProperties -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with adjacent patternProperties::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with adjacent patternProperties::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -528,15 +521,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with nested properties -> with additional properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with nested properties::with additional properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with nested properties::with additional properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -617,15 +608,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with nested patternProperties -> with additional properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with nested patternProperties::with additional properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with nested patternProperties::with additional properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -881,15 +870,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with anyOf -> when one matches and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with anyOf::when one matches and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with anyOf::when one matches and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1017,15 +1004,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with anyOf -> when two match and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with anyOf::when two match and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with anyOf::when two match and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1143,15 +1128,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with oneOf -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with oneOf::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with oneOf::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1204,15 +1187,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with not -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with not::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with not::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1311,15 +1292,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else -> when if is true and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else::when if is true and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else::when if is true and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1431,15 +1410,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else -> when if is false and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else::when if is false and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else::when if is false and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1540,15 +1517,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else, then not defined -> when if is true and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else, then not defined::when if is true and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else, then not defined::when if is true and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1639,15 +1614,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else, then not defined -> when if is false and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else, then not defined::when if is false and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else, then not defined::when if is false and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1739,15 +1712,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else, else not defined -> when if is true and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is true and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is true and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1793,15 +1764,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else, else not defined -> when if is false and has no unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is false and has no unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is false and has no unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1845,15 +1814,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with if/then/else, else not defined -> when if is false and has unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is false and has unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with if/then/else, else not defined::when if is false and has unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1942,15 +1909,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with dependentSchemas -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with dependentSchemas::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with dependentSchemas::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2025,15 +1990,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with boolean schemas -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with boolean schemas::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with boolean schemas::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2107,15 +2070,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with $ref -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with $ref::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with $ref::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2198,15 +2159,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties before $ref -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties before $ref::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties before $ref::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2301,15 +2260,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties with $dynamicRef (2020) -> with unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2362,15 +2319,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties can't see inside cousins -> always fails"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties can't see inside cousins::always fails"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_53() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties can't see inside cousins::always fails" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2402,15 +2357,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties can't see inside cousins (reverse order) -> always fails"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties can't see inside cousins (reverse order)::always fails"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_54() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties can't see inside cousins (reverse order)::always fails" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2588,15 +2541,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "nested unevaluatedProperties, outer true, inner false, properties outside -> with no nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties outside::with no nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_59() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties outside::with no nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2630,15 +2581,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "nested unevaluatedProperties, outer true, inner false, properties outside -> with nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties outside::with nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties outside::with nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2709,15 +2658,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "nested unevaluatedProperties, outer true, inner false, properties inside -> with nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties inside::with nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_62() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::nested unevaluatedProperties, outer true, inner false, properties inside::with nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2752,15 +2699,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "cousin unevaluatedProperties, true and false, true with properties -> with no nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::cousin unevaluatedProperties, true and false, true with properties::with no nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_63() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::cousin unevaluatedProperties, true and false, true with properties::with no nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2796,15 +2741,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "cousin unevaluatedProperties, true and false, true with properties -> with nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::cousin unevaluatedProperties, true and false, true with properties::with nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_64() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::cousin unevaluatedProperties, true and false, true with properties::with nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2879,15 +2822,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "cousin unevaluatedProperties, true and false, false with properties -> with nested unevaluated properties"
      *
      * Test ID: "unevaluatedProperties::cousin unevaluatedProperties, true and false, false with properties::with nested unevaluated properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_66() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::cousin unevaluatedProperties, true and false, false with properties::with nested unevaluated properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2975,15 +2916,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "property is evaluated in an uncle schema to unevaluatedProperties -> uncle keyword evaluation is not significant"
      *
      * Test ID: "unevaluatedProperties::property is evaluated in an uncle schema to unevaluatedProperties::uncle keyword evaluation is not significant"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_68() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::property is evaluated in an uncle schema to unevaluatedProperties::uncle keyword evaluation is not significant" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // see https://stackoverflow.com/questions/66936884/deeply-nested-unevaluatedproperties-and-their-expectations
         assertKsonEnforcesSchema(
             """
@@ -3033,15 +2972,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "in-place applicator siblings, allOf has unevaluated -> base case: both properties present"
      *
      * Test ID: "unevaluatedProperties::in-place applicator siblings, allOf has unevaluated::base case: both properties present"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_69() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::in-place applicator siblings, allOf has unevaluated::base case: both properties present" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3120,15 +3057,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "in-place applicator siblings, allOf has unevaluated -> in place applicator siblings, foo is missing"
      *
      * Test ID: "unevaluatedProperties::in-place applicator siblings, allOf has unevaluated::in place applicator siblings, foo is missing"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_71() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::in-place applicator siblings, allOf has unevaluated::in place applicator siblings, foo is missing" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3166,15 +3101,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "in-place applicator siblings, anyOf has unevaluated -> base case: both properties present"
      *
      * Test ID: "unevaluatedProperties::in-place applicator siblings, anyOf has unevaluated::base case: both properties present"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_72() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::in-place applicator siblings, anyOf has unevaluated::base case: both properties present" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3213,15 +3146,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "in-place applicator siblings, anyOf has unevaluated -> in place applicator siblings, bar is missing"
      *
      * Test ID: "unevaluatedProperties::in-place applicator siblings, anyOf has unevaluated::in place applicator siblings, bar is missing"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_73() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::in-place applicator siblings, anyOf has unevaluated::in place applicator siblings, bar is missing" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3359,15 +3290,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties + single cyclic ref -> Unevaluated on 1st level is invalid"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 1st level is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_77() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 1st level is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3430,15 +3359,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties + single cyclic ref -> Unevaluated on 2nd level is invalid"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 2nd level is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_79() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 2nd level is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -3505,15 +3432,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties + single cyclic ref -> Unevaluated on 3rd level is invalid"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 3rd level is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_81() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties + single cyclic ref::Unevaluated on 3rd level is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -5238,15 +5163,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "dynamic evaluation inside nested refs -> xx + foo is invalid"
      *
      * Test ID: "unevaluatedProperties::dynamic evaluation inside nested refs::xx + foo is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_103() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::dynamic evaluation inside nested refs::xx + foo is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6158,15 +6081,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties not affected by propertyNames -> string property is invalid"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties not affected by propertyNames::string property is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_119() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties not affected by propertyNames::string property is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6226,15 +6147,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "unevaluatedProperties can see annotations from if without then and else -> invalid in case if is evaluated"
      *
      * Test ID: "unevaluatedProperties::unevaluatedProperties can see annotations from if without then and else::invalid in case if is evaluated"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_121() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::unevaluatedProperties can see annotations from if without then and else::invalid in case if is evaluated" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6264,15 +6183,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "dependentSchemas with unevaluatedProperties -> unevaluatedProperties doesn't consider dependentSchemas"
      *
      * Test ID: "unevaluatedProperties::dependentSchemas with unevaluatedProperties::unevaluatedProperties doesn't consider dependentSchemas"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_122() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::dependentSchemas with unevaluatedProperties::unevaluatedProperties doesn't consider dependentSchemas" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6306,15 +6223,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "dependentSchemas with unevaluatedProperties -> unevaluatedProperties doesn't see bar when foo2 is absent"
      *
      * Test ID: "unevaluatedProperties::dependentSchemas with unevaluatedProperties::unevaluatedProperties doesn't see bar when foo2 is absent"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_123() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::dependentSchemas with unevaluatedProperties::unevaluatedProperties doesn't see bar when foo2 is absent" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6385,15 +6300,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "Evaluated properties collection needs to consider instance location -> with an unevaluated property that exists at another location"
      *
      * Test ID: "unevaluatedProperties::Evaluated properties collection needs to consider instance location::with an unevaluated property that exists at another location"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_125() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::Evaluated properties collection needs to consider instance location::with an unevaluated property that exists at another location" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6464,15 +6377,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "Evaluated properties collection needs to consider instance location with patternProperties -> with an unevaluated property that exists at another location"
      *
      * Test ID: "unevaluatedProperties::Evaluated properties collection needs to consider instance location with patternProperties::with an unevaluated property that exists at another location"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_127() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::Evaluated properties collection needs to consider instance location with patternProperties::with an unevaluated property that exists at another location" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -6541,15 +6452,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      *     "Evaluated properties collection needs to consider instance location with additionalProperties -> with an unevaluated property that exists at another location"
      *
      * Test ID: "unevaluatedProperties::Evaluated properties collection needs to consider instance location with additionalProperties::with an unevaluated property that exists at another location"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_129() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedProperties::Evaluated properties collection needs to consider instance location with additionalProperties::with an unevaluated property that exists at another location" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

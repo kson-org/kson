@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
 
     /**
@@ -89,15 +90,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems false -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems false::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems false::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -172,15 +171,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems as schema -> with invalid unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems as schema::with invalid unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_7() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems as schema::with invalid unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -264,15 +261,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with tuple (prefixItems) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with tuple (prefixItems)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with tuple (prefixItems)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -439,15 +434,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with nested tuple (prefixItems) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with nested tuple (prefixItems)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with nested tuple (prefixItems)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -559,15 +552,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with nested items -> with invalid additional item"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with nested items::with invalid additional item"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with nested items::with invalid additional item" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -799,15 +790,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with anyOf (prefixItems) -> when one schema matches and has unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with anyOf (prefixItems)::when one schema matches and has unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with anyOf (prefixItems)::when one schema matches and has unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -907,15 +896,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with anyOf (prefixItems) -> when two schemas match and has unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with anyOf (prefixItems)::when two schemas match and has unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with anyOf (prefixItems)::when two schemas match and has unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -965,15 +952,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with oneOf (prefixItems) -> with no unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with oneOf (prefixItems)::with no unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with oneOf (prefixItems)::with no unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1070,15 +1055,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with not (prefixItems) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with not (prefixItems)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with not (prefixItems)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1176,15 +1159,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with if/then/else (prefixItems) -> when if matches and it has unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with if/then/else (prefixItems)::when if matches and it has unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with if/then/else (prefixItems)::when if matches and it has unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1302,15 +1283,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with if/then/else (prefixItems) -> when if doesn't match and it has unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with if/then/else (prefixItems)::when if doesn't match and it has unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with if/then/else (prefixItems)::when if doesn't match and it has unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1395,15 +1374,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with boolean schemas -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with boolean schemas::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with boolean schemas::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1471,15 +1448,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with $ref (prefixItems) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with $ref (prefixItems)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with $ref (prefixItems)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1562,15 +1537,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems before $ref (prefixItems) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems before $ref (prefixItems)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems before $ref (prefixItems)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1667,15 +1640,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with $dynamicRef (2020-12) -> with unevaluated items"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with $dynamicRef (2020-12)::with unevaluated items"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with $dynamicRef (2020-12)::with unevaluated items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1730,15 +1701,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems can't see inside cousins (prefixItems) -> always fails"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems can't see inside cousins (prefixItems)::always fails"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems can't see inside cousins (prefixItems)::always fails" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1820,15 +1789,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "item is evaluated in an uncle schema to unevaluatedItems (prefixItems) -> uncle keyword evaluation is not significant"
      *
      * Test ID: "unevaluatedItems::item is evaluated in an uncle schema to unevaluatedItems (prefixItems)::uncle keyword evaluation is not significant"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::item is evaluated in an uncle schema to unevaluatedItems (prefixItems)::uncle keyword evaluation is not significant" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1941,15 +1908,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems depends on adjacent contains -> contains passes, second item is not evaluated"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems depends on adjacent contains::contains passes, second item is not evaluated"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems depends on adjacent contains::contains passes, second item is not evaluated" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2023,15 +1988,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems depends on multiple nested contains -> 7 not evaluated, fails unevaluatedItems"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems depends on multiple nested contains::7 not evaluated, fails unevaluatedItems"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems depends on multiple nested contains::7 not evaluated, fails unevaluatedItems" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2256,15 +2219,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems and contains interact to control item dependency relationship -> only b's are invalid"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only b's are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_54() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only b's are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2307,15 +2268,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems and contains interact to control item dependency relationship -> only c's are invalid"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only c's are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_55() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only c's are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2358,15 +2317,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems and contains interact to control item dependency relationship -> only b's and c's are invalid"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only b's and c's are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_56() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only b's and c's are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2412,15 +2369,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems and contains interact to control item dependency relationship -> only a's and c's are invalid"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only a's and c's are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_57() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems and contains interact to control item dependency relationship::only a's and c's are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2466,15 +2421,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with minContains = 0 -> empty array is valid"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with minContains = 0::empty array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_58() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with minContains = 0::empty array is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2528,15 +2481,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems with minContains = 0 -> some but not all items evaluated by contains"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems with minContains = 0::some but not all items evaluated by contains"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems with minContains = 0::some but not all items evaluated by contains" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2791,15 +2742,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "unevaluatedItems can see annotations from if without then and else (prefixItems) -> invalid in case if is evaluated"
      *
      * Test ID: "unevaluatedItems::unevaluatedItems can see annotations from if without then and else (prefixItems)::invalid in case if is evaluated"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_70() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::unevaluatedItems can see annotations from if without then and else (prefixItems)::invalid in case if is evaluated" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2829,15 +2778,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest {
      *     "Evaluated items collection needs to consider instance location (prefixItems) -> with an unevaluated item that exists at another location"
      *
      * Test ID: "unevaluatedItems::Evaluated items collection needs to consider instance location (prefixItems)::with an unevaluated item that exists at another location"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_71() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "unevaluatedItems::Evaluated items collection needs to consider instance location (prefixItems)::with an unevaluated item that exists at another location" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

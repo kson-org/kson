@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
 
     /**
@@ -225,15 +226,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in January"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in January"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in January" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -277,15 +276,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 30 days in February (leap)"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 30 days in February (leap)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 30 days in February (leap)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -329,15 +326,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in March"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in March"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in March" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -381,15 +376,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 31 days in April"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 31 days in April"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 31 days in April" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -433,15 +426,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in May"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in May"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in May" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -485,15 +476,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 31 days in June"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 31 days in June"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 31 days in June" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -537,15 +526,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in July"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in July"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in July" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -589,15 +576,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in August"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in August"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in August" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -641,15 +626,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 31 days in September"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 31 days in September"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 31 days in September" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -693,15 +676,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in October"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in October"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in October" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -745,15 +726,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 31 days in November"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 31 days in November"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 31 days in November" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -797,15 +776,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> a invalid date string with 32 days in December"
      *
      * Test ID: "format-date::validation of date strings::a invalid date string with 32 days in December"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::a invalid date string with 32 days in December" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -826,15 +803,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> an invalid date string"
      *
      * Test ID: "format-date::validation of date strings::an invalid date string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::an invalid date string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -855,15 +830,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> only RFC3339 not all of ISO 8601 are valid"
      *
      * Test ID: "format-date::validation of date strings::only RFC3339 not all of ISO 8601 are valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::only RFC3339 not all of ISO 8601 are valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -884,15 +857,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> non-padded month dates are not valid"
      *
      * Test ID: "format-date::validation of date strings::non-padded month dates are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::non-padded month dates are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -913,15 +884,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> non-padded day dates are not valid"
      *
      * Test ID: "format-date::validation of date strings::non-padded day dates are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::non-padded day dates are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -942,15 +911,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid month"
      *
      * Test ID: "format-date::validation of date strings::invalid month"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid month" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -971,15 +938,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> 2021 is not a leap year"
      *
      * Test ID: "format-date::validation of date strings::2021 is not a leap year"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::2021 is not a leap year" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1023,15 +988,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid non-ASCII '৪' (a Bengali 4)"
      *
      * Test ID: "format-date::validation of date strings::invalid non-ASCII '৪' (a Bengali 4)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid non-ASCII '৪' (a Bengali 4)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1052,15 +1015,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: non-ASCII Bengali digit in month field"
      *
      * Test ID: "format-date::validation of date strings::invalid: non-ASCII Bengali digit in month field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: non-ASCII Bengali digit in month field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1081,15 +1042,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> ISO8601 / non-RFC3339: YYYYMMDD without dashes (2023-03-28)"
      *
      * Test ID: "format-date::validation of date strings::ISO8601 / non-RFC3339: YYYYMMDD without dashes (2023-03-28)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::ISO8601 / non-RFC3339: YYYYMMDD without dashes (2023-03-28)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1110,15 +1069,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> ISO8601 / non-RFC3339: week number implicit day of week (2023-01-02)"
      *
      * Test ID: "format-date::validation of date strings::ISO8601 / non-RFC3339: week number implicit day of week (2023-01-02)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::ISO8601 / non-RFC3339: week number implicit day of week (2023-01-02)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1139,15 +1096,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> ISO8601 / non-RFC3339: week number with day of week (2023-03-28)"
      *
      * Test ID: "format-date::validation of date strings::ISO8601 / non-RFC3339: week number with day of week (2023-03-28)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::ISO8601 / non-RFC3339: week number with day of week (2023-03-28)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1168,15 +1123,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> ISO8601 / non-RFC3339: week number rollover to next year (2023-01-01)"
      *
      * Test ID: "format-date::validation of date strings::ISO8601 / non-RFC3339: week number rollover to next year (2023-01-01)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::ISO8601 / non-RFC3339: week number rollover to next year (2023-01-01)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1197,15 +1150,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> an invalid time string in date-time format"
      *
      * Test ID: "format-date::validation of date strings::an invalid time string in date-time format"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::an invalid time string in date-time format" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1226,15 +1177,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> century year 0100 is not a leap year"
      *
      * Test ID: "format-date::validation of date strings::century year 0100 is not a leap year"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::century year 0100 is not a leap year" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1278,15 +1227,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> century year 2100 is not a leap year"
      *
      * Test ID: "format-date::validation of date strings::century year 2100 is not a leap year"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::century year 2100 is not a leap year" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1307,15 +1254,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: leading whitespace is not permitted"
      *
      * Test ID: "format-date::validation of date strings::invalid: leading whitespace is not permitted"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: leading whitespace is not permitted" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1336,15 +1281,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: trailing whitespace is not permitted"
      *
      * Test ID: "format-date::validation of date strings::invalid: trailing whitespace is not permitted"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: trailing whitespace is not permitted" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1365,15 +1308,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: month 00 is not valid per date-month range 01-12"
      *
      * Test ID: "format-date::validation of date strings::invalid: month 00 is not valid per date-month range 01-12"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: month 00 is not valid per date-month range 01-12" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1394,15 +1335,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: day 00 is not valid per date-mday minimum of 01"
      *
      * Test ID: "format-date::validation of date strings::invalid: day 00 is not valid per date-mday minimum of 01"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_53() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: day 00 is not valid per date-mday minimum of 01" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1423,15 +1362,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: empty string"
      *
      * Test ID: "format-date::validation of date strings::invalid: empty string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_54() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: empty string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1452,15 +1389,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: embedded whitespace between year and month"
      *
      * Test ID: "format-date::validation of date strings::invalid: embedded whitespace between year and month"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_55() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: embedded whitespace between year and month" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1481,15 +1416,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: trailing character after valid full-date"
      *
      * Test ID: "format-date::validation of date strings::invalid: trailing character after valid full-date"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_56() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: trailing character after valid full-date" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1510,15 +1443,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: trailing Z after full-date"
      *
      * Test ID: "format-date::validation of date strings::invalid: trailing Z after full-date"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_57() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: trailing Z after full-date" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1539,15 +1470,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: full-date followed by space and time component"
      *
      * Test ID: "format-date::validation of date strings::invalid: full-date followed by space and time component"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_58() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: full-date followed by space and time component" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1591,15 +1520,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: two-digit year (N-2 digits)"
      *
      * Test ID: "format-date::validation of date strings::invalid: two-digit year (N-2 digits)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: two-digit year (N-2 digits)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1620,15 +1547,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: three-digit year (N-1 digits)"
      *
      * Test ID: "format-date::validation of date strings::invalid: three-digit year (N-1 digits)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_61() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: three-digit year (N-1 digits)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1649,15 +1574,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: five-digit year (N+1 digits)"
      *
      * Test ID: "format-date::validation of date strings::invalid: five-digit year (N+1 digits)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_62() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: five-digit year (N+1 digits)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1678,15 +1601,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: positive sign prefix on year"
      *
      * Test ID: "format-date::validation of date strings::invalid: positive sign prefix on year"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_63() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: positive sign prefix on year" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1707,15 +1628,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: negative sign prefix on year"
      *
      * Test ID: "format-date::validation of date strings::invalid: negative sign prefix on year"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_64() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: negative sign prefix on year" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1736,15 +1655,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: non-ASCII Bengali digit in year field"
      *
      * Test ID: "format-date::validation of date strings::invalid: non-ASCII Bengali digit in year field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_65() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: non-ASCII Bengali digit in year field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1765,15 +1682,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: alphabetic characters in year field"
      *
      * Test ID: "format-date::validation of date strings::invalid: alphabetic characters in year field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_66() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: alphabetic characters in year field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1794,15 +1709,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: three-digit month (N+1 digits)"
      *
      * Test ID: "format-date::validation of date strings::invalid: three-digit month (N+1 digits)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_67() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: three-digit month (N+1 digits)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1823,15 +1736,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: alphabetic characters in month field"
      *
      * Test ID: "format-date::validation of date strings::invalid: alphabetic characters in month field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_68() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: alphabetic characters in month field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1852,15 +1763,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: three-digit day (N+1 digits)"
      *
      * Test ID: "format-date::validation of date strings::invalid: three-digit day (N+1 digits)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_69() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: three-digit day (N+1 digits)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1881,15 +1790,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: alphabetic characters in day field"
      *
      * Test ID: "format-date::validation of date strings::invalid: alphabetic characters in day field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_70() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: alphabetic characters in day field" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1910,15 +1817,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: colon separators"
      *
      * Test ID: "format-date::validation of date strings::invalid: colon separators"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_71() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: colon separators" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1939,15 +1844,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: dot separators"
      *
      * Test ID: "format-date::validation of date strings::invalid: dot separators"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_72() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: dot separators" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1968,15 +1871,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: space separators"
      *
      * Test ID: "format-date::validation of date strings::invalid: space separators"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_73() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: space separators" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1997,15 +1898,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: mixed slash and hyphen separators"
      *
      * Test ID: "format-date::validation of date strings::invalid: mixed slash and hyphen separators"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_74() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: mixed slash and hyphen separators" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2026,15 +1925,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: duplicated first hyphen"
      *
      * Test ID: "format-date::validation of date strings::invalid: duplicated first hyphen"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_75() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: duplicated first hyphen" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2055,15 +1952,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: duplicated second hyphen"
      *
      * Test ID: "format-date::validation of date strings::invalid: duplicated second hyphen"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_76() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: duplicated second hyphen" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2107,15 +2002,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: year field numerically larger than a 32-bit signed integer"
      *
      * Test ID: "format-date::validation of date strings::invalid: year field numerically larger than a 32-bit signed integer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_78() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: year field numerically larger than a 32-bit signed integer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2136,15 +2029,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: character just above '9' as the second digit of the day"
      *
      * Test ID: "format-date::validation of date strings::invalid: character just above '9' as the second digit of the day"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_79() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: character just above '9' as the second digit of the day" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2165,15 +2056,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: non-ASCII digit leaving ten UTF-8 bytes but eight characters"
      *
      * Test ID: "format-date::validation of date strings::invalid: non-ASCII digit leaving ten UTF-8 bytes but eight characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_80() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: non-ASCII digit leaving ten UTF-8 bytes but eight characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2194,15 +2083,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: en dash separators instead of hyphen-minus"
      *
      * Test ID: "format-date::validation of date strings::invalid: en dash separators instead of hyphen-minus"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_81() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: en dash separators instead of hyphen-minus" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -2223,15 +2110,13 @@ class SchemaDraft7SuiteTest_format_date : JsonSchemaTest {
      *     "validation of date strings -> invalid: NUL character after an otherwise valid full-date"
      *
      * Test ID: "format-date::validation of date strings::invalid: NUL character after an otherwise valid full-date"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_82() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-date::validation of date strings::invalid: NUL character after an otherwise valid full-date" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

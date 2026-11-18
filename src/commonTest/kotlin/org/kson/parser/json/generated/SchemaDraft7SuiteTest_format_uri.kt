@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
 
     /**
@@ -478,15 +479,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid protocol-relative URI Reference"
      *
      * Test ID: "format-uri::validation of URIs::an invalid protocol-relative URI Reference"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid protocol-relative URI Reference" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -507,15 +506,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid relative URI Reference"
      *
      * Test ID: "format-uri::validation of URIs::an invalid relative URI Reference"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid relative URI Reference" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -536,15 +533,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid URI"
      *
      * Test ID: "format-uri::validation of URIs::an invalid URI"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid URI" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -565,15 +560,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid URI though valid URI reference"
      *
      * Test ID: "format-uri::validation of URIs::an invalid URI though valid URI reference"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid URI though valid URI reference" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -594,15 +587,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid URI with spaces"
      *
      * Test ID: "format-uri::validation of URIs::an invalid URI with spaces"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid URI with spaces" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -623,15 +614,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid URI with spaces and missing scheme"
      *
      * Test ID: "format-uri::validation of URIs::an invalid URI with spaces and missing scheme"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid URI with spaces and missing scheme" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -652,15 +641,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an invalid URI with comma in scheme"
      *
      * Test ID: "format-uri::validation of URIs::an invalid URI with comma in scheme"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an invalid URI with comma in scheme" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -681,15 +668,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid userinfo"
      *
      * Test ID: "format-uri::validation of URIs::invalid userinfo"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid userinfo" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -710,15 +695,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> unescaped non US-ASCII characters"
      *
      * Test ID: "format-uri::validation of URIs::unescaped non US-ASCII characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::unescaped non US-ASCII characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -739,15 +722,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid backslash character"
      *
      * Test ID: "format-uri::validation of URIs::invalid backslash character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid backslash character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -768,15 +749,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid " character"
      *
      * Test ID: "format-uri::validation of URIs::invalid " character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid " character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -797,15 +776,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid <> characters"
      *
      * Test ID: "format-uri::validation of URIs::invalid <> characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid <> characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -826,15 +803,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid {} characters"
      *
      * Test ID: "format-uri::validation of URIs::invalid {} characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid {} characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -855,15 +830,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid ^ character"
      *
      * Test ID: "format-uri::validation of URIs::invalid ^ character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid ^ character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -884,15 +857,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid ` character"
      *
      * Test ID: "format-uri::validation of URIs::invalid ` character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid ` character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -913,15 +884,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid SPACE character"
      *
      * Test ID: "format-uri::validation of URIs::invalid SPACE character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid SPACE character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -942,15 +911,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid | character"
      *
      * Test ID: "format-uri::validation of URIs::invalid | character"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid | character" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1017,15 +984,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid percent-encoding with non-hex digits"
      *
      * Test ID: "format-uri::validation of URIs::invalid percent-encoding with non-hex digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid percent-encoding with non-hex digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1046,15 +1011,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> incomplete percent-encoding triplet"
      *
      * Test ID: "format-uri::validation of URIs::incomplete percent-encoding triplet"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::incomplete percent-encoding triplet" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1075,15 +1038,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> lone percent sign is invalid"
      *
      * Test ID: "format-uri::validation of URIs::lone percent sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::lone percent sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1104,15 +1065,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> scheme must start with a letter"
      *
      * Test ID: "format-uri::validation of URIs::scheme must start with a letter"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::scheme must start with a letter" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1133,15 +1092,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> invalid character in scheme"
      *
      * Test ID: "format-uri::validation of URIs::invalid character in scheme"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::invalid character in scheme" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1162,15 +1119,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> non-numeric port is invalid"
      *
      * Test ID: "format-uri::validation of URIs::non-numeric port is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::non-numeric port is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1191,15 +1146,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> leading zero in an embedded IPv4 address is invalid"
      *
      * Test ID: "format-uri::validation of URIs::leading zero in an embedded IPv4 address is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::leading zero in an embedded IPv4 address is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1220,15 +1173,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> square brackets are not allowed in a path segment"
      *
      * Test ID: "format-uri::validation of URIs::square brackets are not allowed in a path segment"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::square brackets are not allowed in a path segment" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1249,15 +1200,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> a trailing newline after a valid URI is invalid"
      *
      * Test ID: "format-uri::validation of URIs::a trailing newline after a valid URI is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::a trailing newline after a valid URI is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1278,15 +1227,13 @@ class SchemaDraft7SuiteTest_format_uri : JsonSchemaTest {
      *     "validation of URIs -> an IPv6 address without enclosing brackets is invalid"
      *
      * Test ID: "format-uri::validation of URIs::an IPv6 address without enclosing brackets is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri::validation of URIs::an IPv6 address without enclosing brackets is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

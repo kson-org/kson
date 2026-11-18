@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (~ not escaped)"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (~ not escaped)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (~ not escaped)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -668,15 +667,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (URI Fragment Identifier) #1"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #1"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #1" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -697,15 +694,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (URI Fragment Identifier) #2"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #2"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #2" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -726,15 +721,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (URI Fragment Identifier) #3"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #3"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (URI Fragment Identifier) #3" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -755,15 +748,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (some escaped, but not all) #1"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (some escaped, but not all) #1"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (some escaped, but not all) #1" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -784,15 +775,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (some escaped, but not all) #2"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (some escaped, but not all) #2"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (some escaped, but not all) #2" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -813,15 +802,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (wrong escape character) #1"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (wrong escape character) #1"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (wrong escape character) #1" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -842,15 +829,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (wrong escape character) #2"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (wrong escape character) #2"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (wrong escape character) #2" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -871,15 +856,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (multiple characters not escaped)"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (multiple characters not escaped)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (multiple characters not escaped)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -900,15 +883,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (isn't empty nor starts with /) #1"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #1"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #1" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -929,15 +910,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (isn't empty nor starts with /) #2"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #2"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #2" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -958,15 +937,13 @@ class SchemaDraft2020_12SuiteTest_format_json_pointer : JsonSchemaTest {
      *     "validation of JSON-pointers (JSON String Representation) -> not a valid JSON-pointer (isn't empty nor starts with /) #3"
      *
      * Test ID: "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #3"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-json-pointer::validation of JSON-pointers (JSON String Representation)::not a valid JSON-pointer (isn't empty nor starts with /) #3" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

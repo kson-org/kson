@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
 
     /**
@@ -42,15 +43,13 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
      *     "schema that uses custom metaschema with format-assertion: false -> format-assertion: false: invalid string"
      *
      * Test ID: "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // The true/false boolean in $vocabulary only controls behavior for implementations that do not recognize the vocabulary. For implementations that do understand format-assertion, the boolean has no impact on validation behavior — hence both test groups produce identical results.
         assertKsonEnforcesSchema(
             """
@@ -96,15 +95,13 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
      *     "schema that uses custom metaschema with format-assertion: true -> format-assertion: true: invalid string"
      *
      * Test ID: "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

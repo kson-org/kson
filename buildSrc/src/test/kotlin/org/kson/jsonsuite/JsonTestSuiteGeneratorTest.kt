@@ -82,6 +82,16 @@ class JsonTestSuiteGeneratorTest {
     }
 
     @Test
+    fun onlyClassesWithAnExcludedTestImportIgnore() {
+        val generated = generateFromFixtureSuite(
+            exclusions = mapOf(SchemaDraft.DRAFT_2020_12 to setOf("shared::group::test"))
+        )
+
+        assertTrue(generated.draft2020_12.contains("import kotlin.test.Ignore"), "the class with an excluded test should import Ignore")
+        assertFalse(generated.draft7.contains("import kotlin.test.Ignore"), "the class without excluded tests should not import Ignore")
+    }
+
+    @Test
     fun aMistypedExclusionFailsGeneration() {
         val error = assertFailsWith<RuntimeException> {
             generateFromFixtureSuite(
@@ -231,7 +241,7 @@ class JsonTestSuiteGeneratorTest {
     }
 
     /**
-     * An excluded test is generated with an early `return` ahead of its assertion
+     * An excluded test is generated annotated with `@Ignore`
      */
-    private fun String.disablesItsTest() = lines().any { it.trim() == "return" }
+    private fun String.disablesItsTest() = lines().any { it.trim() == "@Ignore" }
 }

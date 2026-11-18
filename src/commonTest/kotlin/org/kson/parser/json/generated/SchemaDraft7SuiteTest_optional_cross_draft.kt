@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
 
     /**
@@ -18,15 +19,13 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      *     "refs to future drafts are processed as future drafts (2019) -> missing bar is invalid"
      *
      * Test ID: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -59,15 +58,13 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      *     "refs to future drafts are processed as future drafts (2019) -> present bar is valid"
      *
      * Test ID: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -101,15 +98,13 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      *     "refs to future drafts are processed as future drafts (2020) -> first item not a string is invalid"
      *
      * Test ID: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -135,15 +130,13 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      *     "refs to future drafts are processed as future drafts (2020) -> first item is a string is valid"
      *
      * Test ID: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

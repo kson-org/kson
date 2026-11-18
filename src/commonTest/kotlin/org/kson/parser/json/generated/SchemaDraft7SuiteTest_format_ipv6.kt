@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> an IPv6 address with out-of-range values"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::an IPv6 address with out-of-range values"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::an IPv6 address with out-of-range values" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -254,15 +253,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> trailing 5 hex symbols is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::trailing 5 hex symbols is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::trailing 5 hex symbols is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -283,15 +280,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> an IPv6 address with too many components"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::an IPv6 address with too many components"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::an IPv6 address with too many components" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -312,15 +307,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> an IPv6 address containing illegal characters"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::an IPv6 address containing illegal characters"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::an IPv6 address containing illegal characters" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -410,15 +403,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> missing leading octet is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::missing leading octet is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::missing leading octet is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -439,15 +430,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> missing trailing octet is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::missing trailing octet is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::missing trailing octet is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -468,15 +457,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> missing leading octet with omitted octets later"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::missing leading octet with omitted octets later"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::missing leading octet with omitted octets later" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -520,15 +507,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> two sets of double colons is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::two sets of double colons is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::two sets of double colons is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -595,15 +580,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> mixed format with ipv4 section with octet out of range"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::mixed format with ipv4 section with octet out of range"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::mixed format with ipv4 section with octet out of range" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -624,15 +607,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> mixed format with ipv4 section with a hex octet"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::mixed format with ipv4 section with a hex octet"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::mixed format with ipv4 section with a hex octet" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -676,15 +657,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> triple colons is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::triple colons is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::triple colons is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -728,15 +707,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> insufficient octets without double colons"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::insufficient octets without double colons"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::insufficient octets without double colons" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -757,15 +734,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> no colons is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::no colons is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::no colons is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -786,15 +761,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> ipv4 is not ipv6"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::ipv4 is not ipv6"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::ipv4 is not ipv6" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -815,15 +788,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> ipv4 segment must have 4 octets"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::ipv4 segment must have 4 octets"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::ipv4 segment must have 4 octets" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -844,15 +815,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> leading whitespace is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::leading whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::leading whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -873,15 +842,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> trailing whitespace is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::trailing whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::trailing whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -902,15 +869,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> netmask is not a part of ipv6 address"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::netmask is not a part of ipv6 address"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::netmask is not a part of ipv6 address" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -931,15 +896,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> zone id is not a part of ipv6 address"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::zone id is not a part of ipv6 address"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::zone id is not a part of ipv6 address" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -983,15 +946,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> a long invalid ipv6, below length limit, first"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::a long invalid ipv6, below length limit, first"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::a long invalid ipv6, below length limit, first" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1012,15 +973,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> a long invalid ipv6, below length limit, second"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::a long invalid ipv6, below length limit, second"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::a long invalid ipv6, below length limit, second" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1041,15 +1000,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> invalid non-ASCII '৪' (a Bengali 4)"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::invalid non-ASCII '৪' (a Bengali 4)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::invalid non-ASCII '৪' (a Bengali 4)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1070,15 +1027,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> invalid non-ASCII '৪' (a Bengali 4) in the IPv4 portion"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::invalid non-ASCII '৪' (a Bengali 4) in the IPv4 portion"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::invalid non-ASCII '৪' (a Bengali 4) in the IPv4 portion" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1099,15 +1054,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> a bracketed address is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::a bracketed address is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::a bracketed address is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1128,15 +1081,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> a leading zero in the last IPv4 octet is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::a leading zero in the last IPv4 octet is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::a leading zero in the last IPv4 octet is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1226,15 +1177,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> eight groups alongside '::' is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::eight groups alongside '::' is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::eight groups alongside '::' is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1255,15 +1204,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> trailing newline is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::trailing newline is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::trailing newline is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1284,15 +1231,13 @@ class SchemaDraft7SuiteTest_format_ipv6 : JsonSchemaTest {
      *     "validation of IPv6 addresses -> an out-of-range first octet in the embedded IPv4 is invalid"
      *
      * Test ID: "format-ipv6::validation of IPv6 addresses::an out-of-range first octet in the embedded IPv4 is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv6::validation of IPv6 addresses::an out-of-range first octet in the embedded IPv4 is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
 
     /**
@@ -239,15 +240,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "relative pointer ref to array -> mismatch array"
      *
      * Test ID: "ref::relative pointer ref to array::mismatch array"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::relative pointer ref to array::mismatch array" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -657,15 +656,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref applies alongside sibling keywords -> ref valid, maxItems invalid"
      *
      * Test ID: "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1015,15 +1012,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> valid tree"
      *
      * Test ID: "ref::Recursive references between schemas::valid tree"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::Recursive references between schemas::valid tree" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1076,15 +1071,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> invalid tree"
      *
      * Test ID: "ref::Recursive references between schemas::invalid tree"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::Recursive references between schemas::invalid tree" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1205,15 +1198,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref creates new scope when adjacent to keywords -> referenced subschema doesn't see annotations from properties"
      *
      * Test ID: "ref::ref creates new scope when adjacent to keywords::referenced subschema doesn't see annotations from properties"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::ref creates new scope when adjacent to keywords::referenced subschema doesn't see annotations from properties" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1498,15 +1489,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref valid"
      *
      * Test ID: "ref::remote ref::remote ref valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::remote ref::remote ref valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1527,15 +1516,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref invalid"
      *
      * Test ID: "ref::remote ref::remote ref invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::remote ref::remote ref invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1556,15 +1543,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment valid"
      *
      * Test ID: "ref::fragment within remote ref::remote fragment valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::fragment within remote ref::remote fragment valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1585,15 +1570,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment invalid"
      *
      * Test ID: "ref::fragment within remote ref::remote fragment invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::fragment within remote ref::remote fragment invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1614,15 +1597,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref valid"
      *
      * Test ID: "ref::ref within remote ref::ref within ref valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::ref within remote ref::ref within ref valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1643,15 +1624,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref invalid"
      *
      * Test ID: "ref::ref within remote ref::ref within ref invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::ref within remote ref::ref within ref invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1672,15 +1651,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> string is valid"
      *
      * Test ID: "ref::root ref in remote ref::string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::root ref in remote ref::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1708,15 +1685,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> null is valid"
      *
      * Test ID: "ref::root ref in remote ref::null is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::root ref in remote ref::null is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1744,15 +1719,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> object is invalid"
      *
      * Test ID: "ref::root ref in remote ref::object is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::root ref in remote ref::object is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1782,15 +1755,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref with ref to defs -> invalid"
      *
      * Test ID: "ref::remote ref with ref to defs::invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::remote ref with ref to defs::invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1813,15 +1784,13 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref with ref to defs -> valid"
      *
      * Test ID: "ref::remote ref with ref to defs::valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "ref::remote ref with ref to defs::valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

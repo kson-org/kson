@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
 
     /**
@@ -248,15 +249,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> invalid percent-encoding with non-hex digits"
      *
      * Test ID: "format-iri::validation of IRIs::invalid percent-encoding with non-hex digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::invalid percent-encoding with non-hex digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -277,15 +276,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> incomplete percent-encoding triplet"
      *
      * Test ID: "format-iri::validation of IRIs::incomplete percent-encoding triplet"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::incomplete percent-encoding triplet" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -306,15 +303,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> lone percent sign is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::lone percent sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::lone percent sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -381,15 +376,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> an invalid IRI based on IPv6"
      *
      * Test ID: "format-iri::validation of IRIs::an invalid IRI based on IPv6"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::an invalid IRI based on IPv6" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -410,15 +403,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> an invalid relative IRI Reference"
      *
      * Test ID: "format-iri::validation of IRIs::an invalid relative IRI Reference"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::an invalid relative IRI Reference" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -439,15 +430,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> an invalid IRI"
      *
      * Test ID: "format-iri::validation of IRIs::an invalid IRI"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::an invalid IRI" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -468,15 +457,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> an invalid IRI though valid IRI reference"
      *
      * Test ID: "format-iri::validation of IRIs::an invalid IRI though valid IRI reference"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::an invalid IRI though valid IRI reference" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -497,15 +484,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> an IPv6 host whose embedded IPv4 has a leading zero is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::an IPv6 host whose embedded IPv4 has a leading zero is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::an IPv6 host whose embedded IPv4 has a leading zero is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -549,15 +534,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> a trailing newline after a valid IRI is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::a trailing newline after a valid IRI is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::a trailing newline after a valid IRI is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -693,15 +676,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> non-ASCII character in scheme is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::non-ASCII character in scheme is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::non-ASCII character in scheme is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -722,15 +703,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> scheme starting with a digit is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::scheme starting with a digit is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::scheme starting with a digit is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -751,15 +730,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> invalid character in scheme"
      *
      * Test ID: "format-iri::validation of IRIs::invalid character in scheme"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::invalid character in scheme" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -780,15 +757,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> non-numeric port is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::non-numeric port is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::non-numeric port is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -809,15 +784,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> more than one at-sign in the authority is invalid"
      *
      * Test ID: "format-iri::validation of IRIs::more than one at-sign in the authority is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::more than one at-sign in the authority is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -838,15 +811,13 @@ class SchemaDraft2020_12SuiteTest_format_iri : JsonSchemaTest {
      *     "validation of IRIs -> square brackets are not allowed in a path segment"
      *
      * Test ID: "format-iri::validation of IRIs::square brackets are not allowed in a path segment"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-iri::validation of IRIs::square brackets are not allowed in a path segment" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

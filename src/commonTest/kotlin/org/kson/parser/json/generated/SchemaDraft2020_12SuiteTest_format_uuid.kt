@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
 
     /**
@@ -271,15 +272,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> wrong length"
      *
      * Test ID: "format-uuid::uuid format::wrong length"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::wrong length" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -300,15 +299,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> missing section"
      *
      * Test ID: "format-uuid::uuid format::missing section"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::missing section" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -329,15 +326,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> bad characters (not hex)"
      *
      * Test ID: "format-uuid::uuid format::bad characters (not hex)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::bad characters (not hex)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -358,15 +353,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> no dashes"
      *
      * Test ID: "format-uuid::uuid format::no dashes"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::no dashes" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -387,15 +380,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> too few dashes"
      *
      * Test ID: "format-uuid::uuid format::too few dashes"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::too few dashes" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -416,15 +407,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> too many dashes"
      *
      * Test ID: "format-uuid::uuid format::too many dashes"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::too many dashes" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -445,15 +434,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> dashes in the wrong spot"
      *
      * Test ID: "format-uuid::uuid format::dashes in the wrong spot"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::dashes in the wrong spot" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -474,15 +461,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> shifted dashes"
      *
      * Test ID: "format-uuid::uuid format::shifted dashes"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::shifted dashes" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -595,15 +580,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> URN prefixed UUID is invalid"
      *
      * Test ID: "format-uuid::uuid format::URN prefixed UUID is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::URN prefixed UUID is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -624,15 +607,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> a UUID wrapped in curly braces is invalid"
      *
      * Test ID: "format-uuid::uuid format::a UUID wrapped in curly braces is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::a UUID wrapped in curly braces is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -653,15 +634,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> trailing hyphen after a complete UUID is invalid"
      *
      * Test ID: "format-uuid::uuid format::trailing hyphen after a complete UUID is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::trailing hyphen after a complete UUID is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -682,15 +661,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> non-ASCII digit '২' (a Bengali 2) is invalid"
      *
      * Test ID: "format-uuid::uuid format::non-ASCII digit '২' (a Bengali 2) is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::non-ASCII digit '২' (a Bengali 2) is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -711,15 +688,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> an underscore in place of a hex digit is invalid"
      *
      * Test ID: "format-uuid::uuid format::an underscore in place of a hex digit is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::an underscore in place of a hex digit is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -740,15 +715,13 @@ class SchemaDraft2020_12SuiteTest_format_uuid : JsonSchemaTest {
      *     "uuid format -> a trailing newline after a complete UUID is invalid"
      *
      * Test ID: "format-uuid::uuid format::a trailing newline after a complete UUID is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uuid::uuid format::a trailing newline after a complete UUID is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

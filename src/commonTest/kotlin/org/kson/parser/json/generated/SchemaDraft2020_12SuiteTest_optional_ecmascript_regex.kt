@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
 
     /**
@@ -186,15 +187,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 regex escapes control codes with \c and lower letter -> matches"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 regex escapes control codes with \c and lower letter::matches"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 regex escapes control codes with \c and lower letter::matches" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -552,15 +551,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \s matches whitespace -> latin-1 non-breaking-space matches"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \s matches whitespace::latin-1 non-breaking-space matches"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \s matches whitespace::latin-1 non-breaking-space matches" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -582,15 +579,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \s matches whitespace -> zero-width whitespace matches"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \s matches whitespace::zero-width whitespace matches"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \s matches whitespace::zero-width whitespace matches" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -636,15 +631,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \s matches whitespace -> paragraph separator matches (line terminator)"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \s matches whitespace::paragraph separator matches (line terminator)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \s matches whitespace::paragraph separator matches (line terminator)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -666,15 +659,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \s matches whitespace -> EM SPACE matches (Space_Separator)"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \s matches whitespace::EM SPACE matches (Space_Separator)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \s matches whitespace::EM SPACE matches (Space_Separator)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -840,15 +831,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \S matches everything but whitespace -> latin-1 non-breaking-space does not match"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::latin-1 non-breaking-space does not match"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::latin-1 non-breaking-space does not match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -870,15 +859,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \S matches everything but whitespace -> zero-width whitespace does not match"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::zero-width whitespace does not match"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::zero-width whitespace does not match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -924,15 +911,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \S matches everything but whitespace -> paragraph separator does not match (line terminator)"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::paragraph separator does not match (line terminator)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::paragraph separator does not match (line terminator)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -954,15 +939,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "ECMA 262 \S matches everything but whitespace -> EM SPACE does not match (Space_Separator)"
      *
      * Test ID: "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::EM SPACE does not match (Space_Separator)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::ECMA 262 \S matches everything but whitespace::EM SPACE does not match (Space_Separator)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1032,15 +1015,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with pattern -> ascii character in json string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with pattern::ascii character in json string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with pattern::ascii character in json string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1061,15 +1042,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with pattern -> literal unicode character in json string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with pattern::literal unicode character in json string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with pattern::literal unicode character in json string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1090,15 +1069,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with pattern -> unicode character in hex format in string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode character in hex format in string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode character in hex format in string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1119,15 +1096,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with pattern -> unicode matching is case-sensitive"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode matching is case-sensitive"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode matching is case-sensitive" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1378,15 +1353,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "pattern with non-ASCII digits -> ascii digits"
      *
      * Test ID: "optional/ecmascript-regex::pattern with non-ASCII digits::ascii digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_55() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::pattern with non-ASCII digits::ascii digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1407,15 +1380,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "pattern with non-ASCII digits -> ascii non-digits"
      *
      * Test ID: "optional/ecmascript-regex::pattern with non-ASCII digits::ascii non-digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_56() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::pattern with non-ASCII digits::ascii non-digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1436,15 +1407,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "pattern with non-ASCII digits -> non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)"
      *
      * Test ID: "optional/ecmascript-regex::pattern with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_57() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::pattern with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1465,15 +1434,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with patternProperties -> ascii character in json string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::ascii character in json string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_58() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::ascii character in json string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1500,15 +1467,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with patternProperties -> literal unicode character in json string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::literal unicode character in json string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_59() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::literal unicode character in json string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1535,15 +1500,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with patternProperties -> unicode character in hex format in string"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode character in hex format in string"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode character in hex format in string" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1570,15 +1533,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patterns always use unicode semantics with patternProperties -> unicode matching is case-sensitive"
      *
      * Test ID: "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode matching is case-sensitive"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_61() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode matching is case-sensitive" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1895,15 +1856,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patternProperties with non-ASCII digits -> ascii digits"
      *
      * Test ID: "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_72() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1930,15 +1889,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patternProperties with non-ASCII digits -> ascii non-digits"
      *
      * Test ID: "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii non-digits"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_73() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii non-digits" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1965,15 +1922,13 @@ class SchemaDraft2020_12SuiteTest_optional_ecmascript_regex : JsonSchemaTest {
      *     "patternProperties with non-ASCII digits -> non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)"
      *
      * Test ID: "optional/ecmascript-regex::patternProperties with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_74() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/ecmascript-regex::patternProperties with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

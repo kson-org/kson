@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> a regular expression with unclosed parens is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::a regular expression with unclosed parens is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::a regular expression with unclosed parens is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -231,15 +230,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> a quantifier with nothing to repeat is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::a quantifier with nothing to repeat is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::a quantifier with nothing to repeat is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -260,15 +257,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> a character class range in reverse order is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::a character class range in reverse order is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::a character class range in reverse order is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -289,15 +284,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> a trailing backslash is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::a trailing backslash is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::a trailing backslash is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -318,15 +311,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> an unmatched closing parenthesis is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::an unmatched closing parenthesis is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::an unmatched closing parenthesis is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -347,15 +338,13 @@ class SchemaDraft7SuiteTest_format_regex : JsonSchemaTest {
      *     "validation of regular expressions -> an unterminated character class is invalid"
      *
      * Test ID: "format-regex::validation of regular expressions::an unterminated character class is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-regex::validation of regular expressions::an unterminated character class is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IP address with too many components"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IP address with too many components"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IP address with too many components" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -231,15 +230,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IP address with out-of-range values"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IP address with out-of-range values"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IP address with out-of-range values" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -260,15 +257,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IP address without 4 components"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IP address without 4 components"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IP address without 4 components" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -289,15 +284,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> a 2-part address resolving to a routable IP (inet_aton shorthand)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::a 2-part address resolving to a routable IP (inet_aton shorthand)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::a 2-part address resolving to a routable IP (inet_aton shorthand)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -318,15 +311,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> a 3-part address resolving to a routable IP (inet_aton shorthand)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::a 3-part address resolving to a routable IP (inet_aton shorthand)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::a 3-part address resolving to a routable IP (inet_aton shorthand)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -347,15 +338,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IP address as an integer"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IP address as an integer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IP address as an integer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -376,15 +365,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IP address as an integer (decimal)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IP address as an integer (decimal)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IP address as an integer (decimal)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -405,15 +392,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> invalid non-ASCII '২' (a Bengali 2)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::invalid non-ASCII '২' (a Bengali 2)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::invalid non-ASCII '২' (a Bengali 2)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -434,15 +419,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> invalid fullwidth digits (non-ASCII)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::invalid fullwidth digits (non-ASCII)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::invalid fullwidth digits (non-ASCII)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -463,15 +446,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> invalid mathematical bold digits (non-ASCII)"
      *
      * Test ID: "format-ipv4::validation of IP addresses::invalid mathematical bold digits (non-ASCII)"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::invalid mathematical bold digits (non-ASCII)" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -492,15 +473,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> netmask is not a part of ipv4 address"
      *
      * Test ID: "format-ipv4::validation of IP addresses::netmask is not a part of ipv4 address"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::netmask is not a part of ipv4 address" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -521,15 +500,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> leading whitespace is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::leading whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::leading whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -550,15 +527,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> trailing whitespace is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::trailing whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::trailing whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -579,15 +554,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> trailing newline is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::trailing newline is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::trailing newline is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -608,15 +581,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> hexadecimal notation is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::hexadecimal notation is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::hexadecimal notation is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -637,15 +608,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> octal notation explicit is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::octal notation explicit is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::octal notation explicit is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -666,15 +635,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> empty part (double dot) is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::empty part (double dot) is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::empty part (double dot) is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -695,15 +662,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> leading dot is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::leading dot is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::leading dot is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -724,15 +689,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> trailing dot is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::trailing dot is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::trailing dot is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -845,15 +808,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> empty string is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::empty string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::empty string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -874,15 +835,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> plus sign is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::plus sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::plus sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -903,15 +862,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> negative sign is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::negative sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::negative sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -932,15 +889,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> exponential notation is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::exponential notation is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::exponential notation is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -961,15 +916,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> alpha characters are invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::alpha characters are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::alpha characters are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -990,15 +943,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> internal whitespace is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::internal whitespace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::internal whitespace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -1019,15 +970,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> tab character is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::tab character is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::tab character is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -1048,15 +997,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> additional content after an embedded NUL byte"
      *
      * Test ID: "format-ipv4::validation of IP addresses::additional content after an embedded NUL byte"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::additional content after an embedded NUL byte" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -1077,15 +1024,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> with port number is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::with port number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::with port number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -1106,15 +1051,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> an IPv4-mapped IPv6 address is invalid"
      *
      * Test ID: "format-ipv4::validation of IP addresses::an IPv4-mapped IPv6 address is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::an IPv4-mapped IPv6 address is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """
@@ -1135,15 +1078,13 @@ class SchemaDraft7SuiteTest_format_ipv4 : JsonSchemaTest {
      *     "validation of IP addresses -> single octet out of range in last position"
      *
      * Test ID: "format-ipv4::validation of IP addresses::single octet out of range in last position"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-ipv4::validation of IP addresses::single octet out of range in last position" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // RFC 2673, Section 3.2: dotted-quad = decbyte "." decbyte "." decbyte "." decbyte. A 'decbyte' (1*3DIGIT) restricts semantic values to 0-255, allows leading zeros, and strictly forbids symbols, alpha/hex, whitespace, and non-ASCII characters.
         assertKsonEnforcesSchema(
             """

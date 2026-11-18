@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an invalid e-mail address"
      *
      * Test ID: "format-email::validation of e-mail addresses::an invalid e-mail address"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an invalid e-mail address" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -415,15 +414,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> dot before local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::dot before local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::dot before local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -444,15 +441,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> dot after local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::dot after local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::dot after local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -496,15 +491,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> two subsequent dots inside local part are not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::two subsequent dots inside local part are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::two subsequent dots inside local part are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -525,15 +518,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> two email addresses is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::two email addresses is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_22() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::two email addresses is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -554,15 +545,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> full "From" header is invalid"
      *
      * Test ID: "format-email::validation of e-mail addresses::full "From" header is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::full "From" header is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -583,15 +572,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> local part is required"
      *
      * Test ID: "format-email::validation of e-mail addresses::local part is required"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::local part is required" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -612,15 +599,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> domain is required"
      *
      * Test ID: "format-email::validation of e-mail addresses::domain is required"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::domain is required" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -641,15 +626,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> unquoted space in local part is invalid"
      *
      * Test ID: "format-email::validation of e-mail addresses::unquoted space in local part is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::unquoted space in local part is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -785,15 +768,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a non-ASCII character in the local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a non-ASCII character in the local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a non-ASCII character in the local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -814,15 +795,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a non-ASCII character in the domain is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a non-ASCII character in the domain is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a non-ASCII character in the domain is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -843,15 +822,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a fullwidth commercial at is not a valid separator"
      *
      * Test ID: "format-email::validation of e-mail addresses::a fullwidth commercial at is not a valid separator"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a fullwidth commercial at is not a valid separator" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -872,15 +849,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a non-ASCII character in a quoted pair is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a non-ASCII character in a quoted pair is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a non-ASCII character in a quoted pair is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -901,15 +876,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a trailing line feed is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a trailing line feed is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a trailing line feed is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -930,15 +903,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a trailing carriage return is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a trailing carriage return is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a trailing carriage return is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -959,15 +930,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a tab in the local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a tab in the local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a tab in the local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -988,15 +957,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a delete character in the local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a delete character in the local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a delete character in the local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1109,15 +1076,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an unescaped double quote in an unquoted local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::an unescaped double quote in an unquoted local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an unescaped double quote in an unquoted local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1138,15 +1103,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> text after the closing double quote in the local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::text after the closing double quote in the local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::text after the closing double quote in the local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1167,15 +1130,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an unclosed double quote in the local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::an unclosed double quote in the local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an unclosed double quote in the local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1196,15 +1157,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> two unquoted @ signs are not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::two unquoted @ signs are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::two unquoted @ signs are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1225,15 +1184,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a backslash-escaped @ in an unquoted local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a backslash-escaped @ in an unquoted local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a backslash-escaped @ in an unquoted local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1254,15 +1211,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an address literal in the local part position is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::an address literal in the local part position is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an address literal in the local part position is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1283,15 +1238,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an empty string is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::an empty string is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an empty string is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1312,15 +1265,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a domain starting with a dot is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a domain starting with a dot is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a domain starting with a dot is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1341,15 +1292,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a domain ending with a dot is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a domain ending with a dot is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a domain ending with a dot is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1370,15 +1319,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> two subsequent dots inside the domain are not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::two subsequent dots inside the domain are not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_53() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::two subsequent dots inside the domain are not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1422,15 +1369,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> an unclosed address literal is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::an unclosed address literal is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_55() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::an unclosed address literal is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1451,15 +1396,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a domain label before the opening bracket is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a domain label before the opening bracket is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_56() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a domain label before the opening bracket is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1503,15 +1446,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a comma in an unquoted local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a comma in an unquoted local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_58() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a comma in an unquoted local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1532,15 +1473,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a semicolon in an unquoted local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a semicolon in an unquoted local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_59() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a semicolon in an unquoted local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1561,15 +1500,13 @@ class SchemaDraft7SuiteTest_format_email : JsonSchemaTest {
      *     "validation of e-mail addresses -> a colon in an unquoted local part is not valid"
      *
      * Test ID: "format-email::validation of e-mail addresses::a colon in an unquoted local part is not valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_60() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-email::validation of e-mail addresses::a colon in an unquoted local part is not valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

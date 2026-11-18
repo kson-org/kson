@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
 
     /**
@@ -18,15 +19,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change -> base URI change ref valid"
      *
      * Test ID: "id::base URI change::base URI change ref valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change::base URI change ref valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -57,15 +56,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change -> base URI change ref invalid"
      *
      * Test ID: "id::base URI change::base URI change ref invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change::base URI change ref invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -138,15 +135,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change - change folder -> string is invalid"
      *
      * Test ID: "id::base URI change - change folder::string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change - change folder::string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -232,15 +227,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change - change folder in subschema -> string is invalid"
      *
      * Test ID: "id::base URI change - change folder in subschema::string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change - change folder in subschema::string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -372,15 +365,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "refs with relative uris and defs -> valid on both fields"
      *
      * Test ID: "id::refs with relative uris and defs::valid on both fields"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::refs with relative uris and defs::valid on both fields" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -510,15 +501,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "relative refs with absolute uris and defs -> valid on both fields"
      *
      * Test ID: "id::relative refs with absolute uris and defs::valid on both fields"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::relative refs with absolute uris and defs::valid on both fields" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -716,15 +705,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $anchor and $ref -> data is valid against first definition"
      *
      * Test ID: "id::order of evaluation: $id and $anchor and $ref::data is valid against first definition"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::order of evaluation: $id and $anchor and $ref::data is valid against first definition" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -760,15 +747,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $anchor and $ref -> data is invalid against first definition"
      *
      * Test ID: "id::order of evaluation: $id and $anchor and $ref::data is invalid against first definition"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::order of evaluation: $id and $anchor and $ref::data is invalid against first definition" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -804,15 +789,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $ref on nested schema -> data is valid against nested sibling"
      *
      * Test ID: "id::order of evaluation: $id and $ref on nested schema::data is valid against nested sibling"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::order of evaluation: $id and $ref on nested schema::data is valid against nested sibling" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1618,15 +1601,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "URN ref with nested pointer ref -> a string is valid"
      *
      * Test ID: "id::URN ref with nested pointer ref::a string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::URN ref with nested pointer ref::a string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1692,15 +1673,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "retrieved nested refs resolve relative to their URI not $id -> number is invalid"
      *
      * Test ID: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::retrieved nested refs resolve relative to their URI not $id::number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1730,15 +1709,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "retrieved nested refs resolve relative to their URI not $id -> string is valid"
      *
      * Test ID: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::retrieved nested refs resolve relative to their URI not $id::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1768,15 +1745,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with different $id -> number is invalid"
      *
      * Test ID: "id::remote HTTP ref with different $id::number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with different $id::number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1797,15 +1772,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with different $id -> string is valid"
      *
      * Test ID: "id::remote HTTP ref with different $id::string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with different $id::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1826,15 +1799,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with different URN $id -> number is invalid"
      *
      * Test ID: "id::remote HTTP ref with different URN $id::number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with different URN $id::number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1855,15 +1826,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with different URN $id -> string is valid"
      *
      * Test ID: "id::remote HTTP ref with different URN $id::string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with different URN $id::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1884,15 +1853,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with nested absolute ref -> number is invalid"
      *
      * Test ID: "id::remote HTTP ref with nested absolute ref::number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with nested absolute ref::number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1913,15 +1880,13 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "remote HTTP ref with nested absolute ref -> string is valid"
      *
      * Test ID: "id::remote HTTP ref with nested absolute ref::string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::remote HTTP ref with nested absolute ref::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

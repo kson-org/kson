@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
 
     /**
@@ -18,15 +19,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "integer -> a bignum is an integer"
      *
      * Test ID: "optional/bignum::integer::a bignum is an integer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::integer::a bignum is an integer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -47,15 +46,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "integer -> a negative bignum is an integer"
      *
      * Test ID: "optional/bignum::integer::a negative bignum is an integer"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::integer::a negative bignum is an integer" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -145,15 +142,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "maximum integer comparison -> comparison works for high numbers"
      *
      * Test ID: "optional/bignum::maximum integer comparison::comparison works for high numbers"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::maximum integer comparison::comparison works for high numbers" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -174,15 +169,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "maximum integer comparison -> just above the maximum is invalid"
      *
      * Test ID: "optional/bignum::maximum integer comparison::just above the maximum is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_7() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::maximum integer comparison::just above the maximum is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -203,15 +196,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "float comparison with high precision -> below the exclusive maximum is valid"
      *
      * Test ID: "optional/bignum::float comparison with high precision::below the exclusive maximum is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::float comparison with high precision::below the exclusive maximum is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -278,15 +269,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "minimum integer comparison -> just below the minimum is invalid"
      *
      * Test ID: "optional/bignum::minimum integer comparison::just below the minimum is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::minimum integer comparison::just below the minimum is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -307,15 +296,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "float comparison with high precision on negative numbers -> above the exclusive minimum is valid"
      *
      * Test ID: "optional/bignum::float comparison with high precision on negative numbers::above the exclusive minimum is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::float comparison with high precision on negative numbers::above the exclusive minimum is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -384,15 +371,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "enum comparison with high precision -> a slightly smaller decimal is invalid"
      *
      * Test ID: "optional/bignum::enum comparison with high precision::a slightly smaller decimal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::enum comparison with high precision::a slightly smaller decimal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -415,15 +400,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "enum comparison with high precision -> a slightly larger decimal is invalid"
      *
      * Test ID: "optional/bignum::enum comparison with high precision::a slightly larger decimal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::enum comparison with high precision::a slightly larger decimal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -469,15 +452,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "const comparison with high precision -> a slightly smaller decimal is invalid"
      *
      * Test ID: "optional/bignum::const comparison with high precision::a slightly smaller decimal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::const comparison with high precision::a slightly smaller decimal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -498,15 +479,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "const comparison with high precision -> a slightly larger decimal is invalid"
      *
      * Test ID: "optional/bignum::const comparison with high precision::a slightly larger decimal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::const comparison with high precision::a slightly larger decimal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -551,15 +530,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "uniqueItems comparison with high precision -> distinct high-precision decimals are unique"
      *
      * Test ID: "optional/bignum::uniqueItems comparison with high precision::distinct high-precision decimals are unique"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::uniqueItems comparison with high precision::distinct high-precision decimals are unique" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -635,15 +612,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "uniqueItems comparison with high precision -> arrays containing distinct decimals are unique"
      *
      * Test ID: "optional/bignum::uniqueItems comparison with high precision::arrays containing distinct decimals are unique"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_24() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::uniqueItems comparison with high precision::arrays containing distinct decimals are unique" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -701,15 +676,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "uniqueItems comparison with high precision -> objects containing distinct decimals are unique"
      *
      * Test ID: "optional/bignum::uniqueItems comparison with high precision::objects containing distinct decimals are unique"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::uniqueItems comparison with high precision::objects containing distinct decimals are unique" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -790,15 +763,13 @@ class SchemaDraft7SuiteTest_optional_bignum : JsonSchemaTest {
      *     "multipleOf with integers above 2^53 -> 1e20 is not multiple of 3"
      *
      * Test ID: "optional/bignum::multipleOf with integers above 2^53::1e20 is not multiple of 3"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/bignum::multipleOf with integers above 2^53::1e20 is not multiple of 3" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // Both instances are exact as doubles, but dividing by 3 rounds the quotient to an integer, so the check must not rely on the quotient
         assertKsonEnforcesSchema(
             """

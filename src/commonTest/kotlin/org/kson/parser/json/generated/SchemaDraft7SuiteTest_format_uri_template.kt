@@ -1,6 +1,7 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -10,7 +11,7 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+@Suppress("ClassName")
 class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
 
     /**
@@ -202,15 +203,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> an invalid uri-template"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::an invalid uri-template"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::an invalid uri-template" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -277,15 +276,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> an empty expression is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::an empty expression is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::an empty expression is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -306,15 +303,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> an empty varspec inside the variable list is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::an empty varspec inside the variable list is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::an empty varspec inside the variable list is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -335,15 +330,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a zero prefix max-length is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a zero prefix max-length is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a zero prefix max-length is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -364,15 +357,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a five-digit prefix max-length is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a five-digit prefix max-length is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a five-digit prefix max-length is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -416,15 +407,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> an unmatched closing brace is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::an unmatched closing brace is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::an unmatched closing brace is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -468,15 +457,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a literal with a lone percent sign is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a literal with a lone percent sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_19() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a literal with a lone percent sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -497,15 +484,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a literal with an incomplete percent-encoded triplet is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a literal with an incomplete percent-encoded triplet is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a literal with an incomplete percent-encoded triplet is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -526,15 +511,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a literal with non-hex percent encoding is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a literal with non-hex percent encoding is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_21() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a literal with non-hex percent encoding is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -808,15 +791,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> combined prefix and explode modifiers are invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::combined prefix and explode modifiers are invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::combined prefix and explode modifiers are invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -883,15 +864,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a trailing dot in a variable name is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a trailing dot in a variable name is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a trailing dot in a variable name is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -912,15 +891,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a double dot in a variable name is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a double dot in a variable name is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a double dot in a variable name is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -964,15 +941,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a variable name with a lone percent sign is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a variable name with a lone percent sign is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_39() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a variable name with a lone percent sign is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -993,15 +968,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a variable name with an incomplete percent-encoded triplet is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a variable name with an incomplete percent-encoded triplet is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_40() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a variable name with an incomplete percent-encoded triplet is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1022,15 +995,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a variable name with non-hex percent encoding is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a variable name with non-hex percent encoding is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_41() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a variable name with non-hex percent encoding is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1074,15 +1045,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a leading zero in the prefix max-length is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a leading zero in the prefix max-length is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a leading zero in the prefix max-length is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1103,15 +1072,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a space in a literal is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a space in a literal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a space in a literal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1132,15 +1099,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a delete character in a literal is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a delete character in a literal is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a delete character in a literal is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1161,15 +1126,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a trailing comma in the variable list is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a trailing comma in the variable list is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a trailing comma in the variable list is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1190,15 +1153,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> a default value in a varspec is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::a default value in a varspec is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::a default value in a varspec is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -1219,15 +1180,13 @@ class SchemaDraft7SuiteTest_format_uri_template : JsonSchemaTest {
      *     "validation of URI-Templates -> an operator in place of the first varspec is invalid"
      *
      * Test ID: "format-uri-template::validation of URI-Templates::an operator in place of the first varspec is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "format-uri-template::validation of URI-Templates::an operator in place of the first varspec is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
