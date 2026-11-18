@@ -370,15 +370,7 @@ internal class SchemaNavigator(
         return !SchemaDecisions.breaks(schema, docVal, forgiving = incompleteRegion)
     }
 
-    /**
-     * Evaluate an `if` condition against [docVal] into three states.  A condition that [SchemaDecisions.accepts] the
-     * document is [IfState.MATCH].  Otherwise it comes down to whether the document [SchemaDecisions.breaks] the
-     * condition, forgiving errors located inside [incompleteRegion] — the span of the value being
-     * authored.  If it doesn't, the `if` is only unsatisfied because the document is incomplete (e.g. a
-     * required discriminator hasn't been typed yet), so it is [IfState.UNDETERMINED] (emit both branches).
-     * A failed `if` is decidably false against present data, so it is [IfState.NO_MATCH] (emit `else`).
-     * This tells the two apart without inspecting any validator message types.
-     */
+    /** Classify [ifCondition] against [docVal] into an [IfState]. */
     private fun evaluateIf(ifCondition: KsonValue, baseUri: String, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
         val ifSchema = SchemaDecisions.compile(ifCondition, baseUri, idLookup) ?: return IfState.UNDETERMINED
@@ -391,5 +383,14 @@ internal class SchemaNavigator(
     }
 
     /** Outcome of evaluating an `if` condition during [SchemaNavigator] flattening. */
-    private enum class IfState { MATCH, NO_MATCH, UNDETERMINED }
+    private enum class IfState {
+        /** The document satisfies the condition, so `then` applies. */
+        MATCH,
+
+        /** The document contradicts the condition, so `else` applies. */
+        NO_MATCH,
+
+        /** The condition can't be decided yet, e.g. a discriminator isn't typed, so `then` and `else` both apply. */
+        UNDETERMINED
+    }
 }
