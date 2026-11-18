@@ -61,9 +61,9 @@ class JsonTestSuiteGenerator(
             testClassPackageDir.toFile().listFiles { file -> file.name.startsWith(draft.testClassPrefix + "_") }
                 ?.forEach { it.delete() }
             schemaTestDataList.forEach { schemaTestFileData ->
-                val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.testFileName.replace("-", "_").replace("/", "_")
-                val testFileName = testClassPackageDir.resolve("$testClassName.kt")
-                testFileName.toFile().writeText(
+                val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.suitePath.replace("-", "_").replace("/", "_")
+                val testClassFile = testClassPackageDir.resolve("$testClassName.kt")
+                testClassFile.toFile().writeText(
                     generateSchemaSuiteTestClass(
                         this.javaClass.name,
                         classPackage,
@@ -154,8 +154,7 @@ private data class SchemaTestSpec(val description: String, val comment: String? 
  * The test data we parse out of the test files provided by [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  */
 private class SchemaTestData(
-    /** The test file's path within the suite's tests, without its extension, e.g. `optional/bignum` */
-    val testFileName: String,
+    val suitePath: String,
     val filePathFromProjectRoot: String,
     val schemaTestGroups: List<SchemaTestGroup>
 ) {
@@ -163,7 +162,7 @@ private class SchemaTestData(
      * The id of [test] from [group] within its draft, in the format of [schemaTestSuiteExclusions]
      */
     fun idWithinDraft(group: SchemaTestGroup, test: SchemaTestSpec) =
-        "$testFileName::${group.description}::${test.description}"
+        "$suitePath::${group.description}::${test.description}"
 }
 
 private fun generateJsonSuiteTestClass(
