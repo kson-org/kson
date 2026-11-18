@@ -13,7 +13,7 @@ import java.nio.file.Path
  * These can be updated if/when we want to pull in newer tests from those projects.
  */
 const val jsonTestSuiteSHA = "1ef36fa01286573e846ac449e8683f8833c5b26a"
-const val schemaTestSuiteSHA = "9fc880bfb6d8ccd093bc82431f17d13681ffae8e"
+const val schemaTestSuiteSHA = "e2a68a15cd490750fd6b95e604e4054d7d978d1f"
 
 /**
  * This task exposes [JsonTestSuiteGenerator] to our Gradle build, ensuring the task's

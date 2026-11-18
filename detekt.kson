@@ -24,6 +24,9 @@ complexity:
   LongMethod:
     active: true
     threshold: 80
+    excludes:
+      # Generated schema tests make one assertion; their length comes from embedded JSON fixtures.
+      - '**/commonTest/kotlin/org/kson/parser/json/generated/Schema*SuiteTest_*.kt'
     .
   LongParameterList:
     active: true
