@@ -18,7 +18,7 @@ import org.kson.value.navigation.json_pointer.fragmentPointer
  * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), kept to name the target
  *   when it declares no `title`
  */
-class RefValidator(
+internal class RefValidator(
     private val resolvedRef: ResolvedRef,
     private val indexedDocuments: IndexedSchemaDocuments,
     private val refString: String
@@ -41,6 +41,20 @@ class RefValidator(
         schema to parseMessageSink.loggedMessages()
     }
 
+    // the whole chain is resolved at once: parsing it hop by hop would never notice a cycle
+    private val targetPins: Set<KsonValue>? by lazy {
+        val target = indexedDocuments.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        if (target.endsAtUnresolvedRef) return@lazy null
+        val schema = SchemaParser.parseSchemaElement(
+            target.resolvedValue,
+            MessageSink(),
+            target.resolvedValueBaseUri,
+            indexedDocuments)
+        (schema as? JsonObjectSchema)?.pinnedValues()
+    }
+
+    override fun pinnedValues(): Set<KsonValue>? = targetPins
+
     /**
      * A short name for the referenced schema: its `title`, else the last JSON Pointer token of
      * [refString] (`#/$defs/TaskModel` -> `TaskModel`), else `null`.
@@ -49,6 +63,13 @@ class RefValidator(
 
     /** The schema this `$ref` resolves to, or `null` if the target failed to parse. */
     internal fun resolvedSchema(): JsonSchema? = refParseResult.first
+
+    /**
+     * Each `$ref` parses its own copy of its target, so only this can tell that two lead to the same schema.
+     * Base URIs don't count, as a directory-style `$id` lengthens them on every trip around a cycle.
+     */
+    internal fun hasSameTargetAs(other: RefValidator): Boolean =
+        resolvedRef.resolvedValue === other.resolvedRef.resolvedValue
 
     private fun targetTitle(): String? = (resolvedSchema() as? JsonObjectSchema)?.title
 
