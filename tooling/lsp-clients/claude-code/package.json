@@ -1,0 +1,14 @@
+{
+  "name": "@kson/claude-code-plugin",
+  "private": true,
+  "description": "Tests of the KSON plugin for Claude Code",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^11.8.0",
+    "tsx": "^4.23.15",
+    "vscode-languageserver-protocol": "^3.18.4"
+  }
+}

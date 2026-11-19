@@ -67,8 +67,8 @@ export class LanguageServerProcess {
         connection.listen();
     }
 
-    static spawn(command: string, args: string[]): LanguageServerProcess {
-        const child = spawn(command, args, {shell: process.platform === 'win32'});
+    static spawn(command: string, args: string[], env: NodeJS.ProcessEnv = process.env): LanguageServerProcess {
+        const child = spawn(command, args, {env, shell: process.platform === 'win32'});
         return new LanguageServerProcess(child, createProtocolConnection(
             new StreamMessageReader(child.stdout),
             new StreamMessageWriter(child.stdin)

@@ -1,7 +1,7 @@
 ## Language Server Protocol Clients
 
 This project contains clients of the [Language Server Protocol](../language-server-protocol). Currently, we have
-a [Monaco](./monaco) client and a [VS Code](./vscode) client.
+a [Monaco](./monaco) client, a [VS Code](./vscode) client, and a [Claude Code](./claude-code) plugin.
 
 The VS Code client can be run with:
 

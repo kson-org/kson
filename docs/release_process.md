@@ -20,6 +20,7 @@ When `main` is ready to have a release cut from it:
   * [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json): `X.(Y+1).0-dev.0`
+  * [tooling/lsp-clients/claude-code](../tooling/lsp-clients/claude-code/.claude-plugin/plugin.json): `X.(Y+1).0-dev.0`, and the same `kson-language-server` version in its [.lsp.json](../tooling/lsp-clients/claude-code/.lsp.json)
   * [tooling/language-server-protocol](../tooling/language-server-protocol/package.json): `X.(Y+1).0-dev.0`
 - Update the [kson](../lib-rust/kson/Cargo.lock) and [kson-sys](../lib-rust/kson-sys/Cargo.lock) `Cargo.lock` files:
     ```bash
@@ -59,6 +60,7 @@ When `main` is ready to have a release cut from it:
     - [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json)
     - [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json)
     - [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json)
+    - [tooling/lsp-clients/claude-code](../tooling/lsp-clients/claude-code/.claude-plugin/plugin.json), and the `kson-language-server` version its [.lsp.json](../tooling/lsp-clients/claude-code/.lsp.json) pins
     - [tooling/language-server-protocol](../tooling/language-server-protocol/package.json)
   * [tooling/jetbrains plugin.xml](../tooling/jetbrains/src/main/resources/META-INF/plugin.xml): update `<change-notes>` section with very simple release notes (a link to the blog is enough)
 - Commit and push the `release/X.Y.Z` branch

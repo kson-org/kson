@@ -16,6 +16,18 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  claude-code:
+    devDependencies:
+      mocha:
+        specifier: ^11.8.0
+        version: 11.8.0
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      vscode-languageserver-protocol:
+        specifier: ^3.18.4
+        version: 3.18.4
+
   monaco:
     devDependencies:
       '@kson/lsp-shared':
