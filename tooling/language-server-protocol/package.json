@@ -13,6 +13,14 @@
   "//": "[[kson-version-num]]",
   "version": "0.5.0-dev.0",
   "description": "Kson Language Server implementation in TypeScript",
+  "private": true,
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/kson-org/kson",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kson-org/kson.git",
+    "directory": "tooling/language-server-protocol"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -30,6 +38,7 @@
   },
   "scripts": {
     "compile": "tsc",
+    "package": "tsx esbuild.ts",
     "test": "mocha"
   },
   "keywords": [
@@ -44,6 +53,7 @@
   "dependencies": {
     "kson": "link:../../kson-lib/build/dist/js/productionLibrary",
     "kson-tooling": "link:../../kson-tooling-lib/build/dist/js/productionLibrary",
+    "minimatch": "^9.0.9",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
     "vscode-uri": "^3.2.0"
@@ -51,8 +61,10 @@
   "devDependencies": {
     "@types/mocha": "10.0.10",
     "@types/node": "24.19.0",
+    "esbuild": "^0.28.2",
     "mocha": "^11.8.0",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vscode-languageserver-protocol": "^3.18.4"
   }
 }

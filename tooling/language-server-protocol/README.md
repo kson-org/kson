@@ -42,5 +42,17 @@ To run the test suite:
 ./gradlew tooling:language-server-protocol:npm_run_test
 ```
 
+### Packaging for npm
+
+`dist/` is what gets published, since this directory's `package.json` links the unpublished `kson` and `kson-tooling`
+Kotlin/JS libraries. Build it with:
+
+```bash
+./gradlew tooling:language-server-protocol:npm_run_package
+```
+
+The package's README is [README-npm.md](README-npm.md). Give `npm pack` an explicit path, like
+`./tooling/language-server-protocol/dist`: npm reads a bare `dist` as a registry package name.
+
 [1] Visual Studio Code. (2025). *Language Server Extension Guide*. Retrieved
 from https://code.visualstudio.com/api/language-extensions/language-server-extension-guide 

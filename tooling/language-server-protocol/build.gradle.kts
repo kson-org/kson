@@ -25,12 +25,18 @@ tasks {
         dependsOn("npm_run_compile")
     }
 
+    register<PixiExecTask>("npm_run_package") {
+        command=listOf("pnpm", "run", "package")
+        dependsOn(npmInstall)
+    }
+
     check {
         dependsOn("npm_run_test")
     }
 
     clean {
         delete("out")
+        delete("dist")
         delete("node_modules")
     }
 }

@@ -18,6 +18,9 @@ importers:
       kson-tooling:
         specifier: link:../../kson-tooling-lib/build/dist/js/productionLibrary
         version: link:../../kson-tooling-lib/build/dist/js/productionLibrary
+      minimatch:
+        specifier: ^9.0.9
+        version: 9.0.9
       vscode-languageserver:
         specifier: ^10.1.2
         version: 10.1.2
@@ -34,6 +37,9 @@ importers:
       '@types/node':
         specifier: 24.19.0
         version: 24.19.0
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       mocha:
         specifier: ^11.8.0
         version: 11.8.0
@@ -43,6 +49,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vscode-languageserver-protocol:
+        specifier: ^3.18.4
+        version: 3.18.4
 
 packages:
 
