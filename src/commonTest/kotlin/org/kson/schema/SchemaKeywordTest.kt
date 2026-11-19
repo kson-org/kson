@@ -3,6 +3,8 @@ package org.kson.schema
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
+import org.kson.schema.validators.AnyOfValidator
+import org.kson.schema.validators.OneOfValidator
 import org.kson.value.KsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,6 +27,8 @@ class SchemaKeywordTest {
         }
         return keyword.compile(KeywordContext(schema, messageSink), subschemas)
     }
+
+    private fun titleOf(schema: JsonSchema?): String? = (schema as JsonObjectSchema?)?.title
 
     @Test
     fun everySubschemaAKeywordCompilesIsIndexed() {
@@ -66,5 +70,19 @@ class SchemaKeywordTest {
     @Test
     fun anIfThatDoesNotCompileAddsNoValidator() {
         assertNull(compileKeyword("if", """{ "if": 7 }"""))
+    }
+
+    @Test
+    fun unionBranchesKeepTheirDeclaredIndicesWhenOneDoesNotCompile() {
+        val branches = $$"""[{ "$ref": "#/missing" }, { "title": "second" }]"""
+        val anyOf = assertIs<AnyOfValidator>(compileKeyword("anyOf", """{ "anyOf": $branches }"""))
+        val oneOf = assertIs<OneOfValidator>(compileKeyword("oneOf", """{ "oneOf": $branches }"""))
+
+        assertNull(anyOf.declared[0])
+        assertEquals(listOf(null, "second"), anyOf.declared.map(::titleOf))
+        assertEquals(listOf("second"), anyOf.anyOf.map(::titleOf))
+        assertNull(oneOf.declared[0])
+        assertEquals(listOf(null, "second"), oneOf.declared.map(::titleOf))
+        assertEquals(listOf("second"), oneOf.oneOf.map(::titleOf))
     }
 }

@@ -54,7 +54,7 @@ internal class SchemaDraft(
                 IntegerKeyword("minProperties", ::MinPropertiesValidator),
                 IntegerKeyword("maxProperties", ::MaxPropertiesValidator),
                 ConstKeyword,
-                SchemaListKeyword("allOf", { Applies.InPlace }, ::AllOfValidator),
+                SchemaListKeyword("allOf", { Applies.InPlace }) { AllOfValidator(it.filterNotNull()) },
                 SchemaListKeyword("anyOf", Applies::Alternative, ::AnyOfValidator),
                 SchemaListKeyword("oneOf", Applies::Alternative, ::OneOfValidator),
                 SubschemaKeyword("not", Applies.Negated, ::NotValidator),

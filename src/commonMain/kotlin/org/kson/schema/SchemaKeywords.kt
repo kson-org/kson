@@ -148,12 +148,13 @@ internal class SubschemaKeyword(
 
 /**
  * A keyword [name] whose value is a list of subschemas, such as `allOf`.  [applies] gives the part of the instance
- * that the subschema at each index validates.
+ * that the subschema at each index validates.  [factory] gets the compiled subschemas at their indices in the list,
+ * with null where a subschema doesn't compile, and turns them into a validator.
  */
 internal class SchemaListKeyword(
     private val name: String,
     private val applies: (Int) -> Applies,
-    private val factory: (List<JsonSchema>) -> JsonSchemaValidator
+    private val factory: (List<JsonSchema?>) -> JsonSchemaValidator
 ) : SchemaKeyword(setOf(name)) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> =
         (schema.propertyLookup[name] as? KsonList)?.elements.orEmpty()
@@ -165,7 +166,7 @@ internal class SchemaListKeyword(
             context.messageSink.error(value.location, SCHEMA_ARRAY_REQUIRED.create(name))
             return null
         }
-        return factory(subschemas.mapNotNull { it.compiled })
+        return factory(subschemas.map { it.compiled })
     }
 }
 
@@ -195,7 +196,7 @@ internal object ItemsKeyword : SchemaKeyword(setOf("items", "additionalItems")) 
         val items = context.properties["items"] ?: return null
         val additionalItems = subschemas.singleOrNull { it.keyword == "additionalItems" }
         if (items is KsonList) {
-            val tupleSchemas = subschemas.filter { it.keyword == "items" }.mapNotNull { it.compiled }
+            val tupleSchemas = subschemas.filter { it.keyword == "items" }.map { it.compiled }
             return ItemsValidator(LeadingItemsTupleValidator(tupleSchemas), additionalItems(additionalItems, tupleSchemas.size))
         }
         val itemsSchema = subschemas.first { it.keyword == "items" }.compiled ?: return null

@@ -24,18 +24,22 @@ internal class ItemsValidator(private val itemsValidator: LeadingItemsValidator,
 
 internal sealed interface LeadingItemsValidator {
     /**
-     * Validates leading items and returns the count of items validated (i.e., the tuple length).
+     * Validates the leading items and returns the tuple length, the index from which `additionalItems` applies.
      */
     fun validateArray(list: KsonList, messageSink: MessageSink, sourceContext: SourceContext): Int
 }
 
-internal data class LeadingItemsTupleValidator(private val schemas: List<JsonSchema>) : LeadingItemsValidator {
+/**
+ * Validates the item at each index against the schema at that index in [schemas].  [schemas] holds null where an
+ * `items` schema doesn't compile, and the item at that index isn't validated.
+ */
+internal data class LeadingItemsTupleValidator(private val schemas: List<JsonSchema?>) : LeadingItemsValidator {
     override fun validateArray(list: KsonList, messageSink: MessageSink, sourceContext: SourceContext): Int {
         for (i in schemas.indices) {
             if (i >= list.elements.size) {
                 break
             }
-            schemas[i].validate(list.elements[i], messageSink, sourceContext)
+            schemas[i]?.validate(list.elements[i], messageSink, sourceContext)
         }
         return schemas.size
     }
