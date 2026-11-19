@@ -156,7 +156,7 @@ describe('KSON Diagnostics', () => {
             // The document is valid, but it was never validated against the schema: saying nothing
             // here would report the document as fully checked
             assert.strictEqual(diagnostics.length, 1);
-            assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Warning);
+            assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error);
             assert.deepStrictEqual(diagnostics[0].range, {
                 start: {line: 0, character: 0},
                 end: {line: 0, character: 0}

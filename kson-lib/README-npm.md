@@ -92,8 +92,12 @@ if (yamlResult instanceof Result.Success) {
 - **`format(kson: string, formatOptions?: FormatOptions): string`**
   Formats KSON string according to specified style. Returns the formatted string directly.
 
-- **`analyze(kson: string): Analysis`**
-  Analyzes KSON and returns diagnostic information including tokens and any errors.
+- **`analyze(kson: string, filepath?: string, schemaValidator?: SchemaValidator): Analysis`**
+  Analyzes KSON and returns an `Analysis` with:
+  - `tokens`: the lexed tokens of the source
+  - `errors`: its errors and warnings, told apart by each message's `severity`
+  - `ksonValue`: the parsed value, or `null` if the document has errors, including schema violations if a
+    `schemaValidator` was provided
 
 - **`parseSchema(schemaKson: string): SchemaResult`**
   Parses and validates a KSON schema. Returns a `SchemaResult` which can be:

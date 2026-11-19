@@ -106,7 +106,7 @@ class DiagnosticTest {
         """.trimIndent()
         val diagnostics = validateDocument("{ age: \"not a number\" }", schema)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
@@ -122,7 +122,7 @@ class DiagnosticTest {
         """.trimIndent()
         val diagnostics = validateDocument("{ age: 30 }", schema)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
@@ -180,7 +180,7 @@ class DiagnosticTest {
 
         val diagnosticsWithBrokenSchema = validateDocument(ksonDocWithError, schemaWithError)
         assertEquals(2, diagnosticsWithBrokenSchema.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnosticsWithBrokenSchema[0].severity, "the unusable schema")
+        assertEquals(DiagnosticSeverity.ERROR, diagnosticsWithBrokenSchema[0].severity, "the unusable schema")
         assertEquals(
             diagnostics,
             diagnosticsWithBrokenSchema.drop(1),
@@ -195,7 +195,7 @@ class DiagnosticTest {
 
         val diagnostics = validateDocument(validKsonDoc, schemaWithError)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
         assertEquals(
             Range(0, 0, 0, 0),
             diagnostics[0].range,
@@ -211,7 +211,7 @@ class DiagnosticTest {
     fun testSchemaThatParsesButDescribesNoSchemaIsReported() {
         val diagnostics = validateDocument("key: \"value\"", schemaWithBadType)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     /**
@@ -240,7 +240,7 @@ class DiagnosticTest {
     fun testEmptySchemaIsReported() {
         val diagnostics = validateDocument("key: \"value\"", "")
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     /**
@@ -252,7 +252,7 @@ class DiagnosticTest {
         val schemaWithThreeProblems = "{ type: 5, minLength: \"nope\", required: 7 }"
         val diagnostics = validateDocument("key: \"value\"", schemaWithThreeProblems)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
