@@ -277,7 +277,10 @@ internal object PropertiesKeyword : SchemaKeyword(setOf("properties", "patternPr
     }
 }
 
-/** `if`, `then` and `else`.  Without an `if` that compiles, neither `then` nor `else` applies. */
+/**
+ * `if`, `then` and `else`.  Without an `if` that compiles, neither `then` nor `else` applies.  Where the `if` doesn't
+ * compile, `then` and `else` are still compiled to report errors in them.
+ */
 internal object IfKeyword : SchemaKeyword(setOf("if", "then", "else")) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> = listOfNotNull(
         schema.propertyLookup["if"]?.let { DeclaredSubschema(listOf("if"), it, Applies.Condition) },
@@ -286,10 +289,11 @@ internal object IfKeyword : SchemaKeyword(setOf("if", "then", "else")) {
     )
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
-        val ifSchema = subschemas.find { it.keyword == "if" }?.compiled ?: return null
+        val ifSubschema = subschemas.find { it.keyword == "if" } ?: return null
+        val ifSchema = ifSubschema.compiled
         val thenSchema = subschemas.find { it.keyword == "then" }?.compiled
         val elseSchema = subschemas.find { it.keyword == "else" }?.compiled
-        return IfValidator(ifSchema, thenSchema, elseSchema)
+        return ifSchema?.let { IfValidator(it, thenSchema, elseSchema) }
     }
 }
 

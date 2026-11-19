@@ -683,6 +683,27 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testErrorsInThenAndElseAreReportedUnderAnIfThatDoesNotCompile() {
+        assertSchemaHasValidationErrors(
+            $$"""
+                if:
+                  '$ref': '#/missing'
+                  .
+                then:
+                  type: 7
+                  .
+                else:
+                  minimum: low
+            """.trimIndent(),
+            listOf(
+                MessageType.SCHEMA_REF_RESOLUTION_FAILED,
+                MessageType.SCHEMA_TYPE_TYPE_ERROR,
+                MessageType.SCHEMA_NUMBER_REQUIRED
+            )
+        )
+    }
+
+    @Test
     fun testMalformedPropertyNamesSubSchemaDoesNotSilentlyAccept() {
         assertSchemaHasValidationErrors(
             "propertyNames: 42",

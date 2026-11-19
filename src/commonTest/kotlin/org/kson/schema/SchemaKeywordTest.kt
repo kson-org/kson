@@ -3,14 +3,28 @@ package org.kson.schema
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
+import org.kson.value.KsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class SchemaKeywordTest {
     /** A subschema that the index can find by its `$id`, with a malformed `minimum` that compiling reports */
     private val probe = $$"""{ "$id": "urn:example:probe", "minimum": "low" }"""
+
+    /** Compiles the Draft 7 keyword that reads the property [name] of the object schema [schemaSource] */
+    private fun compileKeyword(name: String, schemaSource: String): JsonSchemaValidator? {
+        val schemaObject = assertIs<KsonObject>(KsonCore.parseToAst(schemaSource).ksonValue)
+        val schema = IndexedSchemaDocuments(SchemaDocument(schemaObject)).rootSchema
+        val messageSink = MessageSink()
+        val keyword = SchemaDraft.DRAFT_7.keywordsByName.getValue(name)
+        val subschemas = keyword.declaredSubschemas(schemaObject).map { declared ->
+            CompilableSubschema(declared) { SchemaParser.parseSchemaElement(schema.enter(declared.value), messageSink) }
+        }
+        return keyword.compile(KeywordContext(schema, messageSink), subschemas)
+    }
 
     @Test
     fun everySubschemaAKeywordCompilesIsIndexed() {
@@ -47,5 +61,10 @@ class SchemaKeywordTest {
                 placement
             )
         }
+    }
+
+    @Test
+    fun anIfThatDoesNotCompileAddsNoValidator() {
+        assertNull(compileKeyword("if", """{ "if": 7 }"""))
     }
 }
