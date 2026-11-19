@@ -2,7 +2,6 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
-import org.kson.uri.UriReference
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -15,25 +14,18 @@ class PinsTest {
     private fun kson(source: String): KsonValue =
         assertNotNull(KsonCore.parseToAst(source).ksonValue, "should parse: $source")
 
-    private fun compile(
-        node: KsonValue,
-        baseUri: UriReference,
-        indexedDocuments: IndexedSchemaDocuments
-    ): JsonSchema? = SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, indexedDocuments)
+    private fun compile(schema: SchemaNode): JsonSchema? = SchemaParser.parseSchemaElement(schema, MessageSink())
 
     private fun compiled(schema: String): JsonSchema {
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(kson(schema)))
-        return assertNotNull(
-            compile(indexedDocuments.root.value, indexedDocuments.rootBaseUri, indexedDocuments),
-            "should compile: $schema"
-        )
+        return assertNotNull(compile(indexedDocuments.rootSchema), "should compile: $schema")
     }
 
     private fun branchesOf(union: String): List<JsonSchema> {
         val root = kson(union) as KsonObject
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
         return (root.propertyLookup.getValue("oneOf") as KsonList).elements.map {
-            assertNotNull(compile(it, indexedDocuments.rootSubschemaBaseUri, indexedDocuments), "should compile: $it")
+            assertNotNull(compile(indexedDocuments.rootSchema.enter(it)), "should compile: $it")
         }
     }
 
@@ -738,9 +730,9 @@ class PinsTest {
         assertPinned(Pins.ofAll(branches, kson("kind: circle")), branches = listOf(0))
     }
 
-    /** Each trip around this cycle applies the `$id` again, so it never returns under the same base URI. */
+    /** `N`'s `allOf` leads back to `N` through its directory-style `$id`. */
     @Test
-    fun aRefCycleLengtheningItsBaseUriPinsNothing() {
+    fun aRefCycleThroughADirectoryIdPinsNothing() {
         val branches = branchesOf(
             $$"""
                 '$id': 'http://x/root/'

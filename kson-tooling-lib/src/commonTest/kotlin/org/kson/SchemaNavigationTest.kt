@@ -23,7 +23,7 @@ class SchemaNavigationTest {
      * Helper to navigate schema and get all result values
      */
     private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
-        return navigateSchemaFull(schema, path).map { it.resolvedValue }
+        return navigateSchemaFull(schema, path).map { it.value }
     }
 
     /**
@@ -467,7 +467,7 @@ class SchemaNavigationTest {
             }
         """
         fun typeAt(document: String?) = navigateSchemaFull(schema, listOf("0", "a"), document)
-            .map { ((it.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+            .map { ((it.value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
 
         assertEquals(listOf("object"), typeAt("'0': {}"))
         assertEquals(listOf("string"), typeAt("[{}]"))
@@ -582,7 +582,7 @@ class SchemaNavigationTest {
         }
 
         // [configParent, InnerA] — InnerB is dropped because mode: "a" contradicts its const.
-        val titles = results.mapNotNull { (it.resolvedValue as? InternalKsonObject)?.propertyLookup?.get("title") as? InternalKsonString }
+        val titles = results.mapNotNull { (it.value as? InternalKsonObject)?.propertyLookup?.get("title") as? InternalKsonString }
             .map { it.value }
         assertEquals(listOf("InnerA"), titles,
             "Only the inner branch compatible with the nested document value should survive")
@@ -867,12 +867,12 @@ class SchemaNavigationTest {
         val barkResults = navigateSchemaFull(schema, listOf("bark"))
         assertEquals(1, barkResults.size, "Expected to find 'bark' through then branch")
         assertEquals(Branch.Then, barkResults.single().branchTrail.single().branch)
-        assertEquals("boolean", ((barkResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("boolean", ((barkResults.single().value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
 
         val meowResults = navigateSchemaFull(schema, listOf("meow"))
         assertEquals(1, meowResults.size, "Expected to find 'meow' through else branch")
         assertEquals(Branch.Else, meowResults.single().branchTrail.single().branch)
-        assertEquals("boolean", ((meowResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("boolean", ((meowResults.single().value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -1049,5 +1049,28 @@ class SchemaNavigationTest {
             }
             assertEquals(true, hasStringBranch, "Expected the non-recursive string branch of $combinator to be navigable")
         }
+    }
+
+    /**
+     * `N`'s `allOf` leads back to `N` through its directory-style `$id`.  `flatten` stops the second time it meets
+     * `N`, which has the same base URI both times.
+     */
+    @Test
+    fun testRefCycleThroughADirectoryIdStopsOnItsFirstReturn() {
+        val schema = $$"""
+            {
+                "$id": "http://x/root/",
+                "allOf": [ { "$ref": "sub/" } ],
+                "definitions": {
+                    "N": { "$id": "sub/", "allOf": [ { "$ref": "http://x/root/sub/" } ] }
+                }
+            }
+        """
+
+        val visitsToN = navigateSchemaFull(schema, emptyList()).filter {
+            ((it.value as? InternalKsonObject)?.propertyLookup?.get("\$id") as? InternalKsonString)?.value == "sub/"
+        }
+
+        assertEquals(listOf("http://x/root/", "http://x/root/"), visitsToN.map { it.schema.baseUri.toString() })
     }
 }

@@ -163,7 +163,7 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
 
     /** `type` stops validation at the first `N`, but reading the branch's pins goes on around the `allOf` cycle. */
     @Test
-    fun testRefCycleLengtheningItsBaseUriStillReports() {
+    fun testRefCycleThroughADirectoryIdStillReports() {
         assertReportedInFullAndPartial(
             $$"""
                 '$id': 'http://x/root/'

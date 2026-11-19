@@ -23,12 +23,17 @@ internal object PropertySnippetBuilder {
     ): List<CompletionItem> {
         if (completions.none { it.kind == CompletionKind.PROPERTY }) return completions
         val site = KsonValuePathBuilder(document, caret).newKeySite() ?: return completions
+        val snippetLabels = completions
+            .filter { it.kind == CompletionKind.PROPERTY && StringUnquoted.isUnquotable(it.label) }
+            .map { it.label }
         // Not narrowed: adding the property may change which branches the document fits
-        val navigator = SchemaNavigator(indexedDocuments, carryDeadEnds = true, narrow = false)
+        val navigated = SchemaNavigator(indexedDocuments, carryDeadEnds = true, narrow = false)
+            .navigateToProperties(site.objectPointer, snippetLabels, document.rootAstNode)
         return completions.map { item ->
             val openedValue = item
-                .takeIf { it.kind == CompletionKind.PROPERTY && StringUnquoted.isUnquotable(it.label) }
-                ?.let { openedValue(navigator.navigate(site.objectPointer.child(it.label), document.rootAstNode)) }
+                .takeIf { it.kind == CompletionKind.PROPERTY }
+                ?.let { navigated[it.label] }
+                ?.let(::openedValue)
                 ?: return@map item
             val snippet = SnippetEdit(site.replaceRange, "${item.label}: $openedValue")
             CompletionItem(item.label, item.detail, item.documentation, item.kind, snippet)

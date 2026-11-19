@@ -57,8 +57,8 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return null
         val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val schemaInfos = validSchemas.mapNotNull { ref ->
-            ref.resolvedValue.extractSchemaInfo()
+        val schemaInfos = validSchemas.mapNotNull { validSchema ->
+            validSchema.value.extractSchemaInfo()
         }
 
         return schemaInfos.distinct().joinToString("\n\n---\n\n")
@@ -88,13 +88,13 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
         val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val definitions = validSchemas.filterNot { it.resolvedValue is KsonBoolean }.ifEmpty { validSchemas }
+        val definitions = validSchemas.filterNot { it.value is KsonBoolean }.ifEmpty { validSchemas }
         return definitions.map {
             Range(
-                it.resolvedValue.location.start.line,
-                it.resolvedValue.location.start.column,
-                it.resolvedValue.location.end.line,
-                it.resolvedValue.location.end.column
+                it.value.location.start.line,
+                it.value.location.start.column,
+                it.value.location.end.line,
+                it.value.location.end.column
             )
         }
     }
@@ -130,14 +130,14 @@ object KsonTooling {
 
         // Resolve the reference and return its location
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
-        val resolvedRef = indexedDocuments.resolveRef(refString, indexedDocuments.rootSubschemaBaseUri) ?: return emptyList()
+        val target = indexedDocuments.resolveRef(refString, indexedDocuments.rootSubschemaBaseUri) ?: return emptyList()
 
         return listOf(
             Range(
-                resolvedRef.resolvedValue.location.start.line,
-                resolvedRef.resolvedValue.location.start.column,
-                resolvedRef.resolvedValue.location.end.line,
-                resolvedRef.resolvedValue.location.end.column
+                target.value.location.start.line,
+                target.value.location.start.column,
+                target.value.location.end.line,
+                target.value.location.end.column
             )
         )
     }

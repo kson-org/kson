@@ -12,45 +12,33 @@ import org.kson.value.navigation.json_pointer.fragmentPointer
 /**
  * Validator for JSON Schema `$ref` references
  *
- * @param [resolvedRef] the [ResolvedRef] object for this $ref
- * @param [indexedDocuments] the [IndexedSchemaDocuments] for resolving nested $ref references within the referenced
- *   schema
+ * @param [target] the schema this `$ref` resolves to
  * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), kept to name the target
  *   when it declares no `title`
  */
 internal class RefValidator(
-    private val resolvedRef: ResolvedRef,
-    private val indexedDocuments: IndexedSchemaDocuments,
+    private val target: SchemaNode,
     private val refString: String
 ) : JsonSchemaValidator {
     private val refParseResult: Pair<JsonSchema?, List<LoggedMessage>> by lazy {
         val parseMessageSink = MessageSink()
         // TODO these parsed $ref schemas should be cached for efficiency
-        val chainEnd = indexedDocuments.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        val chainEnd = target.indexedDocuments.resolveRefIfPresent(target)
         val unresolvedRef = chainEnd.unresolvedRef
         val schema = if (unresolvedRef != null) {
             SchemaParser.reportUnresolvedRef(unresolvedRef, parseMessageSink)
             null
         } else {
-            SchemaParser.parseSchemaElement(
-                chainEnd.resolvedValue,
-                parseMessageSink,
-                chainEnd.resolvedValueBaseUri,
-                indexedDocuments)
+            SchemaParser.parseSchemaElement(chainEnd, parseMessageSink)
         }
         schema to parseMessageSink.loggedMessages()
     }
 
     // the whole chain is resolved at once: parsing it hop by hop would never notice a cycle
     private val targetPins: Set<KsonValue>? by lazy {
-        val target = indexedDocuments.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
-        if (target.endsAtUnresolvedRef) return@lazy null
-        val schema = SchemaParser.parseSchemaElement(
-            target.resolvedValue,
-            MessageSink(),
-            target.resolvedValueBaseUri,
-            indexedDocuments)
-        (schema as? JsonObjectSchema)?.pinnedValues()
+        val chainEnd = target.indexedDocuments.resolveRefIfPresent(target)
+        if (chainEnd.endsAtUnresolvedRef) return@lazy null
+        (SchemaParser.parseSchemaElement(chainEnd, MessageSink()) as? JsonObjectSchema)?.pinnedValues()
     }
 
     override fun pinnedValues(): Set<KsonValue>? = targetPins
@@ -66,10 +54,10 @@ internal class RefValidator(
 
     /**
      * Each `$ref` parses its own copy of its target, so only this can tell that two lead to the same schema.
-     * Base URIs don't count, as a directory-style `$id` lengthens them on every trip around a cycle.
+     * Comparing target values is enough, as the same value always has the same base URI (see [SchemaNode.baseUri]).
      */
     internal fun hasSameTargetAs(other: RefValidator): Boolean =
-        resolvedRef.resolvedValue === other.resolvedRef.resolvedValue
+        target.value === other.target.value
 
     private fun targetTitle(): String? = (resolvedSchema() as? JsonObjectSchema)?.title
 
