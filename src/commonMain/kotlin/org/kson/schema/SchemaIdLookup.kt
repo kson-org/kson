@@ -167,7 +167,7 @@ fun ResolvedRef.descend(path: List<KsonValue>): ResolvedRef = path.fold(this) { 
  * The base URI for [schema]'s keywords when [schema] is read under this URI: [schema]'s `$id` resolved against this
  * URI, or this URI when [schema] has no `$id`
  */
-private fun UriReference.withIdOf(schema: KsonValue): UriReference {
+fun UriReference.withIdOf(schema: KsonValue): UriReference {
     val id = (schema as? KsonObject)?.propertyLookup["\$id"] as? KsonString ?: return this
     return resolve(id.value).withoutEmptyFragment()
 }
@@ -180,7 +180,7 @@ private fun UriReference.withoutEmptyFragment(): UriReference = if (fragment == 
  *
  * @param resolvedValue The schema value at this location
  * @param resolvedValueBaseUri The base URI [resolvedValue] is read under.  Its own `$id`, if it has one, is
- *   not applied yet: whatever reads its keywords applies it first, as [SchemaParser] does.
+ *   not applied yet: whatever reads its keywords applies it first, with [withIdOf].
  * @param endsAtUnresolvedRef True when [resolvedValue] holds a `$ref` that couldn't be followed, as its target is
  *   missing or leads back into the chain (see [SchemaIdLookup.resolveRefIfPresent])
  */

@@ -59,13 +59,8 @@ internal object SchemaParser {
             is RefOutcome.NotPresent -> Unit // fall through to parse the remaining keywords
         }
 
-        // Check if this schema defines a new $id and update base URI accordingly
-        val idString = extractId(schemaObject, messageSink)
-        val updatedBaseUri = if (idString != null) {
-            currentBaseUri.resolve(idString)
-        } else {
-            currentBaseUri
-        }
+        reportNonStringId(schemaObject, messageSink)
+        val updatedBaseUri = currentBaseUri.withIdOf(schemaObject)
 
         val metadata = parseMetadata(schemaProperties, updatedBaseUri, idLookup, messageSink)
         val typeValidator = parseTypeValidator(schemaProperties, propertyName, messageSink)
@@ -609,16 +604,10 @@ private fun <T : Any> MutableCollection<T>.addIfNotNull(element: T?) {
     if (element != null) add(element)
 }
 
-/**
- * Extract the `$id` property from the given [KsonObject] if it has one, ensuring it is of type string
- */
-private fun extractId(schemaObject: KsonObject, messageSink: MessageSink): String? {
-    return schemaObject.propertyLookup["\$id"]?.let { idValue ->
-        if (idValue is KsonString) {
-            idValue.value
-        } else {
-            messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
-            null
-        }
+/** Reports an `$id` that isn't a string, as JSON Schema requires it to be one */
+private fun reportNonStringId(schemaObject: KsonObject, messageSink: MessageSink) {
+    val idValue = schemaObject.propertyLookup["\$id"] ?: return
+    if (idValue !is KsonString) {
+        messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
     }
 }

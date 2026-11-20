@@ -1592,6 +1592,35 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testEqualIfConditionsAreOneChoiceUnderAnIdWithAnEmptyFragment() {
+        // `root.json#` identifies the same schema as `root.json`, so the inline member and the one a `$ref` finds are
+        // read under the same base URI, and their equal conditions are one choice
+        val schema = $$"""
+            {
+                "$id": "http://example.com/root.json#",
+                "properties": { "kind": { "type": "string" } },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "enum": ["a", "x"] } } },
+                        "else": { "properties": { "p": { "enum": ["b", "y"] } } }
+                    },
+                    { "$ref": "#/definitions/second" }
+                ],
+                "definitions": {
+                    "second": {
+                        "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "enum": ["b", "x"] } } },
+                        "else": { "properties": { "p": { "enum": ["a", "y"] } } }
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("x", "y"))
+    }
+
+    @Test
     fun testAlternativeReachedAgainFurtherDownChoosesAgain() {
         // Both nodes choose from the same oneOf, separately: the outer's kind a allows its child's p
         // to be x or y, and the child's own kind b allows y or z

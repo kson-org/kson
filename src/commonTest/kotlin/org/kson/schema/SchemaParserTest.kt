@@ -554,6 +554,11 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testNonStringIdReportsError() {
+        assertSchemaHasValidationErrors($$"""{"$id": 42}""", listOf(MessageType.SCHEMA_STRING_REQUIRED))
+    }
+
+    @Test
     fun testInvalidRegexInPatternReportsError() {
         assertSchemaHasValidationErrors(
             """{"pattern": "*"}""",
