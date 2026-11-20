@@ -58,7 +58,7 @@ internal class RefValidator(
 
     /**
      * Each `$ref` parses its own copy of its target, so only this can tell that two lead to the same schema.
-     * Base URIs don't count, as a directory-style `$id` lengthens them on every trip around a cycle.
+     * The target node alone identifies it, as its base URI follows from where it sits in its document.
      */
     internal fun hasSameTargetAs(other: RefValidator): Boolean =
         resolvedRef.resolvedValue === other.resolvedRef.resolvedValue

@@ -19,7 +19,8 @@ import org.kson.walker.nodesAlong
  */
 class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
-    private val idMap: Map<UriReference, KsonValue>
+    /** The schema each URI identifies, with the base URI that schema is read under */
+    private val idMap: Map<UriReference, ResolvedRef>
 
     /** The root schema's base URI: its `$id` when present, otherwise the empty reference. */
     val rootBaseUri: UriReference =
@@ -33,12 +34,13 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
          */
         idMap = mutableMapOf()
 
-        // preload know meta-schemas
-        idMap[UriReference.parse(KsonDraft7MetaSchema.ID)] = KsonDraft7MetaSchema.schemaValue
+        // preload known meta-schemas, each as if retrieved from its ID
+        val draft7MetaSchemaUri = UriReference.parse(KsonDraft7MetaSchema.ID)
+        idMap[draft7MetaSchemaUri] = ResolvedRef(KsonDraft7MetaSchema.schemaValue, draft7MetaSchemaUri)
 
         if (schemaRootValue is KsonObject) {
             // Store the root schema at its baseUri
-            idMap[rootBaseUri] = schemaRootValue
+            idMap[rootBaseUri] = ResolvedRef(schemaRootValue, rootBaseUri)
 
             // Walk the schema tree to collect all IDs with fully-qualified URIs
             walkSchemaForIds(schemaRootValue, idMap, rootBaseUri)
@@ -58,10 +60,10 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         val refUri = currentBaseUri.resolve(ref)
         val resourceUri = refUri.withoutFragment()
         val identified = idMap[refUri.withoutEmptyFragment()]
-        if (identified != null) return ResolvedRef(identified, currentBaseUri)
+        if (identified != null) return identified
 
         val pointer = (refUri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
-        return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it, resourceUri) }
+        return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it.resolvedValue, resourceUri) }
     }
 
 
@@ -97,12 +99,12 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
          * Recursively walks a schema value to collect all `$id` entries with fully-qualified URIs.
          *
          * @param schemaValue The current schema node to examine
-         * @param idMap The map to collect fully-qualified $id entries into
-         * @param currentBaseUri The current base URI context for resolving relative URIs
+         * @param idMap The map to collect each schema with an `$id` into, by its fully-qualified `$id`
+         * @param currentBaseUri The base URI [schemaValue] is read under
          */
         private fun walkSchemaForIds(
             schemaValue: KsonValue,
-            idMap: MutableMap<UriReference, KsonValue>,
+            idMap: MutableMap<UriReference, ResolvedRef>,
             currentBaseUri: UriReference
         ) {
             when (schemaValue) {
@@ -116,7 +118,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
                             // Resolve the ID to its fully-qualified form
                             contextBaseUri = currentBaseUri.resolve(idString).withoutEmptyFragment()
-                            idMap[contextBaseUri] = schemaValue
+                            idMap[contextBaseUri] = ResolvedRef(schemaValue, currentBaseUri)
                         }
                     }
 

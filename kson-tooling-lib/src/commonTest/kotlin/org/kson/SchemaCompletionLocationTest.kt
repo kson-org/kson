@@ -2877,9 +2877,9 @@ class SchemaCompletionLocationTest {
         )
     }
 
-    /** Each trip around `N`'s `allOf` cycle lengthens the base URI, so only the node itself says it was met. */
+    /** `N`'s `allOf` leads back to `N` through its directory-style `$id`. */
     @Test
-    fun testNewKeyBesideARefCycleLengtheningItsBaseUri() {
+    fun testNewKeyBesideARefCycleThroughADirectoryId() {
         val schema = $$"""
             '$id': 'http://x/root/'
             oneOf:

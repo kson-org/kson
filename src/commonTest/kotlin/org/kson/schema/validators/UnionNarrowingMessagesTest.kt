@@ -130,7 +130,7 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
 
     /** `type` stops validation at the first `N`, but reading the branch's pins goes on around the `allOf` cycle. */
     @Test
-    fun testRefCycleLengtheningItsBaseUriStillReports() {
+    fun testRefCycleThroughADirectoryIdStillReports() {
         assertReportedInFullAndPartial(
             $$"""
                 '$id': 'http://x/root/'
@@ -156,9 +156,11 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
         )
     }
 
-    /** `shared` is reached twice, and under the second base URI its `$ref: k` leads to a different pin. */
+    /**
+     * `shared` is reached from two base URIs but always read under its own, so its `$ref: k` names `K1` both times.
+     */
     @Test
-    fun testRefsToTheSameTargetEachContributeTheirPins() {
+    fun testRefsToTheSameTargetKeepTheTargetsBase() {
         val schema = $$"""
             '$id': 'http://x/root/'
             oneOf:
@@ -198,13 +200,14 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
                     const: C
         """.trimIndent()
 
-        for (kind in listOf("Z", "C", "A")) {
+        for (kind in listOf("Z", "C")) {
             assertReportedInFullAndPartial(
                 schema,
                 "kind: $kind",
-                "Value must be one of: \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
+                "Value must be one of: \"A\", \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
             )
         }
+        assertKsonEnforcesSchema("kind: A", schema, true)
     }
 
     @Test

@@ -144,6 +144,27 @@ class SchemaIdLookupTest {
     }
 
     @Test
+    fun readsASchemaFoundByItsIdUnderTheBaseUriItSitsUnder() {
+        // `anchored` sits in other.json, so it is read under other.json, not under root.json, which refers to it
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            properties:
+              field:
+                '$ref': 'other.json#anchored'
+                .
+              .
+            '$defs':
+              other:
+                '$id': 'other.json'
+                '$defs':
+                  anchored:
+                    '$id': '#anchored'
+                    title: anchored
+        """.trimIndent()
+        assertEquals("anchored" to "http://example.com/other.json", resolveField(schema))
+    }
+
+    @Test
     fun doesNotResolveAPlainNameFragmentToAnIdWithoutOne() {
         // `#target` names a fragment of this document, which no `$id` declares; the `$id` `target` names another
         // document

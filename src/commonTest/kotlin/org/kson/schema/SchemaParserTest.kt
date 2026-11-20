@@ -410,6 +410,65 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefWithinASchemaFoundByAPlainNameIdResolvesInItsDocument() {
+        // `anchored` sits in other.json, so its `#/definitions/t` addresses other.json's `t` rather than root.json's
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            properties:
+              x:
+                '$ref': 'other.json#anchored'
+                .
+              .
+            definitions:
+              t: {}
+              other:
+                '$id': 'other.json'
+                definitions:
+                  t:
+                    type: string
+                    .
+                  anchored:
+                    '$id': '#anchored'
+                    allOf:
+                      - '$ref': '#/definitions/t'
+        """.trimIndent()
+        assertKsonEnforcesSchema("x: ok", schema, true)
+        assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
+    fun testSchemaFoundByARelativeIdIsReadUnderTheBaseUriItSitsUnder() {
+        // `other` sits under root.json, so its `$id` resolves against root.json, not against deep/z.json, which refers
+        // to it
+        val schema = $$"""
+            '$id': 'http://example.com/a/root.json'
+            properties:
+              x:
+                '$ref': 'deep/z.json'
+                .
+              .
+            definitions:
+              z:
+                '$id': 'deep/z.json'
+                allOf:
+                  - '$ref': '../sub/other.json'
+                    =
+                .
+              other:
+                '$id': 'sub/other.json'
+                definitions:
+                  t:
+                    type: string
+                    .
+                  .
+                allOf:
+                  - '$ref': '#/definitions/t'
+        """.trimIndent()
+        assertKsonEnforcesSchema("x: ok", schema, true)
+        assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
     fun testPointerRefUnderARootIdWithAnEmptyFragmentResolves() {
         // `http://example.com/root.json#` identifies the same schema as `http://example.com/root.json`
         val schema = $$"""

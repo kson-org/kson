@@ -633,9 +633,9 @@ class SchemaInfoLocationTest {
         assertTrue(hoverInfo.contains("Beta setting"), "Should show beta's description, got: $hoverInfo")
     }
 
-    /** Each trip around `N`'s `allOf` cycle lengthens the base URI, so only the node itself says it was met. */
+    /** `N`'s `allOf` leads back to `N` through its directory-style `$id`. */
     @Test
-    fun testGetSchemaInfoAtLocation_refCycleLengtheningItsBaseUri() {
+    fun testGetSchemaInfoAtLocation_refCycleThroughADirectoryId() {
         val schema = $$"""
             '$id': 'http://x/root/'
             allOf:

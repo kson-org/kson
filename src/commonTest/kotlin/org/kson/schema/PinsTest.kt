@@ -732,9 +732,9 @@ class PinsTest {
         assertPinned(Pins.ofAll(branches, kson("kind: circle")), branches = listOf(0))
     }
 
-    /** Each trip around this cycle applies the `$id` again, so it never returns under the same base URI. */
+    /** `N`'s `allOf` leads back to `N` through its directory-style `$id`. */
     @Test
-    fun aRefCycleLengtheningItsBaseUriPinsNothing() {
+    fun aRefCycleThroughADirectoryIdPinsNothing() {
         val branches = branchesOf(
             $$"""
                 '$id': 'http://x/root/'
