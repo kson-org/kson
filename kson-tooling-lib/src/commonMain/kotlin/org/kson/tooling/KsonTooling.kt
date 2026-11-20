@@ -12,6 +12,7 @@ import org.kson.tooling.navigation.extractSchemaInfo
 import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.schema.RefResolution
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.descend
 import org.kson.validation.SourceContext
@@ -135,7 +136,8 @@ object KsonTooling {
         val pathToHolder = AstNodeWalker.nodesAlong(schemaAst, documentPointer).dropLast(1)
             .map { it.toKsonValueOrNull() ?: return emptyList() }
         val baseUri = schemaIdLookup.root.descend(pathToHolder).resolvedValueBaseUri
-        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return emptyList()
+        val resolvedRef = (schemaIdLookup.resolveRef(refString, baseUri) as? RefResolution.Found)
+            ?.target ?: return emptyList()
 
         return listOf(
             Range(

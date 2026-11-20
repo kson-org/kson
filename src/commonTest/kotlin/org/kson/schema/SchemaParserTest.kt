@@ -351,6 +351,20 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefToNothingReportsError() {
+        val result = KsonCore.parseSchema($$"""'$ref': '#/$defs/missing'""")
+        assertEquals(
+            listOf(
+                LoggedMessage(
+                    Location(Coordinates(0, 9), Coordinates(0, 24), 9, 24),
+                    MessageType.SCHEMA_REF_RESOLUTION_FAILED.create($$"#/$defs/missing")
+                )
+            ),
+            result.messages
+        )
+    }
+
+    @Test
     fun testRefToRefWithMalformedPointerReportsError() {
         // `wrapper` is only parsed once validation follows the root `$ref` to it
         val schema = $$"""

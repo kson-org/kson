@@ -1,5 +1,6 @@
 package org.kson.schema
 
+import org.kson.parser.messages.Message
 import org.kson.uri.UriReference
 import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.JsonPointer
@@ -54,17 +55,21 @@ class SchemaIdLookup(schemaRootValue: KsonValue) {
      *
      * @param ref The reference string (e.g., "#foo", "#/definitions/address", "bar")
      * @param currentBaseUri The current base URI context for resolving relative references
-     * @return The resolved [KsonValue] representing the referenced schema, or null if not found, as when [ref]'s
-     *   fragment is a malformed JSON Pointer
+     * @return The schema [ref] names with the base URI it is read under, or why [ref] names none
      */
-    fun resolveRef(ref: String, currentBaseUri: UriReference): ResolvedRef? {
+    fun resolveRef(ref: String, currentBaseUri: UriReference): RefResolution {
         val refUri = currentBaseUri.resolve(ref)
         val resourceUri = refUri.withoutFragment()
         val identified = idMap[refUri.withoutEmptyFragment()]
-        if (identified != null) return identified
+        if (identified != null) return RefResolution.Found(identified)
 
-        val pointer = (refUri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
-        return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it) }
+        val pointer = when (val fragmentPointer = refUri.fragmentPointer()) {
+            is FragmentPointer.Valid -> fragmentPointer.pointer
+            is FragmentPointer.Malformed -> return RefResolution.MalformedPointer(fragmentPointer.message)
+            null -> return RefResolution.NotFound
+        }
+        val target = idMap[resourceUri]?.let { resolveJsonPointer(pointer, it) } ?: return RefResolution.NotFound
+        return RefResolution.Found(target)
     }
 
 
@@ -85,7 +90,7 @@ class SchemaIdLookup(schemaRootValue: KsonValue) {
             val refValue = (current.resolvedValue as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
                 ?: return current
             followed.add(current)
-            val target = resolveRef(refValue.value, current.resolvedValueBaseUri)
+            val target = (resolveRef(refValue.value, current.resolvedValueBaseUri) as? RefResolution.Found)?.target
                 ?: return current.copy(endsAtUnresolvedRef = true)
             val leadsBack = followed.any {
                 it.resolvedValue === target.resolvedValue && it.resolvedValueBaseUri == target.resolvedValueBaseUri
@@ -184,3 +189,14 @@ data class ResolvedRef(
     val resolvedValueBaseUri: UriReference,
     val endsAtUnresolvedRef: Boolean = false
 )
+
+/** The schema a `$ref` names, or why it names none */
+sealed interface RefResolution {
+    data class Found(val target: ResolvedRef) : RefResolution
+
+    /** No schema has the URI the `$ref` names */
+    data object NotFound : RefResolution
+
+    /** The `$ref`'s fragment is a malformed JSON Pointer, as [message] explains */
+    data class MalformedPointer(val message: Message) : RefResolution
+}

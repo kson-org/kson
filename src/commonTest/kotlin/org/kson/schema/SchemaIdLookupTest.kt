@@ -1,17 +1,25 @@
 package org.kson.schema
 
 import org.kson.KsonCore
+import org.kson.parser.messages.MessageType
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
- * Tests for [SchemaIdLookup.resolveRefIfPresent].
+ * Tests for [SchemaIdLookup.resolveRef] and [SchemaIdLookup.resolveRefIfPresent].
  */
 class SchemaIdLookupTest {
+
+    /** Resolves [ref] as [schema]'s root `$ref` would be. */
+    private fun resolveRef(schema: String, ref: String): RefResolution {
+        val lookup = SchemaIdLookup(KsonCore.parseToAst(schema).ksonValue as KsonObject)
+        return lookup.resolveRef(ref, lookup.root.resolvedValueBaseUri)
+    }
 
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
@@ -121,6 +129,23 @@ class SchemaIdLookupTest {
         """
         assertEquals("first" to "", resolveField(schema))
         assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun distinguishesNotFoundFromMalformedPointer() {
+        // `~2` is not a JSON Pointer escape, so the pointer is malformed even though its document is missing
+        val schema = $$"""
+            '$defs':
+              target:
+                title: target
+        """.trimIndent()
+        val malformed = RefResolution.MalformedPointer(MessageType.JSON_POINTER_INVALID_ESCAPE.create("2"))
+
+        assertIs<RefResolution.Found>(resolveRef(schema, $$"#/$defs/target"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, $$"#/$defs/missing"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, "missing.json"))
+        assertEquals(malformed, resolveRef(schema, $$"#/$defs/a~2b"))
+        assertEquals(malformed, resolveRef(schema, "missing.json#/a~2b"))
     }
 
     @Test

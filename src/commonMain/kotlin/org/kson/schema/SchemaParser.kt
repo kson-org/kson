@@ -5,8 +5,6 @@ import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
 import org.kson.uri.UriReference
 import org.kson.value.*
-import org.kson.value.navigation.json_pointer.FragmentPointer
-import org.kson.value.navigation.json_pointer.fragmentPointer
 
 /**
  * Parses a JSON Schema string into our JsonSchema model.
@@ -238,19 +236,18 @@ internal object SchemaParser {
             messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             return RefOutcome.NotPresent
         }
-        val resolvedValue = idLookup.resolveRef(refString.value, currentBaseUri)
-        if (resolvedValue == null) {
-            val malformedPointer = UriReference.parse(refString.value).fragmentPointer() as? FragmentPointer.Malformed
-            messageSink.error(
-                refString.location,
-                malformedPointer?.message ?: SCHEMA_REF_RESOLUTION_FAILED.create(refString.value)
-            )
-            return RefOutcome.Failed
+        when (val resolution = idLookup.resolveRef(refString.value, currentBaseUri)) {
+            is RefResolution.Found -> {
+                val refValidator = RefValidator(resolution.target, idLookup, refString.value)
+                return RefOutcome.Resolved(
+                    JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
+                )
+            }
+            is RefResolution.NotFound ->
+                messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
+            is RefResolution.MalformedPointer -> messageSink.error(refString.location, resolution.message)
         }
-        val refValidator = RefValidator(resolvedValue, idLookup, refString.value)
-        return RefOutcome.Resolved(
-            JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
-        )
+        return RefOutcome.Failed
     }
 
     /**
