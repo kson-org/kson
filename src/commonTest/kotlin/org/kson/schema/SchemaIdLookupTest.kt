@@ -15,14 +15,22 @@ class SchemaIdLookupTest {
 
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
-        val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
+        val properties = root.propertyLookup.getValue("properties") as KsonObject
         val lookup = SchemaIdLookup(root)
-        return lookup.resolveRefIfPresent(field, lookup.rootBaseUri)
+        val field = lookup.root.descend(listOf(properties, properties.propertyLookup.getValue("field")))
+        return lookup.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
-    private fun resolveField(schema: String): Pair<String?, String> {
-        val resolved = resolve(schema)
+    private fun resolveField(schema: String): Pair<String?, String> = titleAndBaseUri(resolve(schema))
+
+    /** Resolves [schema]'s root, read under the URI it was retrieved from, returning its `title` and base URI. */
+    private fun resolveRoot(schema: String): Pair<String?, String> {
+        val lookup = SchemaIdLookup(KsonCore.parseToAst(schema).ksonValue as KsonObject)
+        return titleAndBaseUri(lookup.resolveRefIfPresent(lookup.root.resolvedValue, lookup.root.resolvedValueBaseUri))
+    }
+
+    private fun titleAndBaseUri(resolved: ResolvedRef): Pair<String?, String> {
         val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
         return title?.value to resolved.resolvedValueBaseUri.toString()
     }
@@ -228,6 +236,38 @@ class SchemaIdLookupTest {
             }
         """
         assertEquals("a" to "sub/other.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesARefUnderARelativeRootId() {
+        // the ref and `other`'s `$id` both resolve against the root's `$id`, to sub/other.json
+        val schema = $$"""
+            '$id': 'sub/root.json'
+            properties:
+              field:
+                '$ref': 'other.json'
+                .
+              .
+            '$defs':
+              other:
+                '$id': 'other.json'
+                title: other
+        """.trimIndent()
+        assertEquals("other" to "sub/root.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesARootRefBesideTheRootIdInTheRootDocument() {
+        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
+        // the root.  `target` is still read under the root's `$id`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            '$ref': '#/$defs/target'
+            '$defs':
+              target:
+                title: target
+        """.trimIndent()
+        assertEquals("target" to "http://example.com/root.json", resolveRoot(schema))
     }
 
     @Test

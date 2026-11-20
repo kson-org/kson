@@ -26,8 +26,10 @@ class PinsTest {
     private fun branchesOf(union: String): List<JsonSchema> {
         val root = kson(union) as KsonObject
         val idLookup = SchemaIdLookup(root)
-        return (root.propertyLookup.getValue("oneOf") as KsonList).elements.map {
-            assertNotNull(compile(it, idLookup.rootBaseUri, idLookup), "should compile: $it")
+        val oneOf = root.propertyLookup.getValue("oneOf") as KsonList
+        return oneOf.elements.map {
+            val baseUri = idLookup.root.descend(listOf(oneOf, it)).resolvedValueBaseUri
+            assertNotNull(compile(it, baseUri, idLookup), "should compile: $it")
         }
     }
 

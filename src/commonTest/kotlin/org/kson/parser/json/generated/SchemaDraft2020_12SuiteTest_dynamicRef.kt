@@ -93,7 +93,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020) -> An array of strings is valid"
      *
      * Test ID: "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
         
@@ -189,7 +193,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020) -> An array of strings is valid"
      *
      * Test ID: "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
         
@@ -293,7 +301,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution (2020) -> Any array is valid"
      *
      * Test ID: "dynamicRef::An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_7() {
         
@@ -1212,7 +1224,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "$dynamicRef avoids the root of each schema, but scopes are still registered (2020) -> data is sufficient for schema at second#/$defs/length"
      *
      * Test ID: "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/$defs/length"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
         
@@ -1543,7 +1559,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef without anchor in fragment behaves identical to $ref -> An array of numbers is valid"
      *
      * Test ID: "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of numbers is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
         
@@ -1590,7 +1610,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor -> Any array is valid"
      *
      * Test ID: "dynamicRef::A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
         
@@ -1636,7 +1660,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor -> Any array is valid"
      *
      * Test ID: "dynamicRef::A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
         
@@ -1683,7 +1711,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope -> The recursive part is valid against the root"
      *
      * Test ID: "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is valid against the root"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
         
@@ -1805,7 +1837,11 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      *     "A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor -> The recursive part doesn't need to validate against the root"
      *
      * Test ID: "dynamicRef::A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor::The recursive part doesn't need to validate against the root"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
         

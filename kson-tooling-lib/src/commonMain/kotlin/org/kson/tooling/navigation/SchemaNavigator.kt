@@ -133,8 +133,10 @@ internal class SchemaNavigator(
         documentPointer: TreePointer<AstNode>,
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
-        val rootBaseUri = idLookup.rootBaseUri
-        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri), emptyList())
+        val rootRef = NavigatedSchema(
+            idLookup.resolveRefIfPresent(idLookup.root.resolvedValue, idLookup.root.resolvedValueBaseUri),
+            emptyList()
+        )
 
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens

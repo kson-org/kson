@@ -17,13 +17,8 @@ internal object SchemaParser {
      * See [parseSchemaElement] for sub-schema parsing.
      */
     fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
-        // Determine the initial base URI from the root schema's $id if present
-        val initialBaseUri = UriReference.parse(
-            (schemaRootValue as? KsonObject)?.let { extractId(it, messageSink) } ?: ""
-        )
-
         val idLookup = SchemaIdLookup(schemaRootValue)
-        return parseSchemaElement(schemaRootValue, messageSink, initialBaseUri, idLookup)
+        return parseSchemaElement(schemaRootValue, messageSink, idLookup.root.resolvedValueBaseUri, idLookup)
     }
 
     /**

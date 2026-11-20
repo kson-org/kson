@@ -809,11 +809,31 @@ private val anchorTests = setOf(
 
 /** Kson applies `$ref` as Draft 7 does, ignoring its sibling keywords (including `$id`) where 2020-12 applies them */
 private val refSiblingTests = setOf(
+    $$"dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/$defs/length",
+    $$"dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid",
+    $$"dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is valid against the root",
+    $$"dynamicRef::A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor::The recursive part doesn't need to validate against the root",
+    $$"dynamicRef::A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid",
+    $$"dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid",
+    $$"dynamicRef::A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid",
+    $$"dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of numbers is valid",
+    $$"dynamicRef::An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid",
     "id::URN ref with nested pointer ref::a string is valid",
+    $$"id::order of evaluation: $id and $ref on nested schema::data is invalid against nested sibling",
     $$"id::order of evaluation: $id and $ref on nested schema::data is valid against nested sibling",
+    $$"id::order of evaluation: $id and $ref::data is invalid against first definition",
+    $$"id::order of evaluation: $id and $ref::data is valid against first definition",
+    "id::ref with absolute-path-reference::a string is valid",
+    "id::ref with absolute-path-reference::an integer is invalid",
+    "id::refs with relative uris and defs::invalid on inner field",
+    "id::refs with relative uris and defs::invalid on outer field",
     "id::refs with relative uris and defs::valid on both fields",
+    "id::relative refs with absolute uris and defs::invalid on inner field",
+    "id::relative refs with absolute uris and defs::invalid on outer field",
     "id::relative refs with absolute uris and defs::valid on both fields",
-    "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
+    "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid",
+    $$"unevaluatedItems::unevaluatedItems with $dynamicRef (2020-12)::with no unevaluated items",
+    $$"unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with no unevaluated properties"
 )
 
 /** Kson rejects patterns using Unicode property escapes such as `\p{Letter}` as invalid regexes */

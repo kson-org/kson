@@ -13,6 +13,7 @@ import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.schema.SchemaIdLookup
+import org.kson.schema.descend
 import org.kson.validation.SourceContext
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonString
@@ -21,6 +22,7 @@ import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.TreePointer
 import org.kson.walker.navigate
+import org.kson.walker.nodesAlong
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -103,7 +105,7 @@ object KsonTooling {
      *
      * Checks if the cursor is positioned on a $ref string value, and if so,
      * resolves it to the target location within the same schema document.
-     * Only internal references (starting with #) are supported.
+     * As in validation, a reference names a schema there by its `$id` or by a JSON Pointer.
      *
      * @param schema The pre-parsed schema document, read error-tolerantly so a localized parse error still drives results
      * @param line The zero-based line number
@@ -129,7 +131,11 @@ object KsonTooling {
 
         // Resolve the reference and return its location
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val resolvedRef = schemaIdLookup.resolveRef(refString, schemaIdLookup.rootBaseUri) ?: return emptyList()
+        // a draft 7 `$ref` ignores the `$id` beside it, so it resolves against the base URI its holder is read under
+        val pathToHolder = AstNodeWalker.nodesAlong(schemaAst, documentPointer).dropLast(1)
+            .map { it.toKsonValueOrNull() ?: return emptyList() }
+        val baseUri = schemaIdLookup.root.descend(pathToHolder).resolvedValueBaseUri
+        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return emptyList()
 
         return listOf(
             Range(

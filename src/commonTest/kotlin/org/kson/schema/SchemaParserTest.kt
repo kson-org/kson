@@ -469,6 +469,64 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefUnderARelativeRootIdResolves() {
+        // `x`'s ref and `other`'s `$id` both resolve against the root's `$id`, to sub/other.json
+        val schema = $$"""
+            '$id': 'sub/root.json'
+            properties:
+              x:
+                '$ref': 'other.json'
+                .
+              .
+            definitions:
+              other:
+                '$id': 'other.json'
+                type: string
+        """.trimIndent()
+        assertKsonEnforcesSchema("x: ok", schema, true)
+        assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
+    fun testRootRefBesideTheRootIdResolvesInTheRootDocument() {
+        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
+        // the root.  `a` is still read under the root's `$id`, so its `other.json` names `other`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            '$ref': '#/definitions/a'
+            definitions:
+              a:
+                '$ref': 'other.json'
+                .
+              other:
+                '$id': 'other.json'
+                type: string
+        """.trimIndent()
+        assertKsonEnforcesSchema("ok", schema, true)
+        assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
+    fun testRootRefBesideARelativeRootIdNamesTheSchemaUnderTheRetrievalUri() {
+        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
+        // `$id`.  Resolved against that `$id`, it would name `decoy`
+        val schema = $$"""
+            '$id': 'sub/root.json'
+            '$ref': 'sub/other.json'
+            definitions:
+              target:
+                '$id': 'other.json'
+                type: string
+                .
+              decoy:
+                '$id': 'sub/other.json'
+                type: number
+        """.trimIndent()
+        assertKsonEnforcesSchema("ok", schema, true)
+        assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
     fun testPointerRefUnderARootIdWithAnEmptyFragmentResolves() {
         // `http://example.com/root.json#` identifies the same schema as `http://example.com/root.json`
         val schema = $$"""
