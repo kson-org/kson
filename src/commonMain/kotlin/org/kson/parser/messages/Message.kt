@@ -33,9 +33,7 @@ interface Message {
 
     companion object {
         /**
-         * Returns true if this message results in a fatal parse error. If so it can be marked during
-         * [org.kson.parser.AstMarker.error], otherwise the message is annotated in
-         * [org.kson.jetbrains.parser.KsonValidationAnnotator.apply].
+         * Returns true if this message results in a fatal parse error during the core parse in [org.kson.parser.Parser]
          */
         fun isFatalParseError(message: Message): Boolean =
             message is CoreParseMessage && message.type.severity == MessageSeverity.ERROR
@@ -372,7 +370,7 @@ enum class MessageType(
             return "The integer \"$overflowNumber\" is too large and cannot be represented."
         }
     },
-    SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED(MessageSeverity.WARNING) {
+    SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Allowed Count", "Actual Count")
         }
@@ -383,7 +381,7 @@ enum class MessageType(
             return "Expected at most $allowedCount items, but found $actualCount"
         }
     },
-    SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.WARNING) {
+    SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Property Name", "Schema Title", "Allowed Properties", "Allowed Patterns")
         }
@@ -405,7 +403,7 @@ enum class MessageType(
             return "Additional property '$propertyName' is not allowed$suffix$allowedSuffix"
         }
     },
-    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.WARNING) {
+    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Property Name", "Schema Description")
         }
@@ -416,7 +414,7 @@ enum class MessageType(
             return "Property '$propertyName' must conform to '$schemaDescription'"
         }
     },
-    SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
+    SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -425,7 +423,7 @@ enum class MessageType(
             return "Value must match at least one sub-schema"
         }
     },
-    SCHEMA_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
+    SCHEMA_SUB_SCHEMA_ERRORS(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Sub-schema error summary")
         }
@@ -435,7 +433,7 @@ enum class MessageType(
             return "Value matches none of these sub-schemas:\n$subSchemaErrors"
         }
     },
-    SCHEMA_OTHER_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
+    SCHEMA_OTHER_SUB_SCHEMA_ERRORS(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Sub-schema error summary")
         }
@@ -445,7 +443,7 @@ enum class MessageType(
             return "Other sub-schemas tried:\n$subSchemaErrors"
         }
     },
-    SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_ARRAY_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -455,7 +453,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be an array"
         }
     },
-    SCHEMA_BOOLEAN_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_BOOLEAN_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -465,7 +463,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be true or false"
         }
     },
-    SCHEMA_CONTAINS_VALIDATION_FAILED(MessageSeverity.WARNING) {
+    SCHEMA_CONTAINS_VALIDATION_FAILED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -474,7 +472,7 @@ enum class MessageType(
             return "Array must contain at least one item that matches the contains schema"
         }
     },
-    SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -483,7 +481,7 @@ enum class MessageType(
             return "Property names in a \"dependencies\" list must be strings"
         }
     },
-    SCHEMA_EMPTY_SCHEMA(MessageSeverity.WARNING) {
+    SCHEMA_EMPTY_SCHEMA(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -492,7 +490,7 @@ enum class MessageType(
             return "Schema must not be empty"
         }
     },
-    SCHEMA_ENUM_VALUE_NOT_ALLOWED(MessageSeverity.WARNING) {
+    SCHEMA_ENUM_VALUE_NOT_ALLOWED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Allowed Values")
         }
@@ -502,7 +500,7 @@ enum class MessageType(
             return "Value must be one of: $allowedValues"
         }
     },
-    SCHEMA_FALSE_SCHEMA_ERROR(MessageSeverity.WARNING) {
+    SCHEMA_FALSE_SCHEMA_ERROR(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -511,7 +509,7 @@ enum class MessageType(
             return "Schema always fails"
         }
     },
-    SCHEMA_INTEGER_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_INTEGER_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -521,7 +519,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be an integer"
         }
     },
-    SCHEMA_NOT_VALIDATION_FAILED(MessageSeverity.WARNING) {
+    SCHEMA_NOT_VALIDATION_FAILED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -530,7 +528,7 @@ enum class MessageType(
             return "Value must not match the specified schema"
         }
     },
-    SCHEMA_NUMBER_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_NUMBER_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -540,7 +538,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be a number"
         }
     },
-    SCHEMA_OBJECT_OR_BOOLEAN(MessageSeverity.WARNING) {
+    SCHEMA_OBJECT_OR_BOOLEAN(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -549,7 +547,7 @@ enum class MessageType(
             return "Schema must be an object or boolean"
         }
     },
-    SCHEMA_OBJECT_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_OBJECT_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -559,7 +557,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be an object"
         }
     },
-    SCHEMA_ONE_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
+    SCHEMA_ONE_OF_VALIDATION_FAILED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -568,7 +566,7 @@ enum class MessageType(
             return "Value must match exactly one of the specified schemas"
         }
     },
-    SCHEMA_ONE_OF_MULTIPLE_MATCHES(MessageSeverity.WARNING) {
+    SCHEMA_ONE_OF_MULTIPLE_MATCHES(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Matched schemas")
         }
@@ -578,7 +576,7 @@ enum class MessageType(
             return "Must match only ONE schema, but matched: $matchedSchemas"
         }
     },
-    SCHEMA_REQUIRED_PROPERTY_MISSING(MessageSeverity.WARNING) {
+    SCHEMA_REQUIRED_PROPERTY_MISSING(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Missing Properties")
         }
@@ -588,7 +586,7 @@ enum class MessageType(
             return "Missing required properties: $missingProperties"
         }
     },
-    SCHEMA_STRING_ARRAY_ENTRY_ERROR(MessageSeverity.WARNING) {
+    SCHEMA_STRING_ARRAY_ENTRY_ERROR(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -598,7 +596,7 @@ enum class MessageType(
             return "Schema \"$schemaPropertyName\" array entries must be strings"
         }
     },
-    SCHEMA_STRING_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_STRING_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -608,7 +606,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be a string"
         }
     },
-    SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED(MessageSeverity.WARNING) {
+    SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
         }
@@ -618,7 +616,7 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be a string or embed block"
         }
     },
-    SCHEMA_TYPE_ARRAY_ENTRY_ERROR(MessageSeverity.WARNING) {
+    SCHEMA_TYPE_ARRAY_ENTRY_ERROR(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -627,7 +625,7 @@ enum class MessageType(
             return "Schema \"type\" array entries must be strings"
         }
     },
-    SCHEMA_TYPE_TYPE_ERROR(MessageSeverity.WARNING) {
+    SCHEMA_TYPE_TYPE_ERROR(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -636,7 +634,7 @@ enum class MessageType(
             return "Schema \"type\" must be a string or array of strings"
         }
     },
-    SCHEMA_UNUSABLE(MessageSeverity.WARNING) {
+    SCHEMA_UNUSABLE(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Problem Location", "Schema Problem")
         }
@@ -648,7 +646,7 @@ enum class MessageType(
                     "First problem in the schema, at $schemaProblemLocation: $schemaProblem"
         }
     },
-    SCHEMA_VALUE_MUST_BE_MULTIPLE_OF(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_MUST_BE_MULTIPLE_OF(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Multiple Of Value")
         }
@@ -658,27 +656,29 @@ enum class MessageType(
             return "Value must be multiple of $multipleOfValue"
         }
     },
-    SCHEMA_STRING_LENGTH_TOO_SHORT(MessageSeverity.WARNING) {
+    SCHEMA_STRING_LENGTH_TOO_SHORT(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Length")
+            return listOf("Minimum Length", "Actual Length")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minLength = parsedArgs.getArg("Minimum Length")
-            return "String length must be >= $minLength"
+            val actualLength = parsedArgs.getArg("Actual Length")
+            return "String length must be >= $minLength, but is $actualLength"
         }
     },
-    SCHEMA_STRING_LENGTH_TOO_LONG(MessageSeverity.WARNING) {
+    SCHEMA_STRING_LENGTH_TOO_LONG(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Length")
+            return listOf("Maximum Length", "Actual Length")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxLength = parsedArgs.getArg("Maximum Length")
-            return "String length must be <= $maxLength"
+            val actualLength = parsedArgs.getArg("Actual Length")
+            return "String length must be <= $maxLength, but is $actualLength"
         }
     },
-    SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Property Name", "Expected Types", "Actual Type")
         }
@@ -691,7 +691,7 @@ enum class MessageType(
             return "${prefix}Expected one of: $expectedTypes, but got: $actualType"
         }
     },
-    SCHEMA_ARRAY_ITEMS_NOT_UNIQUE(MessageSeverity.WARNING) {
+    SCHEMA_ARRAY_ITEMS_NOT_UNIQUE(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -700,7 +700,7 @@ enum class MessageType(
             return "Items in this array must be unique"
         }
     },
-    SCHEMA_VALUE_TOO_LARGE(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_TOO_LARGE(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Maximum Value")
         }
@@ -710,7 +710,7 @@ enum class MessageType(
             return "Value must be <= $maximum"
         }
     },
-    SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Exclusive Maximum Value")
         }
@@ -720,7 +720,7 @@ enum class MessageType(
             return "Value must be < $exclusiveMaximum"
         }
     },
-    SCHEMA_VALUE_TOO_SMALL(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_TOO_SMALL(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Minimum Value")
         }
@@ -730,7 +730,7 @@ enum class MessageType(
             return "Value must be >= $minimum"
         }
     },
-    SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Exclusive Minimum Value")
         }
@@ -740,7 +740,7 @@ enum class MessageType(
             return "Value must be > $exclusiveMinimum"
         }
     },
-    SCHEMA_VALUE_NOT_EQUAL_TO_CONST(MessageSeverity.WARNING) {
+    SCHEMA_VALUE_NOT_EQUAL_TO_CONST(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Required Value")
         }
@@ -750,47 +750,51 @@ enum class MessageType(
             return "Value must be exactly equal to $requiredValue"
         }
     },
-    SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
+    SCHEMA_ARRAY_TOO_LONG(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Items")
+            return listOf("Maximum Number Of Items", "Actual Number Of Items")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val maxItems = parsedArgs.getArg("Maximum Items")
-            return "Array length must be <= $maxItems"
+            val maxItems = parsedArgs.getArg("Maximum Number Of Items")
+            val actualItems = parsedArgs.getArg("Actual Number Of Items")
+            return "Array length must be <= $maxItems, but is $actualItems"
         }
     },
-    SCHEMA_ARRAY_TOO_SHORT(MessageSeverity.WARNING) {
+    SCHEMA_ARRAY_TOO_SHORT(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Items")
+            return listOf("Minimum Number Of Items", "Actual Number Of Items")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val minItems = parsedArgs.getArg("Minimum Items")
-            return "Array length must be >= $minItems"
+            val minItems = parsedArgs.getArg("Minimum Number Of Items")
+            val actualItems = parsedArgs.getArg("Actual Number Of Items")
+            return "Array length must be >= $minItems, but is $actualItems"
         }
     },
-    SCHEMA_OBJECT_TOO_MANY_PROPERTIES(MessageSeverity.WARNING) {
+    SCHEMA_OBJECT_TOO_MANY_PROPERTIES(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Properties")
+            return listOf("Maximum Number Of Properties", "Actual Number Of Properties")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val maxProperties = parsedArgs.getArg("Maximum Properties")
-            return "Object must have <= $maxProperties properties"
+            val maxProperties = parsedArgs.getArg("Maximum Number Of Properties")
+            val actualProperties = parsedArgs.getArg("Actual Number Of Properties")
+            return "Object must have <= $maxProperties properties, but has $actualProperties"
         }
     },
-    SCHEMA_OBJECT_TOO_FEW_PROPERTIES(MessageSeverity.WARNING) {
+    SCHEMA_OBJECT_TOO_FEW_PROPERTIES(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Properties")
+            return listOf("Minimum Number Of Properties", "Actual Number Of Properties")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val minProperties = parsedArgs.getArg("Minimum Properties")
-            return "Object must have >= $minProperties properties"
+            val minProperties = parsedArgs.getArg("Minimum Number Of Properties")
+            val actualProperties = parsedArgs.getArg("Actual Number Of Properties")
+            return "Object must have >= $minProperties properties, but has $actualProperties"
         }
     },
-    SCHEMA_STRING_PATTERN_MISMATCH(MessageSeverity.WARNING) {
+    SCHEMA_STRING_PATTERN_MISMATCH(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Pattern")
         }
@@ -800,7 +804,7 @@ enum class MessageType(
             return "String must match pattern: $pattern"
         }
     },
-    SCHEMA_MISSING_REQUIRED_DEPENDENCIES(MessageSeverity.WARNING) {
+    SCHEMA_MISSING_REQUIRED_DEPENDENCIES(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Required by", "Missing property")
         }
@@ -811,7 +815,7 @@ enum class MessageType(
             return "Property '$missingProperty' is not provided, but it is required by '$requiredBy'"
         }
     },
-    SCHEMA_DEPENDENCIES_SCHEMA_ERROR(MessageSeverity.WARNING) {
+    SCHEMA_DEPENDENCIES_SCHEMA_ERROR(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return listOf("Required by", "Schema error")
         }

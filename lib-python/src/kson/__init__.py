@@ -1180,6 +1180,9 @@ class Analysis(KotlinObjectBase):
     def kson_value(
         self,
     ) -> Optional[KsonValue]:
+        """The parsed value of the source, or null if the document has errors, including schema violations
+        if a `schemaValidator` was passed to [Kson.analyze].
+        """
 
 
         jni_ref = self._jni_ref

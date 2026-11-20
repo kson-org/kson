@@ -8,7 +8,7 @@ import org.kson.value.*
 /**
  * Json Schema `type:` validator
  */
-class TypeValidator(private val allowedTypes: List<String>, private val propertyName: String? = null) {
+internal class TypeValidator(private val allowedTypes: List<String>, private val propertyName: String? = null) {
   constructor(type: String, propertyName: String? = null) : this(listOf(type), propertyName)
 
   /**

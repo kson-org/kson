@@ -5,7 +5,7 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonNumberValidator
 
-class ExclusiveMaximumValidator(private val exclusiveMaximum: Double) : JsonNumberValidator() {
+internal class ExclusiveMaximumValidator(private val exclusiveMaximum: Double) : JsonNumberValidator() {
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (number >= exclusiveMaximum) {

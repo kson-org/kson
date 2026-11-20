@@ -7,7 +7,7 @@ import org.kson.schema.JsonNumberValidator
 import kotlin.math.abs
 import kotlin.math.max
 
-class MultipleOfValidator(private val multipleOf: Double) : JsonNumberValidator() {
+internal class MultipleOfValidator(private val multipleOf: Double) : JsonNumberValidator() {
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (multipleOf != 0.0) {
