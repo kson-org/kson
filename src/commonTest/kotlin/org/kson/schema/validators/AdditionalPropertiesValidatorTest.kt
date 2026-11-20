@@ -28,7 +28,7 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
             listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
         )
 
-        assertEquals("Additional property 'unknownProp' is not allowed", errors[0].message.toString())
+        assertEquals("Additional property 'unknownProp' is not allowed. Allowed properties: foo", errors[0].message.toString())
     }
 
     @Test
@@ -52,7 +52,102 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
             listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
         )
 
-        assertEquals("Additional property 'unknownProp' is not allowed in TaskModel", errors[0].message.toString())
+        assertEquals("Additional property 'unknownProp' is not allowed in TaskModel. Allowed properties: foo", errors[0].message.toString())
+    }
+
+    @Test
+    fun testErrorMessageListsAllowedPropertiesInSchemaOrder() {
+        val errors = assertKsonSchemaErrors(
+            """
+                {
+                    "unknownProp": 1
+                }
+            """,
+            """
+                {
+                    "properties": {
+                        "b": {},
+                        "c": {},
+                        "a": {}
+                    },
+                    "additionalProperties": false
+                }
+            """,
+            listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
+        )
+
+        assertEquals("Additional property 'unknownProp' is not allowed. Allowed properties: b, c, a", errors[0].message.toString())
+    }
+
+    @Test
+    fun testErrorMessageOmitsAllowedPropertiesWhenNoneDeclared() {
+        val errors = assertKsonSchemaErrors(
+            """
+                {
+                    "unknownProp": 1
+                }
+            """,
+            """
+                {
+                    "additionalProperties": false
+                }
+            """,
+            listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
+        )
+
+        assertEquals("Additional property 'unknownProp' is not allowed", errors[0].message.toString())
+    }
+
+    @Test
+    fun testErrorMessageListsPatternsWhenNoNamedProperties() {
+        val errors = assertKsonSchemaErrors(
+            """
+                {
+                    "x-foo": 1,
+                    "unknownProp": 2
+                }
+            """,
+            """
+                {
+                    "title": "TaskModel",
+                    "patternProperties": {
+                        "^x-": {}
+                    },
+                    "additionalProperties": false
+                }
+            """,
+            listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
+        )
+
+        assertEquals("Additional property 'unknownProp' is not allowed in TaskModel. Property names must match '^x-'", errors[0].message.toString())
+    }
+
+    @Test
+    fun testErrorMessageListsNamesAndPatterns() {
+        val errors = assertKsonSchemaErrors(
+            """
+                {
+                    "foo": 1,
+                    "x-foo": 2,
+                    "unknownProp": 3
+                }
+            """,
+            """
+                {
+                    "properties": {
+                        "foo": {}
+                    },
+                    "patternProperties": {
+                        "^x-": {},
+                        "^y-": {}
+                    },
+                    "additionalProperties": false
+                }
+            """,
+            listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
+        )
+
+        assertEquals("Additional property 'unknownProp' is not allowed. Allowed properties: foo, or names matching '^x-' or '^y-'", errors[0].message.toString())
     }
 
     @Test

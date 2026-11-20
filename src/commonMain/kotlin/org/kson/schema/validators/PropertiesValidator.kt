@@ -66,11 +66,22 @@ internal sealed interface AdditionalPropertiesValidator {
     fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
-internal data class AdditionalPropertiesBooleanValidator(val allowed: Boolean, private val schemaTitle: String?) : AdditionalPropertiesValidator {
+internal data class AdditionalPropertiesBooleanValidator(
+    val allowed: Boolean,
+    private val schemaTitle: String?,
+    private val allowedPropertyNames: List<String>,
+    private val allowedPatterns: List<String>,
+) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink, sourceContext: SourceContext) {
         if (!allowed && remainingProperties.isNotEmpty()) {
+            val allowedPropertiesString = allowedPropertyNames.joinToString(", ")
+            val allowedPatternsString = allowedPatterns.joinToString(" or ") { "'$it'" }
             remainingProperties.forEach { (_, property) ->
-                messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(property.propName.value, schemaTitle ?: ""))
+                messageSink.error(
+                    property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(
+                        property.propName.value, schemaTitle ?: "", allowedPropertiesString, allowedPatternsString
+                    )
+                )
             }
         }
     }

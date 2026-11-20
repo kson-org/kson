@@ -72,8 +72,8 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
         assertEquals(
             "Other sub-schemas tried:\n" +
                 "- Group:\n" +
-                "    - Additional property 'mode' is not allowed (1:1)\n" +
-                "    - Additional property 'action' is not allowed (2:1)\n" +
+                "    - Additional property 'mode' is not allowed. Allowed properties: name, members (1:1)\n" +
+                "    - Additional property 'action' is not allowed. Allowed properties: name, members (2:1)\n" +
                 "    - Missing required properties: members (1:1)",
             errors[2].message.toString()
         )

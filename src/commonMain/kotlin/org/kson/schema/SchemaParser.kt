@@ -355,8 +355,9 @@ internal object SchemaParser {
     /**
      * Parses the `properties` / `patternProperties` / `additionalProperties` cluster. These three
      * keywords coordinate to produce at most one [PropertiesValidator]. Returns `null` when none of
-     * the three keywords are present. [title] is the schema's `title`, forwarded to
-     * [AdditionalPropertiesBooleanValidator] when `additionalProperties` is a boolean.
+     * the three keywords are present. When `additionalProperties` is a boolean, the schema's [title],
+     * declared property names, and `patternProperties` patterns are forwarded to
+     * [AdditionalPropertiesBooleanValidator] so its error can describe what is allowed.
      */
     private fun parsePropertyValidators(
         schemaProperties: Map<String, KsonValue>,
@@ -396,7 +397,11 @@ internal object SchemaParser {
 
         val additionalPropertiesValidator = schemaProperties["additionalProperties"]?.let { additionalProperties ->
             when (additionalProperties) {
-                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value, title)
+                is KsonBoolean -> AdditionalPropertiesBooleanValidator(
+                    additionalProperties.value,
+                    title,
+                    propertySchemas.orEmpty().keys.map { it.value },
+                    compiledPatterns.orEmpty().map { it.regex.pattern })
                 else -> parseSchemaElement(additionalProperties, messageSink, updatedBaseUri, idLookup)
                     ?.let { AdditionalPropertiesSchemaValidator(it) }
             }
