@@ -154,12 +154,11 @@ export function startKsonServer(
             // Document formatting
             documentFormattingProvider: true,
 
-            // Diagnostics (pull model preferred)
-            diagnosticProvider: {
+            diagnosticProvider: textDocumentService.clientPullsDiagnostics ? {
                 identifier: distributionId,
                 interFileDependencies: false,
                 workspaceDiagnostics: false
-            } as DiagnosticRegistrationOptions,
+            } as DiagnosticRegistrationOptions : undefined,
 
             // Code lens
             codeLensProvider: {

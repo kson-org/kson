@@ -19,7 +19,7 @@ import {RemoteWorkspace} from "vscode-languageserver";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 import {SchemaProvider} from "../../../core/schema/SchemaProvider";
 import {FileSystemSchemaProvider} from "../../../core/schema/FileSystemSchemaProvider";
-import {pos} from "../../TestHelpers.js";
+import {pos, PULL_DIAGNOSTICS_CAPABILITIES} from "../../TestHelpers.js";
 import {URI} from "vscode-uri";
 import * as fs from "fs";
 import * as os from "os";
@@ -44,31 +44,13 @@ class WorkspaceConnectionStub extends ConnectionStub {
     }
 }
 
-/**
- * Captures the client-facing traffic a schema change produces: the
- * `kson/schemaConfigurationChanged` notification, the diagnostic refresh
- * request, and the window messages the schema commands report with.
- */
 class SchemaConnectionStub extends ConnectionStub {
-    readonly notifications: string[] = [];
-    readonly requests: string[] = [];
-
     constructor() {
         super();
         this.window = {
             showInformationMessage: () => Promise.resolve(undefined),
             showErrorMessage: () => Promise.resolve(undefined)
         } as any;
-    }
-
-    override sendNotification(method: unknown): Promise<void> {
-        this.notifications.push(String(method));
-        return Promise.resolve();
-    }
-
-    override sendRequest<R>(method: unknown): Promise<R> {
-        this.requests.push(String(method));
-        return Promise.resolve(undefined as R);
     }
 }
 
@@ -80,7 +62,9 @@ function createTestSetup(
     schemaProvider?: SchemaProvider
 ) {
     const documentsManager = new KsonDocumentsManager(schemaProvider);
-    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, workspaceRoot, TEST_DISTRIBUTION_ID, {});
+    const service = new KsonTextDocumentService(
+        documentsManager, createCommandExecutor, workspaceRoot, TEST_DISTRIBUTION_ID, PULL_DIAGNOSTICS_CAPABILITIES
+    );
     
     documentsManager.listen(connection);
     service.connect(connection);

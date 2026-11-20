@@ -26,7 +26,8 @@ import {
     FoldingRange,
     FoldingRangeParams,
     SelectionRange,
-    SelectionRangeParams
+    SelectionRangeParams,
+    PublishDiagnosticsParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver";
@@ -65,6 +66,10 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public onDefinitionHandler: ServerRequestHandler<DefinitionParams, Definition | DefinitionLink[] | undefined | null, Location[] | DefinitionLink[], void>;
     public foldingRangeHandler: ServerRequestHandler<FoldingRangeParams, FoldingRange[] | null | undefined, FoldingRange[], void>;
     public selectionRangeHandler: ServerRequestHandler<SelectionRangeParams, SelectionRange[] | null | undefined, SelectionRange[], void>;
+
+    public readonly publishedDiagnostics: PublishDiagnosticsParams[] = [];
+    public readonly notifications: string[] = [];
+    public readonly requests: string[] = [];
 
     languages: Languages;
 
@@ -179,6 +184,21 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     override onSelectionRanges(handler: ServerRequestHandler<SelectionRangeParams, SelectionRange[] | null | undefined, SelectionRange[], void>): Disposable {
         this.selectionRangeHandler = handler;
         return NOOP_DISPOSABLE;
+    }
+
+    override sendDiagnostics(params: PublishDiagnosticsParams): Promise<void> {
+        this.publishedDiagnostics.push(params);
+        return Promise.resolve();
+    }
+
+    override sendNotification(method: unknown): Promise<void> {
+        this.notifications.push(String(method));
+        return Promise.resolve();
+    }
+
+    override sendRequest<R>(method: unknown): Promise<R> {
+        this.requests.push(String(method));
+        return Promise.resolve(undefined as R);
     }
 
     async requestFormatting(uri: string, tabSize = 2, insertSpaces = true) {

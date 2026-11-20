@@ -16,7 +16,8 @@ import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentSe
 import {FullDocumentDiagnosticReport} from "vscode-languageserver";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 import {ksonSettingsWithDefaults} from "../../../core/KsonSettings.js";
-import {pos, SCHEMA_URI, SchemaProviderTestStub, triggeredBy} from "../../TestHelpers";
+import {notifySchemaChange} from "../../../core/schema/notifySchemaChange.js";
+import {pos, PULL_DIAGNOSTICS_CAPABILITIES, SCHEMA_URI, SchemaProviderTestStub, triggeredBy} from "../../TestHelpers";
 
 describe('KsonTextDocumentService', () => {
     const TEST_DISTRIBUTION_ID = 'test-ns';
@@ -26,18 +27,26 @@ describe('KsonTextDocumentService', () => {
     let documentsManager: KsonDocumentsManager;
     const TEST_URI = 'test://test.kson';
 
-    beforeEach(() => {
+    function startService(capabilities: ClientCapabilities) {
         connection = new ConnectionStub();
         schemaProvider = new SchemaProviderTestStub();
         documentsManager = new KsonDocumentsManager(schemaProvider);
-        service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_DISTRIBUTION_ID, {});
+        service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_DISTRIBUTION_ID, capabilities);
 
         documentsManager.listen(connection);
         service.connect(connection)
-    });
+    }
 
-    function openDocument(content: string) {
-        const document = TextDocument.create(TEST_URI, 'kson', 1, content);
+    function reconnect() {
+        connection = new ConnectionStub();
+        documentsManager.listen(connection);
+        service.connect(connection);
+    }
+
+    beforeEach(() => startService(PULL_DIAGNOSTICS_CAPABILITIES));
+
+    function openDocument(content: string, uri = TEST_URI) {
+        const document = TextDocument.create(uri, 'kson', 1, content);
         const params: DidOpenTextDocumentParams = {
             textDocument: {
                 uri: document.uri,
@@ -48,6 +57,14 @@ describe('KsonTextDocumentService', () => {
         };
         connection.didOpenHandler(params);
         return document;
+    }
+
+    function changeDocument(content: string, version: number) {
+        connection.didChangeHandler({textDocument: {uri: TEST_URI, version}, contentChanges: [{text: content}]});
+    }
+
+    function closeDocument() {
+        connection.didCloseHandler({textDocument: {uri: TEST_URI}});
     }
 
     describe('Formatting', () => {
@@ -132,6 +149,131 @@ describe('KsonTextDocumentService', () => {
             openDocument('key: "value"');
             const result = await connection.requestDiagnostics(TEST_URI) as FullDocumentDiagnosticReport;
             assert.strictEqual(result.items.length, 0);
+        });
+
+        it('should ask a client that pulls them to pull again after a schema change', () => {
+            notifySchemaChange(connection, documentsManager);
+
+            assert.deepStrictEqual(connection.requests, ['workspace/diagnostic/refresh']);
+        });
+
+        it('should not ask a client that pulls them to pull again if it did not declare support for that', () => {
+            startService({textDocument: {diagnostic: {}}});
+
+            notifySchemaChange(connection, documentsManager);
+
+            assert.deepStrictEqual(connection.requests, []);
+        });
+
+        it('should ask a client that pulls them to pull again only once, even if the service connected twice', () => {
+            reconnect();
+
+            notifySchemaChange(connection, documentsManager);
+
+            assert.deepStrictEqual(connection.requests, ['workspace/diagnostic/refresh']);
+        });
+
+        it('should publish nothing to a client that pulls them', () => {
+            openDocument('name: "value" extra');
+            changeDocument('name: "value"', 2);
+            notifySchemaChange(connection, documentsManager);
+            closeDocument();
+
+            assert.deepStrictEqual(connection.publishedDiagnostics, []);
+        });
+
+        it('should log the error when a client that pulls them fails the request to pull again', async () => {
+            const logged: string[] = [];
+            connection.console.error = message => { logged.push(message); };
+            connection.sendRequest = () => Promise.reject(new Error('client refused'));
+
+            notifySchemaChange(connection, documentsManager);
+            await new Promise(resolve => setImmediate(resolve));
+
+            assert.deepStrictEqual(logged, ['Error requesting diagnostics refresh: Error: client refused']);
+        });
+
+        describe('for a client that cannot pull them', () => {
+            const OTHER_URI = 'test://other.kson';
+
+            beforeEach(() => startService({}));
+
+            it('should not ask it to pull them after a schema change', () => {
+                notifySchemaChange(connection, documentsManager);
+
+                assert.deepStrictEqual(connection.requests, []);
+            });
+
+            it('should publish to it, rather than ask it to pull them again, even if it supports that request', () => {
+                startService({workspace: {diagnostics: {refreshSupport: true}}});
+                openDocument('name: "value" extra');
+
+                notifySchemaChange(connection, documentsManager);
+
+                assert.deepStrictEqual(connection.requests, []);
+                assert.deepStrictEqual(
+                    connection.publishedDiagnostics.map(({uri, diagnostics}) => [uri, diagnostics.length]),
+                    [[TEST_URI, 1], [TEST_URI, 1]],
+                    'published when the document opened and again after the schema change'
+                );
+            });
+
+            it('should publish a document\'s diagnostics when it opens and when it changes', () => {
+                openDocument('name: "value" extra');
+                changeDocument('name: "value"', 2);
+
+                assert.strictEqual(connection.publishedDiagnostics.length, 2);
+                const [opened, changed] = connection.publishedDiagnostics;
+                assert.strictEqual(opened.uri, TEST_URI);
+                assert.strictEqual(opened.version, 1);
+                assert.deepStrictEqual(
+                    opened.diagnostics.map(diagnostic => [diagnostic.severity, diagnostic.source]),
+                    [[DiagnosticSeverity.Error, TEST_DISTRIBUTION_ID]],
+                    'the trailing token is an error'
+                );
+                assert.deepStrictEqual(changed, {uri: TEST_URI, version: 2, diagnostics: []});
+            });
+
+            it('should clear a document\'s diagnostics when it closes', () => {
+                openDocument('name: "value" extra');
+                closeDocument();
+
+                assert.strictEqual(connection.publishedDiagnostics.length, 2);
+                assert.deepStrictEqual(connection.publishedDiagnostics[1], {uri: TEST_URI, diagnostics: []});
+            });
+
+            it('should republish every open document\'s diagnostics after a schema change', () => {
+                openDocument('count: three');
+                openDocument('anything: goes', OTHER_URI);
+                schemaProvider.addSchema(TEST_URI, TextDocument.create(SCHEMA_URI, 'kson', 1, `{
+                    type: object
+                    properties: {
+                        count: { type: integer }
+                    }
+                }`));
+
+                notifySchemaChange(connection, documentsManager);
+
+                assert.deepStrictEqual(
+                    connection.publishedDiagnostics.map(({uri, diagnostics}) => [uri, diagnostics.length]),
+                    [[TEST_URI, 0], [OTHER_URI, 0], [TEST_URI, 1], [OTHER_URI, 0]],
+                    'published as each opens, then both again; only the document under the new schema breaks it'
+                );
+            });
+
+            it('should publish diagnostics only once for each change, even if the service connected twice', () => {
+                reconnect();
+
+                openDocument('name: "value" extra');
+                notifySchemaChange(connection, documentsManager);
+                closeDocument();
+
+                assert.deepStrictEqual(
+                    connection.publishedDiagnostics.map(({uri, diagnostics}) => [uri, diagnostics.length]),
+                    [[TEST_URI, 1], [TEST_URI, 1], [TEST_URI, 0]],
+                    'published when the document opened, again after the schema change, and cleared when it closed'
+                );
+            });
         });
     });
 
@@ -364,6 +506,13 @@ describe('KsonTextDocumentService', () => {
             const result = await connection.requestDiagnostics(TEST_URI) as FullDocumentDiagnosticReport;
             assert.strictEqual(result.kind, 'full');
             assert.strictEqual(result.items.length, 0);
+        });
+
+        it('should publish empty diagnostics when diagnosticService throws, to a client that cannot pull them', () => {
+            startService({});
+            breakService('diagnosticService');
+            openDocument('name: "value" extra');
+            assert.deepStrictEqual(connection.publishedDiagnostics, [{uri: TEST_URI, version: 1, diagnostics: []}]);
         });
 
         it('should return [] when codeLensService throws', async () => {
