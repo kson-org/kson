@@ -1,29 +1,46 @@
 package org.kson.schema
 
 import org.kson.KsonCore
+import org.kson.parser.messages.MessageType
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
- * Tests for [SchemaIdLookup.resolveRefIfPresent].
+ * Tests for [SchemaIdLookup.resolveRef] and [SchemaIdLookup.resolveRefIfPresent].
  */
 class SchemaIdLookupTest {
 
+    /** Resolves [ref] as [schema]'s root `$ref` would be. */
+    private fun resolveRef(schema: String, ref: String): RefResolution {
+        val lookup = SchemaIdLookup(KsonCore.parseToAst(schema).ksonValue as KsonObject)
+        return lookup.resolveRef(ref, lookup.root.resolvedValueBaseUri)
+    }
+
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
-        val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
-        return SchemaIdLookup(root).resolveRefIfPresent(field, "")
+        val properties = root.propertyLookup.getValue("properties") as KsonObject
+        val lookup = SchemaIdLookup(root)
+        val field = lookup.root.descend(listOf(properties, properties.propertyLookup.getValue("field")))
+        return lookup.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
-    private fun resolveField(schema: String): Pair<String?, String> {
-        val resolved = resolve(schema)
+    private fun resolveField(schema: String): Pair<String?, String> = titleAndBaseUri(resolve(schema))
+
+    /** Resolves [schema]'s root, read under the URI it was retrieved from, returning its `title` and base URI. */
+    private fun resolveRoot(schema: String): Pair<String?, String> {
+        val lookup = SchemaIdLookup(KsonCore.parseToAst(schema).ksonValue as KsonObject)
+        return titleAndBaseUri(lookup.resolveRefIfPresent(lookup.root.resolvedValue, lookup.root.resolvedValueBaseUri))
+    }
+
+    private fun titleAndBaseUri(resolved: ResolvedRef): Pair<String?, String> {
         val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
-        return title?.value to resolved.resolvedValueBaseUri
+        return title?.value to resolved.resolvedValueBaseUri.toString()
     }
 
     /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
@@ -97,5 +114,264 @@ class SchemaIdLookupTest {
         """
         assertEquals("first" to "", resolveField(schema))
         assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun stopsAtARefWithAMalformedPointer() {
+        // `~2` is no JSON Pointer escape, so `first`'s `$ref` names no schema and the chain ends at `first`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/$defs/first" } },
+              "$defs": {
+                "first": { "$ref": "#/$defs/a~2b", "title": "first" }
+              }
+            }
+        """
+        assertEquals("first" to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun distinguishesNotFoundFromMalformedPointer() {
+        // `~2` is not a JSON Pointer escape, so the pointer is malformed even though its document is missing
+        val schema = $$"""
+            '$defs':
+              target:
+                title: target
+        """.trimIndent()
+        val malformed = RefResolution.MalformedPointer(MessageType.JSON_POINTER_INVALID_ESCAPE.create("2"))
+
+        assertIs<RefResolution.Found>(resolveRef(schema, $$"#/$defs/target"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, $$"#/$defs/missing"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, "missing.json"))
+        assertEquals(malformed, resolveRef(schema, $$"#/$defs/a~2b"))
+        assertEquals(malformed, resolveRef(schema, "missing.json#/a~2b"))
+    }
+
+    @Test
+    fun resolvesAPercentEncodedUtf8Pointer() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/$defs/caf%C3%A9" } },
+              "$defs": { "café": { "title": "café" } }
+            }
+        """
+        assertEquals("café" to "", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAPointerWithinTheSchemaItsRefNames() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "other.json#/$defs/target" } },
+              "$defs": {
+                "target": { "title": "root target" },
+                "other": {
+                  "$id": "other.json",
+                  "$defs": { "target": { "title": "other target" } }
+                }
+              }
+            }
+        """
+        assertEquals("other target" to "other.json", resolveField(schema))
+    }
+
+    @Test
+    fun readsASchemaFoundByItsIdUnderTheBaseUriItSitsUnder() {
+        // `anchored` sits in other.json, so it is read under other.json, not under root.json, which refers to it
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            properties:
+              field:
+                '$ref': 'other.json#anchored'
+                .
+              .
+            '$defs':
+              other:
+                '$id': 'other.json'
+                '$defs':
+                  anchored:
+                    '$id': '#anchored'
+                    title: anchored
+        """.trimIndent()
+        assertEquals("anchored" to "http://example.com/other.json", resolveField(schema))
+    }
+
+    @Test
+    fun doesNotResolveAPlainNameFragmentToAnIdWithoutOne() {
+        // `#target` names a fragment of this document, which no `$id` declares; the `$id` `target` names another
+        // document
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#target" } },
+              "$defs": {
+                "target": { "$id": "target", "title": "target" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun doesNotReadAColonInARelativePathAsAScheme() {
+        // against no base, `./a:b` is the relative path `a:b`, while the `$id` `a:b` is a URI with the scheme `a`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "./a:b" } },
+              "$defs": {
+                "target": { "$id": "a:b", "title": "target" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun resolvesAPointerWithinASchemaWithARelativeId() {
+        // `other`'s `$id` resolves against the root's once, so `a` is read under sub/other.json rather than
+        // sub/sub/other.json
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
+              "$defs": {
+                "other": {
+                  "$id": "sub/other.json",
+                  "$defs": { "a": { "title": "a" } }
+                }
+              }
+            }
+        """
+        assertEquals("a" to "http://example.com/sub/other.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAPointerWithinASchemaWithARelativeIdWithoutARootId() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
+              "$defs": {
+                "other": {
+                  "$id": "sub/other.json",
+                  "$defs": { "a": { "title": "a" } }
+                }
+              }
+            }
+        """
+        assertEquals("a" to "sub/other.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesARefUnderARelativeRootId() {
+        // the ref and `other`'s `$id` both resolve against the root's `$id`, to sub/other.json
+        val schema = $$"""
+            '$id': 'sub/root.json'
+            properties:
+              field:
+                '$ref': 'other.json'
+                .
+              .
+            '$defs':
+              other:
+                '$id': 'other.json'
+                title: other
+        """.trimIndent()
+        assertEquals("other" to "sub/root.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesARootRefBesideTheRootIdInTheRootDocument() {
+        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
+        // the root.  `target` is still read under the root's `$id`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            '$ref': '#/$defs/target'
+            '$defs':
+              target:
+                title: target
+        """.trimIndent()
+        assertEquals("target" to "http://example.com/root.json", resolveRoot(schema))
+    }
+
+    @Test
+    fun resolvesARefWithoutAFragmentToAnIdWithAnEmptyOne() {
+        // `other.json#` identifies the same schema as `other.json`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "other.json" } },
+              "$defs": {
+                "other": { "$id": "other.json#", "title": "other" }
+              }
+            }
+        """
+        assertEquals("other" to "", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAPointerWithinASchemaWhoseIdHasAnEmptyFragment() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "other.json#/$defs/target" } },
+              "$defs": {
+                "other": {
+                  "$id": "other.json#",
+                  "$defs": { "target": { "title": "target" } }
+                }
+              }
+            }
+        """
+        assertEquals("target" to "other.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesARefWithDotSegments() {
+        val schema = $$"""
+            {
+              "$id": "http://example.com/schemas/root.json",
+              "properties": { "field": { "$ref": "../shared/defs.json#/$defs/target" } },
+              "$defs": {
+                "shared": {
+                  "$id": "http://example.com/shared/defs.json",
+                  "$defs": { "target": { "title": "target" } }
+                }
+              }
+            }
+        """
+        assertEquals("target" to "http://example.com/shared/defs.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesANetworkPathRef() {
+        // the ref names a host of its own, keeping only the base's scheme
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "//other.example/target.json" } },
+              "$defs": {
+                "target": { "$id": "http://other.example/target.json", "title": "target" }
+              }
+            }
+        """
+        assertEquals("target", resolveField(schema).first)
+    }
+
+    @Test
+    fun resolvesAUrnRefToAUrnIdReadUnderAnotherBase() {
+        // a URN takes nothing from the base it is read under, so the ref and the `$id` name the same schema
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "urn:example:target" } },
+              "$defs": {
+                "nested": {
+                  "$id": "http://example.com/nested/nested.json",
+                  "$defs": { "target": { "$id": "urn:example:target", "title": "target" } }
+                }
+              }
+            }
+        """
+        assertEquals("target", resolveField(schema).first)
     }
 }

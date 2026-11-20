@@ -1,11 +1,10 @@
 package org.kson.schema
 
 import org.kson.KsonCore
+import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
-import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -16,7 +15,7 @@ class SchemaProgressTest {
 
     private fun progressTowards(schema: String): SchemaProgress {
         val node = kson(schema)
-        return SchemaProgress(node, "", SchemaIdLookup(node))
+        return SchemaProgress(node, UriReference.parse(""), SchemaIdLookup(node))
     }
 
     private fun locationOf(property: String, document: KsonValue) =
@@ -50,11 +49,11 @@ class SchemaProgressTest {
         )
         val idLookup = SchemaIdLookup(root)
 
-        val underItsId = SchemaProgress(root, "https://example.org/root", idLookup)
+        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), idLookup)
         assertTrue(underItsId.accepts(kson("3")))
         assertTrue(underItsId.rejects(kson("three")))
 
-        val elsewhere = SchemaProgress(root, "https://example.org/elsewhere", idLookup)
+        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), idLookup)
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }
@@ -62,21 +61,18 @@ class SchemaProgressTest {
     @Test
     fun whatIsNoSchemaNeitherAcceptsNorRejects() {
         val circle = kson("circle")
+        val noSchemas = listOf(
+            "3",
+            $$"'$ref': '#/$defs/missing'",
+            // `~2` is no JSON Pointer escape
+            $$"'$ref': '#/$defs/a~2b'"
+        )
 
-        for (noSchema in listOf("3", $$"'$ref': '#/$defs/missing'")) {
+        for (noSchema in noSchemas) {
             val progress = progressTowards(noSchema)
 
             assertFalse(progress.accepts(circle), "accepts: $noSchema")
             assertFalse(progress.rejects(circle), "rejects: $noSchema")
-        }
-    }
-
-    @Test
-    fun aMalformedRefPointerThrows() {
-        val malformedPointer = kson($$"'$ref': '#/$defs/a~2b'")
-
-        assertFailsWith<InvalidJsonPointerException> {
-            SchemaProgress(malformedPointer, "", SchemaIdLookup(malformedPointer))
         }
     }
 

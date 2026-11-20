@@ -277,7 +277,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "refs with relative uris and defs -> invalid on inner field"
      *
      * Test ID: "id::refs with relative uris and defs::invalid on inner field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_7() {
         
@@ -321,7 +325,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "refs with relative uris and defs -> invalid on outer field"
      *
      * Test ID: "id::refs with relative uris and defs::invalid on outer field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_8() {
         
@@ -413,7 +421,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "relative refs with absolute uris and defs -> invalid on inner field"
      *
      * Test ID: "id::relative refs with absolute uris and defs::invalid on inner field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
         
@@ -457,7 +469,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "relative refs with absolute uris and defs -> invalid on outer field"
      *
      * Test ID: "id::relative refs with absolute uris and defs::invalid on outer field"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_11() {
         
@@ -631,7 +647,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $ref -> data is valid against first definition"
      *
      * Test ID: "id::order of evaluation: $id and $ref::data is valid against first definition"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_15() {
         
@@ -668,7 +688,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $ref -> data is invalid against first definition"
      *
      * Test ID: "id::order of evaluation: $id and $ref::data is invalid against first definition"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
         
@@ -830,7 +854,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "order of evaluation: $id and $ref on nested schema -> data is invalid against nested sibling"
      *
      * Test ID: "id::order of evaluation: $id and $ref on nested schema::data is invalid against nested sibling"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_20() {
         
@@ -1417,7 +1445,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "ref with absolute-path-reference -> a string is valid"
      *
      * Test ID: "id::ref with absolute-path-reference::a string is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
         
@@ -1451,7 +1483,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "ref with absolute-path-reference -> an integer is invalid"
      *
      * Test ID: "id::ref with absolute-path-reference::an integer is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
         

@@ -3,7 +3,7 @@ package org.kson.schema
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
+import org.kson.uri.UriReference
 import org.kson.value.*
 
 /**
@@ -15,15 +15,8 @@ internal object SchemaParser {
      * See [parseSchemaElement] for sub-schema parsing.
      */
     fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
-        // Determine the initial base URI from the root schema's $id if present
-        val initialBaseUri = if (schemaRootValue is KsonObject) {
-            extractId(schemaRootValue, messageSink) ?: ""
-        } else {
-            ""
-        }
-
         val idLookup = SchemaIdLookup(schemaRootValue)
-        return parseSchemaElement(schemaRootValue, messageSink, initialBaseUri, idLookup)
+        return parseSchemaElement(schemaRootValue, messageSink, idLookup.root.resolvedValueBaseUri, idLookup)
     }
 
     /**
@@ -37,7 +30,7 @@ internal object SchemaParser {
     fun parseSchemaElement(
         schemaValue: KsonValue,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -54,7 +47,7 @@ internal object SchemaParser {
     private fun parseObjectSchema(
         schemaObject: KsonObject,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -66,13 +59,8 @@ internal object SchemaParser {
             is RefOutcome.NotPresent -> Unit // fall through to parse the remaining keywords
         }
 
-        // Check if this schema defines a new $id and update base URI accordingly
-        val idString = extractId(schemaObject, messageSink)
-        val updatedBaseUri = if (idString != null) {
-            resolveUri(idString, currentBaseUri).toString()
-        } else {
-            currentBaseUri
-        }
+        reportNonStringId(schemaObject, messageSink)
+        val updatedBaseUri = currentBaseUri.withIdOf(schemaObject)
 
         val metadata = parseMetadata(schemaProperties, updatedBaseUri, idLookup, messageSink)
         val typeValidator = parseTypeValidator(schemaProperties, propertyName, messageSink)
@@ -176,7 +164,7 @@ internal object SchemaParser {
     private inline fun parseSubSchemaValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (JsonSchema) -> JsonSchemaValidator,
@@ -195,7 +183,7 @@ internal object SchemaParser {
     private fun parseSchemaListValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (List<JsonSchema>) -> JsonSchemaValidator,
@@ -234,7 +222,7 @@ internal object SchemaParser {
      */
     private fun tryResolveRef(
         schemaProperties: Map<String, KsonValue>,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): RefOutcome {
@@ -243,15 +231,18 @@ internal object SchemaParser {
             messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             return RefOutcome.NotPresent
         }
-        val resolvedValue = idLookup.resolveRef(refString.value, currentBaseUri)
-        if (resolvedValue == null) {
-            messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
-            return RefOutcome.Failed
+        when (val resolution = idLookup.resolveRef(refString.value, currentBaseUri)) {
+            is RefResolution.Found -> {
+                val refValidator = RefValidator(resolution.target, idLookup, refString.value)
+                return RefOutcome.Resolved(
+                    JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
+                )
+            }
+            is RefResolution.NotFound ->
+                messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
+            is RefResolution.MalformedPointer -> messageSink.error(refString.location, resolution.message)
         }
-        val refValidator = RefValidator(resolvedValue, idLookup, refString.value)
-        return RefOutcome.Resolved(
-            JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
-        )
+        return RefOutcome.Failed
     }
 
     /**
@@ -273,7 +264,7 @@ internal object SchemaParser {
      */
     private fun parseMetadata(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): SchemaMetadata {
@@ -362,7 +353,7 @@ internal object SchemaParser {
     private fun parsePropertyValidators(
         schemaProperties: Map<String, KsonValue>,
         title: String?,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -473,7 +464,7 @@ internal object SchemaParser {
      */
     private fun parseItemsValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -525,7 +516,7 @@ internal object SchemaParser {
      */
     private fun parseIfThenElseValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -548,7 +539,7 @@ internal object SchemaParser {
      */
     private fun parseDependenciesValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -573,7 +564,7 @@ internal object SchemaParser {
      */
     private fun parseSingleDependency(
         value: KsonValue,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): DependencyValidator? {
@@ -596,7 +587,7 @@ internal object SchemaParser {
         schemaProperties: Map<String, KsonValue>,
         tupleLength: Int,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup
     ): AdditionalItemsValidator? {
         return schemaProperties["additionalItems"]?.let { additionalItems ->
@@ -618,16 +609,10 @@ private fun <T : Any> MutableCollection<T>.addIfNotNull(element: T?) {
     if (element != null) add(element)
 }
 
-/**
- * Extract the `$id` property from the given [KsonObject] if it has one, ensuring it is of type string
- */
-private fun extractId(schemaObject: KsonObject, messageSink: MessageSink): String? {
-    return schemaObject.propertyLookup["\$id"]?.let { idValue ->
-        if (idValue is KsonString) {
-            idValue.value
-        } else {
-            messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
-            null
-        }
+/** Reports an `$id` that isn't a string, as JSON Schema requires it to be one */
+private fun reportNonStringId(schemaObject: KsonObject, messageSink: MessageSink) {
+    val idValue = schemaObject.propertyLookup["\$id"] ?: return
+    if (idValue !is KsonString) {
+        messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
     }
 }

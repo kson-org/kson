@@ -4,10 +4,10 @@ import org.kson.value.KsonValue
 import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.schema.*
-import org.kson.schema.SchemaIdLookup.Companion.parseUri
+import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
-import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
-import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.json_pointer.FragmentPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 
 /**
  * Validator for JSON Schema `$ref` references
@@ -45,14 +45,7 @@ internal class RefValidator(
         (schema as? JsonObjectSchema)?.pinnedValues()
     }
 
-    override fun pinnedValues(): Set<KsonValue>? =
-        try {
-            targetPins
-        } catch (_: InvalidJsonPointerException) {
-            // a wrong `type` can stop validation short of a property's malformed `$ref`,
-            // so reading that property's pin mustn't be what throws
-            null
-        }
+    override fun pinnedValues(): Set<KsonValue>? = targetPins
 
     /**
      * A short name for the referenced schema: its `title`, else the last JSON Pointer token of
@@ -65,7 +58,7 @@ internal class RefValidator(
 
     /**
      * Each `$ref` parses its own copy of its target, so only this can tell that two lead to the same schema.
-     * Base URIs don't count, as a directory-style `$id` lengthens them on every trip around a cycle.
+     * The target node alone identifies it, as its base URI follows from where it sits in its document.
      */
     internal fun hasSameTargetAs(other: RefValidator): Boolean =
         resolvedRef.resolvedValue === other.resolvedRef.resolvedValue
@@ -86,8 +79,6 @@ internal class RefValidator(
 
 /** The last token of a `$ref` fragment that is a rooted JSON Pointer, else `null`. */
 private fun pointerTail(refString: String): String? {
-    val fragment = parseUri(refString).fragment
-    if (!fragment.startsWith("#/")) return null
-    val tokens = runCatching { JsonPointer(fragment.removePrefix("#")).tokens }.getOrNull() ?: return null
-    return tokens.lastOrNull()?.ifBlank { null }
+    val pointer = (UriReference.parse(refString).fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
+    return pointer.tokens.lastOrNull()?.ifBlank { null }
 }

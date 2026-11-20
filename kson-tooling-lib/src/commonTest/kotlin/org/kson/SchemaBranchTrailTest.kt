@@ -261,6 +261,25 @@ class SchemaBranchTrailTest {
     }
 
     @Test
+    fun refCycleEndsAtTheSameSchemaUnderAnIdWithAnEmptyFragment() {
+        // the chain runs from `p` to `a`, whose `$ref` leads back to `p`, so it ends at `a` however the `$id` is written
+        fun trailsUnder(id: String) = trails(
+            $$"""
+                {
+                    "$id": "$$id",
+                    "properties": { "p": { "$ref": "#/$defs/a", "type": "object" } },
+                    "$defs": { "a": { "$ref": "#/properties/p", "type": "array" } }
+                }
+            """,
+            listOf("p"),
+            carryDeadEnds = true
+        )
+
+        assertEquals(listOf("array at an unresolved \$ref"), trailsUnder("http://example.com/root.json"))
+        assertEquals(listOf("array at an unresolved \$ref"), trailsUnder("http://example.com/root.json#"))
+    }
+
+    @Test
     fun unnarrowedNavigationRulesOutNoBranch() {
         val schema = """
             {

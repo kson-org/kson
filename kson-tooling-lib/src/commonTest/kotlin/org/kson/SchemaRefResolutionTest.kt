@@ -329,6 +329,70 @@ class SchemaRefResolutionTest {
     }
 
     @Test
+    fun testResolveRef_underARelativeRootId() {
+        // the ref and `other`'s `$id` both resolve against the root's `$id`, to sub/other.json
+        assertRefResolution($$"""
+            '$id': 'sub/root.json'
+            properties:
+              x:
+                '$ref': 'other.json<cursor>'
+                .
+              .
+            definitions:
+              other:
+                <target>'$id': 'other.json'
+                type: string
+                .</target>
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_rootRefBesideARelativeRootId() {
+        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
+        // `$id`.  Resolved against that `$id`, it would name `decoy`
+        assertRefResolution($$"""
+            '$id': 'sub/root.json'
+            '$ref': 'sub/other.json<cursor>'
+            definitions:
+              target:
+                <target>'$id': 'other.json'
+                type: string
+                .</target>
+              decoy:
+                '$id': 'sub/other.json'
+                type: number
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_underANestedId() {
+        // `p`'s ref resolves against `a`'s `$id`, to nested/b.json, rather than against the root's, to b.json
+        assertRefResolution($$"""
+            '$id': 'http://example.com/root.json'
+            properties:
+              a:
+                '$id': 'http://example.com/nested/a.json'
+                properties:
+                  p:
+                    '$ref': 'b.json<cursor>'
+                    .
+                  .
+                definitions:
+                  b:
+                    <target>'$id': 'b.json'
+                    type: string
+                    .</target>
+                  .
+                .
+              .
+            definitions:
+              b:
+                '$id': 'b.json'
+                type: number
+        """.trimIndent())
+    }
+
+    @Test
     fun testResolveRef_afterListElementInError() {
         // The element in error keeps its index in the cursor's pointer, so the cursor's ref resolves
         // to `y`, not to the `z` that dropping the broken element would shift into its place

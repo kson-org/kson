@@ -5,12 +5,12 @@ import org.kson.ast.ObjectNode
 import org.kson.parser.Location
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
 import org.kson.schema.SchemaProgress
+import org.kson.schema.withIdOf
+import org.kson.uri.UriReference
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
-import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
@@ -23,7 +23,7 @@ import org.kson.walker.nodesAlong
  */
 internal data class NavigatedSchema(
     val resolvedValue: KsonValue,
-    val resolvedValueBaseUri: String,
+    val resolvedValueBaseUri: UriReference,
     val branchTrail: List<BranchStep> = emptyList(),
     val endsAtUnresolvedRef: Boolean = false
 ) {
@@ -41,7 +41,12 @@ internal data class BranchStep(val choice: Choice, val branch: Branch)
  * Equal choices are one choice, as a value takes the same branch of each: equal `if` conditions in two `allOf`
  * members decide alike.
  */
-internal data class Choice(val node: KsonValue, val baseUri: String, val depth: Int, val openBranches: List<Branch>)
+internal data class Choice(
+    val node: KsonValue,
+    val baseUri: UriReference,
+    val depth: Int,
+    val openBranches: List<Branch>
+)
 
 internal sealed interface Branch {
     data class Index(val index: Int) : Branch
@@ -128,8 +133,10 @@ internal class SchemaNavigator(
         documentPointer: TreePointer<AstNode>,
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
-        val rootBaseUri = idLookup.rootBaseUri
-        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri), emptyList())
+        val rootRef = NavigatedSchema(
+            idLookup.resolveRefIfPresent(idLookup.root.resolvedValue, idLookup.root.resolvedValueBaseUri),
+            emptyList()
+        )
 
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens
@@ -169,7 +176,7 @@ internal class SchemaNavigator(
     private fun stepInto(ref: NavigatedSchema, token: String, arrayIndex: Int?): List<NavigatedSchema> {
         if (carryDeadEnds && (ref.resolvedValue.isFalseSchema || ref.endsAtUnresolvedRef)) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return emptyList()
-        val updatedBaseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
+        val updatedBaseUri = ref.resolvedValueBaseUri.withIdOf(schemaObj)
 
         val stepped = mutableListOf<KsonValue>()
 
@@ -207,12 +214,6 @@ internal class SchemaNavigator(
         val items = arraySchema.propertyLookup["items"]
         val tuple = items as? KsonList ?: return items
         return tuple.elements.getOrNull(index) ?: arraySchema.propertyLookup["additionalItems"]
-    }
-
-    /** The base URI that `$ref`s in [schema] resolve against. */
-    private fun baseUriWithin(schema: KsonObject, baseUri: String): String {
-        val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
-        return resolveUri(id.value, baseUri).toString()
     }
 
     /**
@@ -254,7 +255,7 @@ internal class SchemaNavigator(
      *
      * Recurses into each branch so nested combinators/conditionals are fully flattened,
      * each narrowed against the same [docVal].  Like [stepInto], it reads [ref]'s keywords under the
-     * base URI [ref]'s own `$id` gives (see [baseUriWithin]).
+     * base URI [ref]'s own `$id` gives (see [withIdOf]).
      *
      * The parent [ref] is preserved at the head of the result so its title, description,
      * and constraints remain available.
@@ -269,14 +270,14 @@ internal class SchemaNavigator(
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
 
         // A combinator branch can `$ref` back to a node already being flattened on this path, and
-        // expanding it consumes no pointer token, so stop at a node we're already inside.  Compare
-        // the node alone: a directory-style `$id` lengthens the base URI on every trip around a cycle.
+        // expanding it consumes no pointer token, so stop at a node we're already inside.  The
+        // node alone identifies it, as its base URI follows from where it sits in its document.
         if (inProgress.any { it === schemaObj }) {
             return listOf(ref)
         }
         inProgress.add(schemaObj)
 
-        val baseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
+        val baseUri = ref.resolvedValueBaseUri.withIdOf(schemaObj)
         val results = mutableListOf<NavigatedSchema>()
         var addedBranches = false
 
@@ -317,7 +318,7 @@ internal class SchemaNavigator(
      */
     private fun narrowedBranches(
         alternatives: KsonList,
-        baseUri: String,
+        baseUri: UriReference,
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<ResolvedRef, BranchStep>> {
@@ -339,7 +340,7 @@ internal class SchemaNavigator(
      */
     private fun conditionalBranches(
         schemaObj: KsonObject,
-        baseUri: String,
+        baseUri: UriReference,
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<KsonValue, BranchStep>> {
@@ -371,7 +372,7 @@ internal class SchemaNavigator(
     }
 
     /** Classify [ifCondition] against [docVal] into an [IfState]. */
-    private fun evaluateIf(ifCondition: KsonValue, baseUri: String, docVal: KsonValue?): IfState {
+    private fun evaluateIf(ifCondition: KsonValue, baseUri: UriReference, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
         val progress = SchemaProgress(ifCondition, baseUri, idLookup)
         if (progress.accepts(docVal)) return IfState.MATCH

@@ -1049,4 +1049,51 @@ class SchemaNavigationTest {
             assertEquals(true, hasStringBranch, "Expected the non-recursive string branch of $combinator to be navigable")
         }
     }
+
+    /**
+     * `N`'s `allOf` leads back to `N` through its directory-style `$id`.  `flatten` stops the second time it meets
+     * `N`, which has the same base URI both times.
+     */
+    @Test
+    fun testRefCycleThroughADirectoryIdStopsOnItsFirstReturn() {
+        val schema = $$"""
+            '$id': 'http://x/root/'
+            allOf:
+              - '$ref': 'sub/'
+                =
+            definitions:
+              N:
+                '$id': 'sub/'
+                allOf:
+                  - '$ref': 'http://x/root/sub/'
+        """.trimIndent()
+
+        val visitsToN = navigateSchemaFull(schema, emptyList()).filter {
+            ((it.resolvedValue as? InternalKsonObject)?.propertyLookup?.get("\$id") as? InternalKsonString)?.value == "sub/"
+        }
+
+        assertEquals(listOf("http://x/root/", "http://x/root/"), visitsToN.map { it.resolvedValueBaseUri.toString() })
+    }
+
+    /** `x`'s ref resolves against the root's `$id` to sub/other.json, so it names `other`, read under sub/root.json. */
+    @Test
+    fun testRefUnderARelativeRootIdResolvesUnderItOnce() {
+        val schema = $$"""
+            '$id': 'sub/root.json'
+            properties:
+              x:
+                '$ref': 'other.json'
+                .
+              .
+            definitions:
+              other:
+                '$id': 'other.json'
+                type: string
+        """.trimIndent()
+
+        val other = navigateSchemaFull(schema, listOf("x")).single()
+
+        assertEquals("string", ((other.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("sub/root.json", other.resolvedValueBaseUri.toString())
+    }
 }

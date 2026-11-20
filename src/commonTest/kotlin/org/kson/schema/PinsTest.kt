@@ -2,6 +2,7 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
+import org.kson.uri.UriReference
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -14,19 +15,21 @@ class PinsTest {
     private fun kson(source: String): KsonValue =
         assertNotNull(KsonCore.parseToAst(source).ksonValue, "should parse: $source")
 
-    private fun compile(node: KsonValue, baseUri: String, idLookup: SchemaIdLookup): JsonSchema? =
+    private fun compile(node: KsonValue, baseUri: UriReference, idLookup: SchemaIdLookup): JsonSchema? =
         SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, idLookup)
 
     private fun compiled(schema: String): JsonSchema {
         val node = kson(schema)
-        return assertNotNull(compile(node, "", SchemaIdLookup(node)), "should compile: $schema")
+        return assertNotNull(compile(node, UriReference.parse(""), SchemaIdLookup(node)), "should compile: $schema")
     }
 
     private fun branchesOf(union: String): List<JsonSchema> {
         val root = kson(union) as KsonObject
         val idLookup = SchemaIdLookup(root)
-        return (root.propertyLookup.getValue("oneOf") as KsonList).elements.map {
-            assertNotNull(compile(it, idLookup.rootBaseUri, idLookup), "should compile: $it")
+        val oneOf = root.propertyLookup.getValue("oneOf") as KsonList
+        return oneOf.elements.map {
+            val baseUri = idLookup.root.descend(listOf(oneOf, it)).resolvedValueBaseUri
+            assertNotNull(compile(it, baseUri, idLookup), "should compile: $it")
         }
     }
 
@@ -731,9 +734,9 @@ class PinsTest {
         assertPinned(Pins.ofAll(branches, kson("kind: circle")), branches = listOf(0))
     }
 
-    /** Each trip around this cycle applies the `$id` again, so it never returns under the same base URI. */
+    /** `N`'s `allOf` leads back to `N` through its directory-style `$id`. */
     @Test
-    fun aRefCycleLengtheningItsBaseUriPinsNothing() {
+    fun aRefCycleThroughADirectoryIdPinsNothing() {
         val branches = branchesOf(
             $$"""
                 '$id': 'http://x/root/'
@@ -765,23 +768,6 @@ class PinsTest {
         assertCandidates(Pins.ofAll(shapes, kson("circel")), branches = everyBranch)
         assertCandidates(Pins.ofAll(shapes, kson("[1, 2]")), branches = everyBranch)
         assertCandidates(Pins.ofAll(shapes, kson("%kind\n  circel\n%%")), branches = everyBranch)
-    }
-
-    @Test
-    fun aValueThatIsNotAnObjectReadsNoPin() {
-        // reading the first branch's pins would follow its `$ref` to the malformed pointer
-        val branches = branchesOf(
-            $$"""
-                oneOf:
-                  - '$ref': '#/$defs/Bad'
-                  - true
-                '$defs':
-                  Bad:
-                    '$ref': '#/$defs/a~2b'
-            """.trimIndent()
-        )
-
-        assertCandidates(Pins.ofAll(branches, kson("3")), branches = listOf(0, 1))
     }
 
     @Test
