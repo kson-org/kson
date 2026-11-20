@@ -357,6 +357,49 @@ class KsonSmokeTest {
         assertTrue(messages[1].contains("age"), messages[1])
     }
 
+    /**
+     * Schema violations are errors, so a document that is valid KSON but breaks its schema has no
+     * [Analysis.ksonValue], the same as any other document with errors.
+     */
+    @Test
+    fun testAnalyzeWithSchemaErrorsReturnsNullKsonValue() {
+        val schemaKson = """{"type": "object", "required": ["age"]}"""
+        val schemaResult = Kson.parseSchema(schemaKson)
+        assertIs<SchemaResult.Success>(schemaResult)
+
+        val analysis = Kson.analyze(
+            """{"name": "John"}""",
+            filepath = null,
+            schemaValidator = schemaResult.schemaValidator
+        )
+        val messages = analysis.errors.map { it.message }
+
+        assertNull(analysis.ksonValue, "a schema violation is an error, so there should be no value")
+        assertEquals(1, analysis.errors.size, "expected only the missing property, got: $messages")
+        assertEquals(MessageSeverity.ERROR, analysis.errors[0].severity)
+        assertTrue(messages[0].contains("age"), messages[0])
+    }
+
+    /**
+     * Schema validation needs a parsed value, so malformed KSON reports only parse errors.
+     */
+    @Test
+    fun testAnalyzeWithSchemaSkipsSchemaCheckWhenKsonIsInvalid() {
+        val schemaKson = """{"type": "object", "required": ["age"]}"""
+        val schemaResult = Kson.parseSchema(schemaKson)
+        assertIs<SchemaResult.Success>(schemaResult)
+
+        val analysis = Kson.analyze(
+            """{"name": "John"""",
+            filepath = null,
+            schemaValidator = schemaResult.schemaValidator
+        )
+
+        assertNull(analysis.ksonValue)
+        assertTrue(analysis.errors.isNotEmpty())
+        assertTrue(analysis.errors.none { it.message.contains("age") }, "schema checks should not run on malformed KSON")
+    }
+
     @Test
     fun testPropertyKeys_basicAccess() {
         val input = """

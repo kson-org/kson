@@ -2567,7 +2567,8 @@ impl Analysis {
         util::from_kotlin_list(result)
     }
 
-
+    /// The parsed value of the source, or null if the document has errors, including schema violations
+    /// if a `schemaValidator` was passed to [Kson.analyze].
     pub fn kson_value(
         &self,
     ) -> Option<KsonValue> {
