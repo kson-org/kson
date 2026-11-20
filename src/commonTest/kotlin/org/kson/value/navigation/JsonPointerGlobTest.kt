@@ -3,6 +3,7 @@
 package org.kson.value.navigation
 
 import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -117,7 +118,7 @@ class JsonPointerGlobTest {
 
     @Test
     fun `invalid pointer without leading slash throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointerGlob("foo/bar")
         }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
@@ -126,7 +127,7 @@ class JsonPointerGlobTest {
 
     @Test
     fun `invalid escape sequence throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointerGlob("/foo~2bar")
         }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
@@ -134,7 +135,7 @@ class JsonPointerGlobTest {
 
     @Test
     fun `incomplete RFC escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointerGlob("/foo~")
         }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
@@ -142,7 +143,7 @@ class JsonPointerGlobTest {
 
     @Test
     fun `incomplete backslash escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointerGlob("/foo\\")
         }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))

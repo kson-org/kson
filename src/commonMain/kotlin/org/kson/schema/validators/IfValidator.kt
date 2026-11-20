@@ -4,10 +4,11 @@ import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
+import org.kson.schema.isValid
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
-class IfValidator(private val ifSchema: JsonSchema, private val thenSchema: JsonSchema?, private val elseSchema: JsonSchema?) :
+internal class IfValidator(private val ifSchema: JsonSchema, private val thenSchema: JsonSchema?, private val elseSchema: JsonSchema?) :
     JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         branchToApply(ksonValue, sourceContext)?.validate(ksonValue, messageSink, sourceContext)

@@ -713,4 +713,65 @@ class SchemaDefinitionLocationTest {
         )
     }
 
+    @Test
+    fun testJumpToDefinition_propertyDeclaredInOneAllOfMemberAndClosedByAnother() {
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "allOf": [
+                    { "properties": { "a": <caret>{ "type": "string" }<caret> } },
+                    { "additionalProperties": false }
+                  ]
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                <caret>a: x
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_propertyDeclaredInOneAllOfMemberAndLeftOpenByAnother() {
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "allOf": [
+                    { "properties": { "a": <caret>{ "type": "string" }<caret> } },
+                    { "additionalProperties": true }
+                  ]
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                <caret>a: x
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_propertyNothingDeclaresFindsTheFalseClosingIt() {
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "additionalProperties": <caret>false<caret>
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                <caret>a: 1
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_propertyNothingDeclaresFindsTheTrueAllowingIt() {
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "additionalProperties": <caret>true<caret>
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                <caret>a: 1
+            """.trimIndent()
+        )
+    }
 }

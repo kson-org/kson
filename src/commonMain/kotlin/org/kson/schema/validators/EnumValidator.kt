@@ -7,7 +7,7 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonSchemaValidator
 import org.kson.validation.SourceContext
 
-class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
+internal class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val enumValues = enum.elements
         if (!enumValues.contains(ksonValue)) {

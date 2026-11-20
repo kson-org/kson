@@ -28,22 +28,22 @@ sealed interface JsonSchema: Validator {
    */
   fun descriptionWithDefault(): String
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
+}
 
-  fun isValid(
-    ksonValue: KsonValue,
-    messageSink: MessageSink,
-    sourceContext: SourceContext = SourceContext()
-  ): Boolean {
-    val numErrors = messageSink.loggedMessages().size
-    validate(ksonValue, messageSink, sourceContext)
-    return messageSink.loggedMessages().size == numErrors
-  }
+internal fun JsonSchema.isValid(
+  ksonValue: KsonValue,
+  messageSink: MessageSink,
+  sourceContext: SourceContext = SourceContext()
+): Boolean {
+  val numErrors = messageSink.loggedMessages().size
+  validate(ksonValue, messageSink, sourceContext)
+  return messageSink.loggedMessages().size == numErrors
 }
 
 /**
  * The main [JsonSchema] object representation
  */
-class JsonObjectSchema(
+internal class JsonObjectSchema(
     val title: String?,
     val description: String?,
     val comment: String?,
@@ -88,29 +88,36 @@ class JsonObjectSchema(
   /**
    * This schema plus the target of a lone `$ref` and each `allOf` member, transitively: all of them
    * constrain the same document.  Property schemas aren't followed, so a self-referential
-   * `child: { $ref: node }` can't recurse.
+   * `child: { $ref: node }` can't recurse, and a `$ref` to a target already followed on the way to it is skipped,
+   * so neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
+   * visited once per path, which only gets expensive in schemas nobody writes.
    */
-  private fun compositionSources(): Set<JsonObjectSchema> {
-    val sources = mutableSetOf<JsonObjectSchema>()
-    val pending = ArrayDeque<JsonObjectSchema>(listOf(this))
+  private fun compositionSources(): List<JsonObjectSchema> {
+    val sources = mutableListOf<JsonObjectSchema>()
+    val pending = ArrayDeque(listOf(this to emptyList<RefValidator>()))
     while (pending.isNotEmpty()) {
-      val schema = pending.removeFirst()
-      if (!sources.add(schema)) continue
-      (schema.soleRefValidator()?.resolvedSchema() as? JsonObjectSchema)?.let { pending.add(it) }
+      val (schema, followedRefs) = pending.removeFirst()
+      sources.add(schema)
+      val ref = schema.soleRefValidator()
+      if (ref != null && followedRefs.none(ref::hasSameTargetAs)) {
+        (ref.resolvedSchema() as? JsonObjectSchema)?.let { pending.add(it to followedRefs + ref) }
+      }
       schema.schemaValidators.filterIsInstance<AllOfValidator>()
-        .flatMapTo(pending) { it.allOf.filterIsInstance<JsonObjectSchema>() }
+        .flatMap { it.allOf.filterIsInstance<JsonObjectSchema>() }
+        .mapTo(pending) { it to followedRefs }
     }
     return sources
   }
 
   /**
-   * The properties `const` or `enum` fixes to a value set, across every [compositionSources] schema.
-   * A property several of them pin is pinned to the intersection, which may be empty.
+   * Those of the [present] properties that `const` or `enum` fixes to a value set, directly or through a lone
+   * `$ref`, across every [compositionSources] schema.  A property several of them pin is pinned to the
+   * intersection, which may be empty.
    */
-  internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
+  internal fun pinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> {
     val pins = mutableMapOf<String, Set<KsonValue>>()
     compositionSources().forEach { source ->
-      source.ownPinnedProperties().forEach { (property, values) ->
+      source.ownPinnedProperties(present).forEach { (property, values) ->
         pins[property] = pins[property]?.intersect(values) ?: values
       }
     }
@@ -127,11 +134,13 @@ class JsonObjectSchema(
       source.ownRequiredProperties() + source.ownPropertySchemas().keys.map { it.value }
     }
 
-  private fun ownPinnedProperties(): Map<String, Set<KsonValue>> =
-    ownPropertySchemas().mapNotNull { (name, propertySchema) ->
-      val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
-      pinned?.let { name.value to it }
+  private fun ownPinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> =
+    ownPropertySchemas().filterKeys { it.value in present }.mapNotNull { (name, propertySchema) ->
+      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name.value to it }
     }.toMap()
+
+  /** The values this schema's lone validator restricts its target to, or `null` if it doesn't pin. */
+  internal fun pinnedValues(): Set<KsonValue>? = schemaValidators.singleOrNull()?.pinnedValues()
 
   private fun ownRequiredProperties(): Set<String> =
     schemaValidators.filterIsInstance<RequiredValidator>()
@@ -161,7 +170,7 @@ class JsonObjectSchema(
 /**
  * The most basic valid JsonSchema: `true` accepts all Json, `false` accepts none.
  */
-class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
+internal class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
   override fun descriptionWithDefault() = if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
     if (valid) {
@@ -173,7 +182,7 @@ class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
 }
 
 /** The integer [ksonNumber] denotes, or `null`: JSON Schema counts a decimal like `1.0` as an integer. */
-fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
+internal fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
   return when (ksonNumber.value) {
     is NumberParser.ParsedNumber.Integer -> ksonNumber.value.value
     is NumberParser.ParsedNumber.Decimal -> {

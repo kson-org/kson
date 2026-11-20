@@ -92,8 +92,12 @@ if (yamlResult instanceof Result.Success) {
 - **`format(kson: string, formatOptions?: FormatOptions): string`**
   Formats KSON string according to specified style. Returns the formatted string directly.
 
-- **`analyze(kson: string): Analysis`**
-  Analyzes KSON and returns diagnostic information including tokens and any errors.
+- **`analyze(kson: string, filepath?: string, schemaValidator?: SchemaValidator): Analysis`**
+  Analyzes KSON and returns an `Analysis` with:
+  - `tokens`: the lexed tokens of the source
+  - `errors`: its errors and warnings, told apart by each message's `severity`
+  - `ksonValue`: the parsed value, or `null` if the document has errors, including schema violations if a
+    `schemaValidator` was provided
 
 - **`parseSchema(schemaKson: string): SchemaResult`**
   Parses and validates a KSON schema. Returns a `SchemaResult` which can be:
@@ -145,19 +149,18 @@ console.error(String(result.errors)); // [[ERROR] Unclosed list at 1:6]
 # Comments are supported
 person:
   name: 'Leonardo Bonacci'
-  nickname: Fibonacci  # Quotes are optional for simple strings
+  # Quotes are optional for simple strings
+  nickname: Fibonacci
   age: 42
+  favorite_numbers: [0, 1, 1, 2, 3, 5, 8]
+  golden_ratio: '(1 + √5)/2'
 
-  # Arrays can be written in multiple styles
+  # Lists may also be written with dashes, YAML-style
   favorite_books:
     - title: Elements
       author: Euclid
     - title: Metaphysics
       author: Aristotle
-
-  # Nested arrays and complex values
-  favorite_numbers: [0, 1, 1, 2, 3, 5, 8]
-  golden_ratio: '(1 + √5)/2'
 ```
 
 ## Environment Support

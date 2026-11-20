@@ -11,7 +11,7 @@ import org.kson.value.navigation.json_pointer.fragmentPointer
 /**
  * Parses a JSON Schema string into our JsonSchema model.
  */
-object SchemaParser {
+internal object SchemaParser {
     /**
      * Parse [schemaRootValue] as a JSON Schema root, i.e. a complete JSON Schema, not a sub-schema.
      * See [parseSchemaElement] for sub-schema parsing.

@@ -82,6 +82,16 @@ class JsonTestSuiteGeneratorTest {
     }
 
     @Test
+    fun onlyClassesWithAnExcludedTestImportIgnore() {
+        val generated = generateFromFixtureSuite(
+            exclusions = mapOf(SchemaDraft.DRAFT_2020_12 to setOf("shared::group::test"))
+        )
+
+        assertTrue(generated.draft2020_12.contains("import kotlin.test.Ignore"), "the class with an excluded test should import Ignore")
+        assertFalse(generated.draft7.contains("import kotlin.test.Ignore"), "the class without excluded tests should not import Ignore")
+    }
+
+    @Test
     fun aMistypedExclusionFailsGeneration() {
         val error = assertFailsWith<RuntimeException> {
             generateFromFixtureSuite(
@@ -90,7 +100,7 @@ class JsonTestSuiteGeneratorTest {
         }
 
         assertEquals(
-            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+            "Invalid schema test exclusions for DRAFT_2020_12: no DRAFT_2020_12 test has these ids:\n" +
                     "\"shared::group::tset\"",
             error.message
         )
@@ -105,21 +115,78 @@ class JsonTestSuiteGeneratorTest {
         }
 
         assertEquals(
-            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+            "Invalid schema test exclusions for DRAFT_2020_12: no DRAFT_2020_12 test has these ids:\n" +
                     "\"draft7Only::group::test\"",
             error.message
         )
     }
 
-    private class SharedTestClasses(val draft7: String, val draft2020_12: String)
+    /**
+     * The result of [generateFromFixtureSuite]: the [draft7] and [draft2020_12] classes generated for `shared`, and
+     * the names of every class generated for [draft7]
+     */
+    private class GeneratedFixtureSuite(val draft7: String, val draft2020_12: String, val draft7ClassNames: Set<String>)
+
+    @Test
+    fun aDraftIsGeneratedOnlyTheGroupsCompatibleWithIt() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(generated.draft7.contains("shared::draft7Only group::test"), "draft 7 should get the draft 7 only group")
+        assertFalse(generated.draft2020_12.contains("shared::draft7Only group::test"), "2020-12 should not get the draft 7 only group")
+    }
+
+    @Test
+    fun eachDraftDesignatesItsDialectInTheSchema() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(generated.draft7.contains(SchemaDraft.DRAFT_7.metaSchemaUri), "draft 7 schemas should name draft 7")
+        assertTrue(
+            generated.draft2020_12.contains(SchemaDraft.DRAFT_2020_12.metaSchemaUri),
+            "2020-12 schemas should name 2020-12"
+        )
+    }
+
+    @Test
+    fun optionalTestsAreGeneratedUnderNamesMarkingThemOptional() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(
+            "${SchemaDraft.DRAFT_7.testClassPrefix}_optional_extra" in generated.draft7ClassNames,
+            "optional tests should get a class named for their optional origin"
+        )
+    }
+
+    @Test
+    fun optionalTestsAreExcludedByTheirOptionalPath() {
+        generateFromFixtureSuite(exclusions = mapOf(SchemaDraft.DRAFT_7 to setOf("optional/extra::group::test")))
+    }
+
+    @Test
+    fun proposalsAreNotGenerated() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertFalse(generated.draft7ClassNames.any { "proposal" in it }, "proposals should not be generated")
+    }
+
+    @Test
+    fun contentWithoutADollarNeedsNoInterpolationPrefix() {
+        assertEquals("", interpolationPrefixFor("""{ "type": "string" }"""))
+    }
+
+    @Test
+    fun theInterpolationPrefixOutnumbersTheLongestDollarRun() {
+        assertEquals("$$", interpolationPrefixFor($$"""{ "$ref": "#/$defs/a" }"""))
+        assertEquals("$$$", interpolationPrefixFor($$$"""costs $$this or $${it}"""))
+    }
 
     /**
-     * Generates tests from a suite in which both drafts have the test `shared::group::test` and only Draft 7 has
-     * `draft7Only::group::test`, applying only the given [exclusions] and returning the classes generated for
-     * `shared`.  The suites are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in
-     * place rather than cloning), so unlike [testGenerate] this needs no network.
+     * Generates tests from a suite in which both drafts have the tests `shared::group::test` and
+     * `optional/extra::group::test`, only Draft 7 has `shared::draft7Only group::test` and `draft7Only::group::test`,
+     * and a proposal has `proposals/proposal/proposal::group::test`, applying only the given [exclusions].  The suites
+     * are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in place rather than
+     * cloning), so unlike [testGenerate] this needs no network.
      */
-    private fun generateFromFixtureSuite(exclusions: Map<SchemaDraft, Set<String>>): SharedTestClasses {
+    private fun generateFromFixtureSuite(exclusions: Map<SchemaDraft, Set<String>>): GeneratedFixtureSuite {
         val tempDirectory = createTempDirectory("JsonTestSuiteGeneratorTest")
 
         // the generator insists that the JSONTestSuite has every file named in its edit list
@@ -128,19 +195,27 @@ class JsonTestSuiteGeneratorTest {
             JsonTestSuiteEditList.all().associate { "test_parsing/$it" to "[]" }
         )
 
-        val schemaTestFile = """
-            [
-                {
-                    "description": "group",
-                    "schema": { "type": "string" },
-                    "tests": [{ "description": "test", "data": "a string", "valid": true }]
-                }
-            ]
+        fun schemaTestFile(vararg groups: Pair<String, String?>) = """
+            {
+                "description": "fixture",
+                "tests": [${groups.joinToString(",") { (description, compatibility) -> """
+                    {
+                        "description": "$description",
+                        ${compatibility?.let { "\"compatibility\": \"$it\"," } ?: ""}
+                        "schema": { "type": "string" },
+                        "tests": [{ "description": "test", "data": "a string", "valid": true }]
+                    }""" }}
+                ]
+            }
         """.trimIndent()
         val schemaSuiteSHA = commitFixtureRepo(
             tempDirectory.resolve("JSON-Schema-Test-Suite"),
-            SchemaDraft.entries.associate { "tests/${it.folderName}/shared.json" to schemaTestFile } +
-                    ("tests/${SchemaDraft.DRAFT_7.folderName}/draft7Only.json" to schemaTestFile)
+            mapOf(
+                "validation/tests/shared.json" to schemaTestFile("group" to null, "draft7Only group" to "=7"),
+                "validation/tests/draft7Only.json" to schemaTestFile("group" to "=7"),
+                "validation/tests/optional/extra.json" to schemaTestFile("group" to null),
+                "validation/tests/proposals/proposal/proposal.json" to schemaTestFile("group" to null)
+            )
         )
 
         val generator = JsonTestSuiteGenerator(
@@ -153,9 +228,13 @@ class JsonTestSuiteGeneratorTest {
         )
         generator.generate()
 
-        return SharedTestClasses(
+        return GeneratedFixtureSuite(
             generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_7.testClassPrefix}_shared.kt").readText(),
-            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_2020_12.testClassPrefix}_shared.kt").readText()
+            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_2020_12.testClassPrefix}_shared.kt").readText(),
+            generator.testClassPackageDir.toFile().list()!!
+                .filter { it.startsWith(SchemaDraft.DRAFT_7.testClassPrefix) }
+                .map { it.removeSuffix(".kt") }
+                .toSet()
         )
     }
 
@@ -173,7 +252,7 @@ class JsonTestSuiteGeneratorTest {
     }
 
     /**
-     * An excluded test is generated with an early `return` ahead of its assertion
+     * An excluded test is generated annotated with `@Ignore`
      */
-    private fun String.disablesItsTest() = lines().any { it.trim() == "return" }
+    private fun String.disablesItsTest() = lines().any { it.trim() == "@Ignore" }
 }

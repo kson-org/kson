@@ -1,5 +1,6 @@
 package org.kson.value.navigation
 
+import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -78,7 +79,7 @@ class JsonPointerTest {
 
     @Test
     fun `invalid pointer without leading slash throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointer("foo/bar")
         }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
@@ -87,7 +88,7 @@ class JsonPointerTest {
 
     @Test
     fun `invalid escape sequence throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointer("/foo~2bar")
         }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
@@ -95,7 +96,7 @@ class JsonPointerTest {
 
     @Test
     fun `incomplete escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<InvalidJsonPointerException> {
             JsonPointer("/foo~")
         }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
