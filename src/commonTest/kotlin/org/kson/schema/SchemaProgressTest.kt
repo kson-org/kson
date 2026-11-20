@@ -4,9 +4,7 @@ import org.kson.KsonCore
 import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
-import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -63,21 +61,18 @@ class SchemaProgressTest {
     @Test
     fun whatIsNoSchemaNeitherAcceptsNorRejects() {
         val circle = kson("circle")
+        val noSchemas = listOf(
+            "3",
+            $$"'$ref': '#/$defs/missing'",
+            // `~2` is no JSON Pointer escape
+            $$"'$ref': '#/$defs/a~2b'"
+        )
 
-        for (noSchema in listOf("3", $$"'$ref': '#/$defs/missing'")) {
+        for (noSchema in noSchemas) {
             val progress = progressTowards(noSchema)
 
             assertFalse(progress.accepts(circle), "accepts: $noSchema")
             assertFalse(progress.rejects(circle), "rejects: $noSchema")
-        }
-    }
-
-    @Test
-    fun aMalformedRefPointerThrows() {
-        val malformedPointer = kson($$"'$ref': '#/$defs/a~2b'")
-
-        assertFailsWith<InvalidJsonPointerException> {
-            SchemaProgress(malformedPointer, UriReference.parse(""), SchemaIdLookup(malformedPointer))
         }
     }
 

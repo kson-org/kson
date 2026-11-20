@@ -128,39 +128,6 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
         )
     }
 
-    /** Validation stops at `Broken`'s `type`, so only reading its pins would reach the malformed pointer. */
-    @Test
-    fun testNonObjectDocumentReportsEveryBranchWithoutReadingPins() {
-        val wholeDocument = Location(Coordinates(0, 0), Coordinates(0, 1), 0, 1)
-
-        assertReportedInFullAndPartial(
-            $$"""
-                oneOf:
-                  - title: Broken
-                    type: object
-                    allOf:
-                      - '$ref': '#/$defs/Bad'
-                      =
-
-                  - title: Text
-                    type: string
-                    .
-                '$defs':
-                  Bad:
-                    '$ref': '#/$defs/a~2b'
-            """.trimIndent(),
-            "3",
-            "Value must match exactly one of the specified schemas" to wholeDocument,
-            """
-                Value matches none of these sub-schemas:
-                - Broken:
-                    - Expected one of: object, but got: integer (1:1)
-                - Text:
-                    - Expected one of: string, but got: integer (1:1)
-            """.trimIndent() to wholeDocument
-        )
-    }
-
     /** `type` stops validation at the first `N`, but reading the branch's pins goes on around the `allOf` cycle. */
     @Test
     fun testRefCycleLengtheningItsBaseUriStillReports() {

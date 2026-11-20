@@ -8,7 +8,6 @@ import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
 import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.fragmentPointer
-import org.kson.value.navigation.json_pointer.InvalidJsonPointerException
 
 /**
  * Validator for JSON Schema `$ref` references
@@ -46,14 +45,7 @@ internal class RefValidator(
         (schema as? JsonObjectSchema)?.pinnedValues()
     }
 
-    override fun pinnedValues(): Set<KsonValue>? =
-        try {
-            targetPins
-        } catch (_: InvalidJsonPointerException) {
-            // a wrong `type` can stop validation short of a property's malformed `$ref`,
-            // so reading that property's pin mustn't be what throws
-            null
-        }
+    override fun pinnedValues(): Set<KsonValue>? = targetPins
 
     /**
      * A short name for the referenced schema: its `title`, else the last JSON Pointer token of

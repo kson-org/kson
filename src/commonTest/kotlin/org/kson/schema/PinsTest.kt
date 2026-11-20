@@ -769,23 +769,6 @@ class PinsTest {
     }
 
     @Test
-    fun aValueThatIsNotAnObjectReadsNoPin() {
-        // reading the first branch's pins would follow its `$ref` to the malformed pointer
-        val branches = branchesOf(
-            $$"""
-                oneOf:
-                  - '$ref': '#/$defs/Bad'
-                  - true
-                '$defs':
-                  Bad:
-                    '$ref': '#/$defs/a~2b'
-            """.trimIndent()
-        )
-
-        assertCandidates(Pins.ofAll(branches, kson("3")), branches = listOf(0, 1))
-    }
-
-    @Test
     fun aBranchThatDidNotCompilePinsNothingAndStaysACandidate() {
         val circle = shapes.first()
 
