@@ -16,7 +16,7 @@ package org.kson.value.navigation.json_pointer
  * ```
  *
  * @property pointerString The JSON Pointer string (must be valid according to RFC 6901)
- * @throws IllegalArgumentException if the pointer string is invalid
+ * @throws InvalidJsonPointerException if the pointer string is invalid
  */
 class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(pointerString)) {
 

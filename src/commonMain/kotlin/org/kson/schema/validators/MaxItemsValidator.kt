@@ -6,7 +6,7 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonArrayValidator
 import org.kson.validation.SourceContext
 
-class MaxItemsValidator(private val maxItems: Long) : JsonArrayValidator() {
+internal class MaxItemsValidator(private val maxItems: Long) : JsonArrayValidator() {
     override fun validateArray(node: KsonList, messageSink: MessageSink, sourceContext: SourceContext) {
         val actualNumItems = node.elements.size
         if (actualNumItems > maxItems) {

@@ -632,4 +632,27 @@ class SchemaInfoLocationTest {
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Beta setting"), "Should show beta's description, got: $hoverInfo")
     }
+
+    /** Each trip around `N`'s `allOf` cycle lengthens the base URI, so only the node itself says it was met. */
+    @Test
+    fun testGetSchemaInfoAtLocation_refCycleLengtheningItsBaseUri() {
+        val schema = $$"""
+            '$id': 'http://x/root/'
+            allOf:
+              - '$ref': 'sub/'
+                .
+            properties:
+              note:
+                description: N
+                .
+              .
+            '$defs':
+              N:
+                '$id': 'sub/'
+                allOf:
+                  - '$ref': 'http://x/root/sub/'
+        """.trimIndent()
+
+        assertEquals("N", getInfoAtCaret(schema, "<caret>note: 1")?.trim())
+    }
 }

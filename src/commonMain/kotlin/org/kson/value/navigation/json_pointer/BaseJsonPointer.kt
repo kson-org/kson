@@ -47,7 +47,7 @@ abstract class BaseJsonPointer(parser: PointerParser) {
                     is JsonPointerGlobParser -> "JsonPointerGlob"
                     else -> "pointer"
                 }
-                throw IllegalArgumentException(
+                throw InvalidJsonPointerException(
                     "Invalid $pointerTypeName '$pointerString': ${result.message}"
                 )
             }

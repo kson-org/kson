@@ -5,7 +5,7 @@ import org.kson.KsonCore
 /**
  * Built-in Draft-07 meta-schema
  */
-data object KsonDraft7MetaSchema {
+internal data object KsonDraft7MetaSchema {
     const val ID = "http://json-schema.org/draft-07/schema"
     const val SOURCE = $$"""
         '$schema': 'http://json-schema.org/draft-07/schema#'

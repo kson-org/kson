@@ -23,7 +23,7 @@ package org.kson.value.navigation.json_pointer
  * - Performance: O(n) where n is the size of the subtree being searched
  *
  * @property pointerString The JsonPointerGlob string (must be valid)
- * @throws IllegalArgumentException if the pointer string is invalid
+ * @throws InvalidJsonPointerException if the pointer string is invalid
  */
 @ExperimentalJsonPointerGlobLanguage
 class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
