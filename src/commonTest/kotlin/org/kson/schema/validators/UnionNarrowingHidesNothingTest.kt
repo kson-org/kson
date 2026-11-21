@@ -98,8 +98,8 @@ class UnionNarrowingHidesNothingTest : JsonSchemaTest {
         assertEquals(
             "Other sub-schemas tried:\n" +
                 "- ApiKeyAuth:\n" +
-                "    - Additional property 'clientId' is not allowed in ApiKeyAuth (1:1)\n" +
-                "    - Additional property 'grantType' is not allowed in ApiKeyAuth (2:1)\n" +
+                "    - Additional property 'clientId' is not allowed in ApiKeyAuth. Allowed properties: apiKey, location (1:1)\n" +
+                "    - Additional property 'grantType' is not allowed in ApiKeyAuth. Allowed properties: apiKey, location (2:1)\n" +
                 "    - Missing required properties: apiKey (1:1)",
             errors[1].message.toString()
         )
