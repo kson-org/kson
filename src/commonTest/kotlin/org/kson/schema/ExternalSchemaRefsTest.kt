@@ -283,6 +283,25 @@ class ExternalSchemaRefsTest {
     }
 
     @Test
+    fun refThroughAnIdIdentifiedLaterDiscoversItsTargetsDependencies() {
+        // `a` is extension data, so `a.json` identifies it only once the first `$ref` leads there
+        val root = value($$"""{
+            "allOf": [{ "$ref": "#/extension/a" }, { "$ref": "a.json#/extension/x" }],
+            "extension": {
+                "a": { "$id": "a.json", "extension": { "x": { "$ref": "x-dependency.json" } } }
+            }
+        }""")
+        val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
+
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
+
+        assertEquals(
+            listOf(UriReference.parse("file:///schemas/x-dependency.json")),
+            indexedDocuments.missingDocumentUris
+        )
+    }
+
+    @Test
     fun referencedCustomPointerTargetsDiscoverTheirOwnDependencies() {
         val root = value($$"""{ "$ref": "child.json#/custom" }""")
         val child = value($$"""{

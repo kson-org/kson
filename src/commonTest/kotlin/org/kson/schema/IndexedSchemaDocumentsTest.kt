@@ -279,6 +279,23 @@ class IndexedSchemaDocumentsTest {
     }
 
     @Test
+    fun resolvesAnIdSharedByReferencedValuesToTheDeepestOne() {
+        // `shallow` is referenced after `deep`, through `hook`
+        val schema = $$"""
+            {
+              "allOf": [{ "$ref": "#/extension/deep/a/b" }, { "$ref": "#/extension/hook" }],
+              "properties": { "field": { "$ref": "http://x.test/shared.json" } },
+              "extension": {
+                "hook": { "$ref": "#/extension/shallow" },
+                "shallow": { "$id": "http://x.test/shared.json", "title": "shallow" },
+                "deep": { "a": { "b": { "$id": "http://x.test/shared.json", "title": "deep" } } }
+              }
+            }
+        """
+        assertEquals("deep" to "", resolveField(schema))
+    }
+
+    @Test
     fun doesNotResolveARefToAnIdInAKeywordBesideARef() {
         val schema = $$"""
             {
