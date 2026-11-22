@@ -36,9 +36,18 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun retrievalUriResolvesRelativePointersAndTransitiveReferences() {
-        val root = value($$"""{ "$ref": "../common/first.json#/definitions/entry" }""")
-        val first = value($$"""{ "definitions": { "entry": { "$ref": "second.json#/definitions/value" } } }""")
-        val second = value("""{ "definitions": { "value": { "title": "Target", "type": "string" } } }""")
+        val root = value($$"""'$ref': '../common/first.json#/definitions/entry'""")
+        val first = value($$"""
+            definitions:
+              entry:
+                '$ref': 'second.json#/definitions/value'
+        """.trimIndent())
+        val second = value("""
+            definitions:
+              value:
+                title: Target
+                type: string
+        """.trimIndent())
         val documents = listOf(
             SchemaDocument(first, UriReference.parse("file:///schemas/common/first.json")),
             SchemaDocument(second, UriReference.parse("file:///schemas/common/second.json"))
@@ -57,13 +66,16 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun nestedRelativeIdsApplyOnce() {
-        val root = value($$"""{
-            "$id": "canonical/root.json",
-            "definitions": {
-                "nested": { "$id": "../nested/", "properties": { "field": { "$ref": "value.json" } } }
-            }
-        }""")
-        val external = value("""{ "title": "External" }""")
+        val root = value($$"""
+            '$id': 'canonical/root.json'
+            definitions:
+              nested:
+                '$id': '../nested/'
+                properties:
+                  field:
+                    '$ref': 'value.json'
+        """.trimIndent())
+        val external = value("title: External")
         val documents = listOf(
             SchemaDocument(external, UriReference.parse("https://example.test/schemas/nested/value.json"))
         )
@@ -86,16 +98,29 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun discoversUniqueMissingResourcesButNotDataOrLocalMissingFragments() {
-        val root = value($$"""{
-            "properties": {
-                "a": { "$ref": "shared.json#/first" },
-                "b": { "$ref": "shared.json#/second" },
-                "c": { "$ref": "#/missing" },
-                "d": { "$id": "ignored/", "$ref": "other.json" }
-            },
-            "default": { "$ref": "data.json" },
-            "enum": [{ "$id": "data-id.json", "$ref": "enum.json" }]
-        }""")
+        val root = value($$"""
+            properties:
+              a:
+                '$ref': 'shared.json#/first'
+                .
+              b:
+                '$ref': 'shared.json#/second'
+                .
+              c:
+                '$ref': '#/missing'
+                .
+              d:
+                '$id': 'ignored/'
+                '$ref': 'other.json'
+                .
+              .
+            default:
+              '$ref': 'data.json'
+              .
+            enum:
+              - '$id': 'data-id.json'
+                '$ref': 'enum.json'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
@@ -108,10 +133,12 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun doesNotDiscoverResourcesReferencedBesideARef() {
-        val root = value($$"""{
-            "$ref": "other.json",
-            "properties": { "field": { "$ref": "ignored.json" } }
-        }""")
+        val root = value($$"""
+            '$ref': 'other.json'
+            properties:
+              field:
+                '$ref': 'ignored.json'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
@@ -121,9 +148,9 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun loadedSharedAndCyclicDependenciesTerminateDiscoveryAndRefResolution() {
-        val root = value($$"""{ "$ref": "a.json" }""")
-        val a = value($$"""{ "$ref": "b.json" }""")
-        val b = value($$"""{ "$ref": "a.json" }""")
+        val root = value($$"""'$ref': 'a.json'""")
+        val a = value($$"""'$ref': 'b.json'""")
+        val b = value($$"""'$ref': 'a.json'""")
         val documents = listOf(
             SchemaDocument(a, UriReference.parse("https://example.test/a.json")),
             SchemaDocument(b, UriReference.parse("https://example.test/b.json"))
@@ -135,17 +162,19 @@ class ExternalSchemaRefsTest {
         assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
         val chainEnd = indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)
         val cycle = assertIs<UnresolvedRef.Cycle>(chainEnd.unresolvedRef)
-        assertSame((b as KsonObject).propertyLookup["\$ref"], cycle.ref)
+        assertSame((b as KsonObject).propertyLookup[$$"$ref"], cycle.ref)
         val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_REF_CYCLE), messageTypes)
     }
 
     @Test
     fun retrievalAliasesAndCanonicalIdsFindTheSameExternalPointer() {
-        val external = value($$"""{
-            "$id": "https://canonical.test/types.json",
-            "definitions": { "str": { "type": "string" } }
-        }""")
+        val external = value($$"""
+            '$id': 'https://canonical.test/types.json'
+            definitions:
+              str:
+                type: string
+        """.trimIndent())
         val documents = listOf(SchemaDocument(external, UriReference.parse("file:///types.json")))
         val rootDocument = SchemaDocument(value("{}"), UriReference.parse("file:///root.json"))
         val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
@@ -164,15 +193,25 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun productiveRecursiveExternalSchemasValidateFiniteDocuments() {
-        val root = value($$"""{ "$ref": "a.json" }""")
-        val a = value($$"""{
-            "type": "object",
-            "properties": { "value": { "type": "number" }, "next": { "$ref": "b.json" } }
-        }""")
-        val b = value($$"""{
-            "type": "object",
-            "properties": { "value": { "type": "number" }, "next": { "$ref": "a.json" } }
-        }""")
+        val root = value($$"""'$ref': 'a.json'""")
+        val a = value($$"""
+            type: object
+            properties:
+              value:
+                type: number
+                .
+              next:
+                '$ref': 'b.json'
+        """.trimIndent())
+        val b = value($$"""
+            type: object
+            properties:
+              value:
+                type: number
+                .
+              next:
+                '$ref': 'a.json'
+        """.trimIndent())
         val documents = listOf(
             SchemaDocument(a, UriReference.parse("file:///a.json")),
             SchemaDocument(b, UriReference.parse("file:///b.json"))
@@ -182,17 +221,32 @@ class ExternalSchemaRefsTest {
         val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
         assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
-        val finiteChain = """{ "value": 1, "next": { "value": 2, "next": { "value": 3 } } }"""
+        val finiteChain = """
+            value: 1
+            next:
+              value: 2
+              next:
+                value: 3
+        """.trimIndent()
         assertEquals(emptyList(), validationMessages(indexedDocuments, finiteChain))
-        val badThirdValue = """{ "next": { "next": { "value": "bad" } } }"""
+        val badThirdValue = """
+            next:
+              next:
+                value: bad
+        """.trimIndent()
         val messages = validationMessages(indexedDocuments, badThirdValue)
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messages.map { it.message.type })
-        assertEquals(listOf(Location(Coordinates(0, 32), Coordinates(0, 35), 32, 35)), messages.map { it.location })
+        assertEquals(listOf(Location(Coordinates(2, 11), Coordinates(2, 14), 25, 28)), messages.map { it.location })
     }
 
     @Test
     fun pointersIntoExtensionDataResolveWithoutInterpretingDataIds() {
-        val external = value($$"""{ "extension": { "$id": "ignored/", "target": { "type": "number" } } }""")
+        val external = value($$"""
+            extension:
+              '$id': 'ignored/'
+              target:
+                type: number
+        """.trimIndent())
         val documents = listOf(SchemaDocument(external, UriReference.parse("file:///types.json")))
         val rootDocument = SchemaDocument(value("{}"), UriReference.parse("file:///root.json"))
         val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
@@ -206,8 +260,16 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun rootRefIgnoresTheRootIdBesideIt() {
-        val root = value($$"""{ "$id": "canonical/root.json", "$ref": "types.json#/definitions/str" }""")
-        val types = value("""{ "definitions": { "str": { "type": "string", "title": "String" } } }""")
+        val root = value($$"""
+            '$id': 'canonical/root.json'
+            '$ref': 'types.json#/definitions/str'
+        """.trimIndent())
+        val types = value("""
+            definitions:
+              str:
+                type: string
+                title: String
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/types.json"))
 
@@ -226,28 +288,38 @@ class ExternalSchemaRefsTest {
     @Test
     fun rootIdWithAnEmptyFragmentSetsTheBaseWithoutIt() {
         // `canonical/root.json#` identifies the same schema as `canonical/root.json`
-        val root = value($$"""{
-            "$id": "canonical/root.json#",
-            "properties": { "field": { "$ref": "#/definitions/str" } },
-            "definitions": { "str": { "type": "string" } }
-        }""")
+        val root = value($$"""
+            '$id': 'canonical/root.json#'
+            properties:
+              field:
+                '$ref': '#/definitions/str'
+                .
+              .
+            definitions:
+              str:
+                type: string
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
 
         assertEquals("file:///schemas/canonical/root.json", indexedDocuments.rootSubschemaBaseUri.toString())
-        val messageTypes = validationMessages(indexedDocuments, """{ "field": 42 }""").map { it.message.type }
+        val messageTypes = validationMessages(indexedDocuments, "field: 42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
 
     @Test
     fun rootIdAppliesOnceToReferencedExtensionData() {
-        val root = value($$"""{
-            "$id": "canonical/root.json",
-            "allOf": [{ "$ref": "#/extension/target" }],
-            "extension": { "target": { "$ref": "types.json" } }
-        }""")
-        val types = value("""{ "type": "string" }""")
+        val root = value($$"""
+            '$id': 'canonical/root.json'
+            allOf:
+              - '$ref': '#/extension/target'
+                .
+            extension:
+              target:
+                '$ref': 'types.json'
+        """.trimIndent())
+        val types = value("type: string")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/canonical/types.json"))
 
@@ -263,12 +335,14 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun rootIdBesideRootRefDoesNotApplyToReferencedExtensionData() {
-        val root = value($$"""{
-            "$id": "canonical/root.json",
-            "$ref": "#/extension/target",
-            "extension": { "target": { "$ref": "types.json" } }
-        }""")
-        val types = value("""{ "type": "string" }""")
+        val root = value($$"""
+            '$id': 'canonical/root.json'
+            '$ref': '#/extension/target'
+            extension:
+              target:
+                '$ref': 'types.json'
+        """.trimIndent())
+        val types = value("type: string")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/types.json"))
 
@@ -285,12 +359,18 @@ class ExternalSchemaRefsTest {
     @Test
     fun refThroughAnIdIdentifiedLaterDiscoversItsTargetsDependencies() {
         // `a` is extension data, so `a.json` identifies it only once the first `$ref` leads there
-        val root = value($$"""{
-            "allOf": [{ "$ref": "#/extension/a" }, { "$ref": "a.json#/extension/x" }],
-            "extension": {
-                "a": { "$id": "a.json", "extension": { "x": { "$ref": "x-dependency.json" } } }
-            }
-        }""")
+        val root = value($$"""
+            allOf:
+              - '$ref': '#/extension/a'
+              - '$ref': 'a.json#/extension/x'
+                .
+            extension:
+              a:
+                '$id': 'a.json'
+                extension:
+                  x:
+                    '$ref': 'x-dependency.json'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
@@ -303,12 +383,15 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun referencedCustomPointerTargetsDiscoverTheirOwnDependencies() {
-        val root = value($$"""{ "$ref": "child.json#/custom" }""")
-        val child = value($$"""{
-            "custom": { "$ref": "next.json" },
-            "unreferenced": { "$ref": "unused.json" }
-        }""")
-        val next = value("""{ "type": "string" }""")
+        val root = value($$"""'$ref': 'child.json#/custom'""")
+        val child = value($$"""
+            custom:
+              '$ref': 'next.json'
+              .
+            unreferenced:
+              '$ref': 'unused.json'
+        """.trimIndent())
+        val next = value("type: string")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val childDocument = SchemaDocument(child, UriReference.parse("file:///schemas/child.json"))
         val nextDocument = SchemaDocument(next, UriReference.parse("file:///schemas/next.json"))
@@ -326,13 +409,15 @@ class ExternalSchemaRefsTest {
     @Test
     fun onlyReferencedDefsEntriesDiscoverTheirDependencies() {
         // Draft 7 has no `$defs`, so what it holds is data, read as a schema only where a `$ref` leads
-        val root = value($$"""{
-            "$ref": "#/$defs/used",
-            "$defs": {
-                "used": { "$ref": "used.json" },
-                "unused": { "$ref": "unused.json" }
-            }
-        }""")
+        val root = value($$"""
+            '$ref': '#/$defs/used'
+            '$defs':
+              used:
+                '$ref': 'used.json'
+                .
+              unused:
+                '$ref': 'unused.json'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
@@ -342,21 +427,29 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun referencedCustomSchemaIdsApplyWithoutInterpretingUnreferencedDataIds() {
-        val root = value($$"""{ "$ref": "child.json#/custom/selected" }""")
-        val child = value($$"""{
-            "custom": {
-                "$id": "ignored/",
-                "selected": {
-                    "$id": "types/",
-                    "properties": { "field": { "$ref": "next.json#/custom" } }
-                }
-            },
-            "default": { "$ref": "unused.json" }
-        }""")
-        val next = value($$"""{ "custom": {
-            "type": "object",
-            "properties": { "next": { "$ref": "../child.json#/custom/selected" } }
-        } }""")
+        val root = value($$"""'$ref': 'child.json#/custom/selected'""")
+        val child = value($$"""
+            custom:
+              '$id': 'ignored/'
+              selected:
+                '$id': 'types/'
+                properties:
+                  field:
+                    '$ref': 'next.json#/custom'
+                    .
+                  .
+                .
+              .
+            default:
+              '$ref': 'unused.json'
+        """.trimIndent())
+        val next = value($$"""
+            custom:
+              type: object
+              properties:
+                next:
+                  '$ref': '../child.json#/custom/selected'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val childDocument = SchemaDocument(child, UriReference.parse("file:///schemas/child.json"))
         val nextDocument = SchemaDocument(next, UriReference.parse("file:///schemas/types/next.json"))
@@ -366,11 +459,20 @@ class ExternalSchemaRefsTest {
 
         assertEquals(listOf(UriReference.parse("file:///schemas/types/next.json")), incomplete.missingDocumentUris)
         assertEquals(emptyList(), complete.missingDocumentUris)
-        assertEquals(emptyList(), validationMessages(complete, """{ "field": { "next": { "field": {} } } }"""))
-        val badThirdField = """{ "field": { "next": { "field": 42 } } }"""
+        val goodThirdField = """
+            field:
+              next:
+                field: {}
+        """.trimIndent()
+        assertEquals(emptyList(), validationMessages(complete, goodThirdField))
+        val badThirdField = """
+            field:
+              next:
+                field: 42
+        """.trimIndent()
         val messages = validationMessages(complete, badThirdField)
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messages.map { it.message.type })
-        assertEquals(listOf(Location(Coordinates(0, 32), Coordinates(0, 34), 32, 34)), messages.map { it.location })
+        assertEquals(listOf(Location(Coordinates(2, 11), Coordinates(2, 13), 26, 28)), messages.map { it.location })
     }
 
     @Test
@@ -378,15 +480,23 @@ class ExternalSchemaRefsTest {
         val targetRef = "#/custom/target"
         val nestedRef = "#/custom/target/definitions/nested"
         val documents = listOf(
-            SchemaDocument(value("""{ "type": "number" }"""), UriReference.parse("file:///s/y.json")),
-            SchemaDocument(value("""{ "type": "string" }"""), UriReference.parse("file:///s/x/y.json"))
+            SchemaDocument(value("type: number"), UriReference.parse("file:///s/y.json")),
+            SchemaDocument(value("type: string"), UriReference.parse("file:///s/x/y.json"))
         )
 
         for (refs in listOf(listOf(targetRef, nestedRef), listOf(nestedRef, targetRef))) {
-            val root = value($$"""{
-                "allOf": [{ "$ref": "$${refs[0]}" }, { "$ref": "$${refs[1]}" }],
-                "custom": { "target": { "$id": "x/", "definitions": { "nested": { "$ref": "y.json" } } } }
-            }""")
+            val root = value($$"""
+                allOf:
+                  - '$ref': '$${refs[0]}'
+                  - '$ref': '$${refs[1]}'
+                    .
+                custom:
+                  target:
+                    '$id': 'x/'
+                    definitions:
+                      nested:
+                        '$ref': 'y.json'
+            """.trimIndent())
             val rootDocument = SchemaDocument(root, UriReference.parse("file:///s/root.json"))
 
             val incomplete = IndexedSchemaDocuments(rootDocument)
@@ -404,13 +514,21 @@ class ExternalSchemaRefsTest {
     @Test
     fun customSchemaReferencedLaterScopesTheSubschemasReferencedBefore() {
         // only `hook` leads to `target`, so it is referenced later than `nested`
-        val root = value($$"""{
-            "allOf": [{ "$ref": "#/custom/target/definitions/nested" }, { "$ref": "#/custom/hook" }],
-            "custom": {
-                "hook": { "$ref": "#/custom/target" },
-                "target": { "$id": "x/", "definitions": { "nested": { "$ref": "y.json" } } }
-            }
-        }""")
+        val root = value($$"""
+            allOf:
+              - '$ref': '#/custom/target/definitions/nested'
+              - '$ref': '#/custom/hook'
+                .
+            custom:
+              hook:
+                '$ref': '#/custom/target'
+                .
+              target:
+                '$id': 'x/'
+                definitions:
+                  nested:
+                    '$ref': 'y.json'
+        """.trimIndent())
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///s/root.json"))
 
         val indexedDocuments = IndexedSchemaDocuments(rootDocument)
@@ -420,8 +538,17 @@ class ExternalSchemaRefsTest {
 
     @Test
     fun additionalDocumentsMustSayWhereTheyWereRetrievedFrom() {
-        val root = value($$"""{ "$ref": "#/definitions/text", "definitions": { "text": { "type": "string" } } }""")
-        val document = value("""{ "definitions": { "text": { "type": "number" } } }""")
+        val root = value($$"""
+            '$ref': '#/definitions/text'
+            definitions:
+              text:
+                type: string
+        """.trimIndent())
+        val document = value("""
+            definitions:
+              text:
+                type: number
+        """.trimIndent())
 
         for (retrievalUri in listOf(null, UriReference.parse(""), UriReference.parse("#/definitions"))) {
             assertFailsWith<IllegalArgumentException>("retrieval URI '$retrievalUri'") {

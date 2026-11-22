@@ -21,9 +21,9 @@ class IndexedSchemaDocumentsPerformanceTest {
     private fun chainOfRefs(): KsonValue {
         val links = (0 until chainLength).joinToString(", ") { index ->
             val next = if (index < chainLength - 1) "#/definitions/link${index + 1}" else "end.json"
-            $$""""link$$index": { "$ref": "$$next" }"""
+            $$"""link$$index: { '$ref': '$$next' }"""
         }
-        val source = $$"""{ "$ref": "#/definitions/link0", "definitions": { $$links } }"""
+        val source = $$"""{ '$ref': '#/definitions/link0', definitions: { $$links } }"""
         return assertNotNull(KsonCore.parseToAst(source).ksonValue)
     }
 
@@ -34,6 +34,6 @@ class IndexedSchemaDocumentsPerformanceTest {
         val (indexedDocuments, elapsed) = measureTimedValue { IndexedSchemaDocuments(rootDocument) }
 
         assertEquals(listOf(UriReference.parse("file:///schemas/end.json")), indexedDocuments.missingDocumentUris)
-        assertTrue(elapsed < 5.seconds, "Indexing a chain of $chainLength `\$ref`s took $elapsed")
+        assertTrue(elapsed < 5.seconds, $$"Indexing a chain of $$chainLength `$ref`s took $$elapsed")
     }
 }

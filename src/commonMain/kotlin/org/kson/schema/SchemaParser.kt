@@ -224,9 +224,9 @@ internal object SchemaParser {
         indexedDocuments: IndexedSchemaDocuments,
         messageSink: MessageSink,
     ): RefOutcome {
-        val refString = schemaObject.propertyLookup["\$ref"] ?: return RefOutcome.NotPresent
+        val refString = schemaObject.propertyLookup[$$"$ref"] ?: return RefOutcome.NotPresent
         if (refString !is KsonString) {
-            messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
+            messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create($$"$ref"))
             return RefOutcome.NotPresent
         }
         val target = when (val resolution = indexedDocuments.resolveRef(refString.value, currentBaseUri)) {
@@ -287,7 +287,7 @@ internal object SchemaParser {
             }
         }
         val description = parseStringOrEmbedBlock(schemaProperties, "description", messageSink)
-        val comment = parseStringOrEmbedBlock(schemaProperties, "\$comment", messageSink)
+        val comment = parseStringOrEmbedBlock(schemaProperties, $$"$comment", messageSink)
         val default = schemaProperties["default"]
         val definitions = schemaProperties["definitions"]?.let { definitionsValue ->
             if (definitionsValue is KsonObject) {
@@ -621,8 +621,8 @@ private fun <T : Any> MutableCollection<T>.addIfNotNull(element: T?) {
 
 /** Reports an `$id` that isn't a string, as JSON Schema requires it to be one */
 private fun reportNonStringId(schemaObject: KsonObject, messageSink: MessageSink) {
-    val idValue = schemaObject.propertyLookup["\$id"] ?: return
+    val idValue = schemaObject.propertyLookup[$$"$id"] ?: return
     if (idValue !is KsonString) {
-        messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
+        messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create($$"$id"))
     }
 }

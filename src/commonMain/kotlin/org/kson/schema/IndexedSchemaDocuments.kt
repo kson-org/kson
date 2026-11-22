@@ -165,7 +165,7 @@ class IndexedSchemaDocuments(
         val followed = mutableListOf<KsonValue>()
         var current = ResolvedRef(value, currentBaseUri)
         while (true) {
-            val ref = (current.resolvedValue as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
+            val ref = (current.resolvedValue as? KsonObject)?.propertyLookup?.get($$"$ref") as? KsonString
                 ?: return current
             followed.add(current.resolvedValue)
             val target = when (val resolution = resolveRef(ref.value, current.resolvedValueBaseUri)) {
@@ -251,8 +251,8 @@ class IndexedSchemaDocuments(
             isDocumentRoot: Boolean = false
         ) {
             val keywords = keywordsOf(value)
-            val id = keywords["\$id"] as? KsonString
-            val ref = keywords["\$ref"] as? KsonString
+            val id = keywords[$$"$id"] as? KsonString
+            val ref = keywords[$$"$ref"] as? KsonString
             val subschemaBaseUri = enclosingBaseUri.withIdOf(value)
             val schema = IndexedSchema(value, enclosingBaseUri, subschemaBaseUri, depth)
 
@@ -283,8 +283,8 @@ private val SchemaDocument.initialBaseUri: UriReference
 /** The keywords of [schema] that apply: a string `$ref` alone, as Draft 7 ignores the keywords beside it */
 private fun keywordsOf(schema: KsonValue): Map<String, KsonValue> {
     val keywords = (schema as? KsonObject)?.propertyLookup.orEmpty()
-    val ref = keywords["\$ref"]
-    return if (ref is KsonString) mapOf("\$ref" to ref) else keywords
+    val ref = keywords[$$"$ref"]
+    return if (ref is KsonString) mapOf($$"$ref" to ref) else keywords
 }
 
 /** The subschemas [keywordValue] holds, if [keyword] is one of Draft 7's subschema keywords */
@@ -316,7 +316,7 @@ fun ResolvedRef.descend(path: List<KsonValue>): ResolvedRef = path.fold(this) { 
  * URI, or this URI when [schema] has no `$id` that applies
  */
 fun UriReference.withIdOf(schema: KsonValue): UriReference {
-    val id = keywordsOf(schema)["\$id"] as? KsonString ?: return this
+    val id = keywordsOf(schema)[$$"$id"] as? KsonString ?: return this
     return resolve(id.value).withoutEmptyFragment()
 }
 
