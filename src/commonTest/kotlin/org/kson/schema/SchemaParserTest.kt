@@ -401,6 +401,28 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefToAListItemResolvesOnlyByACanonicalIndex() {
+        fun schema(index: String) = $$"""
+            items:
+              - type: string
+              - type: number
+                .
+            properties:
+              a:
+                '$ref': '#/items/$$index'
+        """.trimIndent()
+        assertKsonEnforcesSchema("a: 1", schema("1"), true)
+        for (index in listOf("01", "+1", "-0")) {
+            val ref = "#/items/$index"
+            assertEquals(
+                listOf(MessageType.SCHEMA_REF_RESOLUTION_FAILED.create(ref)),
+                KsonCore.parseSchema(schema(index)).messages.map { it.message },
+                ref
+            )
+        }
+    }
+
+    @Test
     fun testRefToRefWithMalformedPointerReportsError() {
         // `wrapper` is only parsed once validation follows the root `$ref` to it
         val schema = $$"""

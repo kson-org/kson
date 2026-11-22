@@ -12,6 +12,7 @@ import org.kson.schema.SchemaProgress
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.TreePointer
@@ -186,12 +187,11 @@ internal class SchemaNavigator(
     }
 
     /**
-     * The list index [token] stands for, or null where it names a property.  In an object [container], a token names
-     * a property even when it is a number.  Anywhere else a number is an index, including where the document has no
-     * node to read the token in, as past what it holds.
+     * Returns the list index [token] names, or null when [token] is a property name.  In an object [container] every
+     * token is a property name; anywhere else, even without a [container], [JsonPointer.arrayIndex] decides.
      */
     private fun arrayIndex(token: String, container: AstNode?): Int? =
-        if (container is ObjectNode) null else token.toIntOrNull()
+        if (container is ObjectNode) null else JsonPointer.arrayIndex(token)
 
     /** Returns the subschema among [subschemas] that validates the list item at [index], or null if none does. */
     private fun itemSchema(subschemas: List<Subschema>, index: Int): Subschema? =

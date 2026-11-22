@@ -475,6 +475,21 @@ class SchemaNavigationTest {
     }
 
     @Test
+    fun testNavigatePropertyNamedByDigitsWithALeadingZero() {
+        val schema = """
+            {
+                properties: { "01": { type: "object" } }
+                items: { type: "string" }
+            }
+        """
+        fun typeAt(token: String) = navigateSchema(schema, listOf(token))
+            .map { ((it as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+
+        assertEquals(listOf("string"), typeAt("1"))
+        assertEquals(listOf("object"), typeAt("01"))
+    }
+
+    @Test
     fun testNavigateWithInvalidRegexInPatternProperties() {
         // Test that invalid regex patterns are handled gracefully
         val schema = """

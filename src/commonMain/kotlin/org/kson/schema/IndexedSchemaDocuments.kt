@@ -253,7 +253,7 @@ class IndexedSchemaDocuments internal constructor(
         place.path.fold<String, KsonValue?>(documents[place.document].value) { value, token ->
             when (value) {
                 is KsonObject -> value.propertyLookup[token]
-                is KsonList -> token.toIntOrNull()?.let { value.elements.getOrNull(it) }
+                is KsonList -> JsonPointer.arrayIndex(token)?.let { value.elements.getOrNull(it) }
                 else -> null
             }
         }

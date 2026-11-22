@@ -192,6 +192,38 @@ class IndexedSchemaDocumentsTest {
     }
 
     @Test
+    fun resolvesAPointerToAPropertyNamedByDigitsWithALeadingZero() {
+        val schema = $$"""
+            properties:
+              field:
+                '$ref': '#/properties/01'
+                .
+              '01':
+                title: '01'
+        """.trimIndent()
+        assertEquals("01" to "", resolveField(schema))
+    }
+
+    @Test
+    fun doesNotIndexAValueAgainThroughARefByANonCanonicalIndex() {
+        // indexing `x` again through the `$ref` would resolve its `$id` against the root instead of `second/`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            allOf:
+              - '$ref': '#/items/01/properties/x'
+                .
+            items:
+              - {}
+              - '$id': 'http://example.com/second/'
+                properties:
+                  x:
+                    '$id': 'x.json'
+        """.trimIndent()
+        assertIs<RefResolution.Found>(resolveRef(schema, "http://example.com/second/x.json"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, "http://example.com/x.json"))
+    }
+
+    @Test
     fun resolvesAPointerWithinTheSchemaItsRefNames() {
         val schema = $$"""
             properties:
