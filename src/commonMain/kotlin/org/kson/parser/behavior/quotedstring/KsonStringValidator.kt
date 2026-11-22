@@ -54,10 +54,9 @@ class KsonStringValidator {
             is ListNode -> validateListElements(node, messageSink)
             is QuotedStringNode -> validateQuotedString(node, messageSink)
             is EmbedBlockNode -> {
-                val tagNode = node.embedTagNode
-                if (tagNode is QuotedStringNode) {
-                    validateQuotedString(tagNode, messageSink)
-                }
+                listOf(node.embedTagNode, node.embedContentNode)
+                    .filterIsInstance<QuotedStringNode>()
+                    .forEach { validateQuotedString(it, messageSink) }
             }
             // No validation needed for other node types
             is UnquotedStringNode,

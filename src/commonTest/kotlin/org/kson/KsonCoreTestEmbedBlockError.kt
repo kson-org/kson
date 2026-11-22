@@ -81,6 +81,12 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     }
 
     @Test
+    fun testEmbedBlockObjectValidatesItsStrings() {
+        assertParserRejectsSource("embedTag: x\nembedContent: 'a\\xb'", listOf(STRING_BAD_ESCAPE))
+        assertParserRejectsSource("embedTag: x\nembedContent: 'a\u0001b'", listOf(STRING_CONTROL_CHARACTER))
+    }
+
+    @Test
     fun testEmbedBlockPartialDelim() {
         assertParserRejectsSource(
             """
