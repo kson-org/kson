@@ -40,18 +40,18 @@ class SchemaProgressTest {
     fun refsAreReadUnderTheBaseUriItIsGiven() {
         val root = kson(
             $$"""
-                '$id': 'https://example.org/root'
                 '$ref': '#/$defs/count'
                 '$defs':
                   count:
                     type: number
             """.trimIndent()
         )
-        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
+        val retrievalUri = UriReference.parse("https://example.org/root")
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, retrievalUri))
 
-        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), indexedDocuments)
-        assertTrue(underItsId.accepts(kson("3")))
-        assertTrue(underItsId.rejects(kson("three")))
+        val underItsRetrievalUri = SchemaProgress(root, retrievalUri, indexedDocuments)
+        assertTrue(underItsRetrievalUri.accepts(kson("3")))
+        assertTrue(underItsRetrievalUri.rejects(kson("three")))
 
         val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments)
         assertFalse(elsewhere.accepts(kson("3")))

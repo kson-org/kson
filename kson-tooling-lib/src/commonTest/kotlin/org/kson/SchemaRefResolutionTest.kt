@@ -369,19 +369,13 @@ class SchemaRefResolutionTest {
 
     @Test
     fun testResolveRef_rootRefBesideARelativeRootId() {
-        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
-        // `$id`.  Resolved against that `$id`, it would name `decoy`
         assertRefResolution($$"""
             '$id': 'sub/root.json'
-            '$ref': 'sub/other.json<cursor>'
+            '$ref': '#/definitions/target<cursor>'
             definitions:
               target:
-                <target>'$id': 'other.json'
-                type: string
+                <target>type: string
                 .</target>
-              decoy:
-                '$id': 'sub/other.json'
-                type: number
         """.trimIndent())
     }
 

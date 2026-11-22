@@ -90,7 +90,7 @@ class IndexedSchemaDocuments(
             val indexedTarget = schemaOf(target)
             if (indexedTarget != null) return ResolvedRef(target, indexedTarget.baseUri)
 
-            // extension data gets its base URI from the schemas enclosing it
+            // a value that is not indexed gets its base URI from the schemas enclosing it
             val enclosingSchema = enclosingSchemaOf(listOf(resource.value) + pathToTarget)
             return ResolvedRef(target, enclosingSchema.subschemaBaseUri)
         }
@@ -137,8 +137,8 @@ class IndexedSchemaDocuments(
 
     /**
      * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema it ultimately
-     * refers to.  Keywords beside a `$ref`, `$id` included, are ignored.  A `$ref` that doesn't resolve or leads back
-     * into the chain ends it, and becomes the result's [unresolvedRef][ResolvedRef.unresolvedRef].
+     * refers to.  A `$ref` that doesn't resolve or leads back into the chain ends it, and becomes the result's
+     * [unresolvedRef][ResolvedRef.unresolvedRef].
      *
      * @param value The schema value that might contain a `$ref`
      * @param currentBaseUri The base URI [value] is read under
@@ -162,7 +162,7 @@ class IndexedSchemaDocuments(
         }
     }
 
-    /** Indexes the [documents], plus the reference targets [subschemasOf] doesn't reach, such as extension data */
+    /** Indexes the [documents], and every value their `$ref`s lead to */
     private fun indexUntilReferencesSettle(): Index {
         var referencedValues = emptyList<KsonValue>()
         while (true) {
@@ -210,9 +210,9 @@ class IndexedSchemaDocuments(
             enclosingBaseUri: UriReference,
             isDocumentRoot: Boolean = false
         ) {
-            val schemaObject = value as? KsonObject
-            val id = schemaObject?.propertyLookup?.get("\$id") as? KsonString
-            val ref = schemaObject?.propertyLookup?.get("\$ref") as? KsonString
+            val keywords = keywordsOf(value)
+            val id = keywords["\$id"] as? KsonString
+            val ref = keywords["\$ref"] as? KsonString
             val subschemaBaseUri = enclosingBaseUri.withIdOf(value)
             val schema = IndexedSchema(value, enclosingBaseUri, subschemaBaseUri)
 
@@ -220,8 +220,7 @@ class IndexedSchemaDocuments(
             if (isDocumentRoot) schemasByUri[enclosingBaseUri] = schema
             if (id != null) schemasByUri[subschemaBaseUri] = schema
             if (ref != null) references.add(Reference(ref.value, enclosingBaseUri))
-            // keywords beside a `$ref` are ignored, but the schemas they hold can still be referenced
-            schemaObject?.propertyLookup?.forEach { (keyword, keywordValue) ->
+            keywords.forEach { (keyword, keywordValue) ->
                 subschemasOf(keyword, keywordValue).forEach { addSchema(it, subschemaBaseUri) }
             }
         }
@@ -247,6 +246,13 @@ class IndexedSchemaDocuments(
 /** The base URI this document's root `$id` resolves against: its retrieval URI without a fragment, or else empty */
 private val SchemaDocument.initialBaseUri: UriReference
     get() = retrievalUri?.withoutFragment() ?: UriReference.parse("")
+
+/** The keywords of [schema] that apply: a string `$ref` alone, as Draft 7 ignores the keywords beside it */
+private fun keywordsOf(schema: KsonValue): Map<String, KsonValue> {
+    val keywords = (schema as? KsonObject)?.propertyLookup.orEmpty()
+    val ref = keywords["\$ref"]
+    return if (ref is KsonString) mapOf("\$ref" to ref) else keywords
+}
 
 /** The subschemas [keywordValue] holds, if [keyword] is one of Draft 7's subschema keywords */
 private fun subschemasOf(keyword: String, keywordValue: KsonValue): List<KsonValue> = when (keyword) {
@@ -274,10 +280,10 @@ fun ResolvedRef.descend(path: List<KsonValue>): ResolvedRef = path.fold(this) { 
 
 /**
  * The base URI for [schema]'s keywords when [schema] is read under this URI: [schema]'s `$id` resolved against this
- * URI, or this URI when [schema] has no `$id`
+ * URI, or this URI when [schema] has no `$id` that applies
  */
 fun UriReference.withIdOf(schema: KsonValue): UriReference {
-    val id = (schema as? KsonObject)?.propertyLookup["\$id"] as? KsonString ?: return this
+    val id = keywordsOf(schema)["\$id"] as? KsonString ?: return this
     return resolve(id.value).withoutEmptyFragment()
 }
 

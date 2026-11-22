@@ -45,14 +45,18 @@ interface JsonSchemaTest {
     /**
      * Pass a [sourceContext] carrying [org.kson.validation.ValidationMode.PARTIAL] to exercise
      * draft-mode validation; it defaults to a full validation.
+     *
+     * @param externalSchemaSources the sources of the external schema documents [schemaJson] references, by
+     *   retrieval URI
      */
     fun assertKsonSchemaErrors(
         ksonSource: String,
         schemaJson: String,
         expectedParseMessageTypes: List<MessageType>,
         message: String? = null,
-        sourceContext: SourceContext = SourceContext()): List<LoggedMessage> {
-        val jsonSchema = assertValidSchema(schemaJson)
+        sourceContext: SourceContext = SourceContext(),
+        externalSchemaSources: Map<String, String> = emptyMap()): List<LoggedMessage> {
+        val jsonSchema = assertValidSchema(schemaJson, externalSchemaSources = externalSchemaSources)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)

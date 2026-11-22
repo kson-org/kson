@@ -249,6 +249,90 @@ class IndexedSchemaDocumentsTest {
     }
 
     @Test
+    fun doesNotResolveARefToAnIdBesideARef() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "http://example.com/target.json" } },
+              "definitions": {
+                "target": { "$id": "http://example.com/target.json", "$ref": "#/definitions/other" },
+                "other": { "title": "other" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun doesNotLetAnIdBesideARefReplaceTheSchemaWithThatId() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "http://example.com/target.json" } },
+              "definitions": {
+                "target": { "$id": "http://example.com/target.json", "title": "target" },
+                "impostor": { "$id": "http://example.com/target.json", "$ref": "#/definitions/other" },
+                "other": { "title": "other" }
+              }
+            }
+        """
+        assertEquals("target" to "", resolveField(schema))
+    }
+
+    @Test
+    fun doesNotResolveARefToAnIdInAKeywordBesideARef() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "http://example.com/nested.json" } },
+              "definitions": {
+                "holder": {
+                  "$ref": "#/definitions/other",
+                  "definitions": { "nested": { "$id": "http://example.com/nested.json", "title": "nested" } }
+                },
+                "other": { "title": "other" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun resolvesARefToAnIdBesideARefThatIsNotAString() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "http://example.com/holder/nested.json" } },
+              "definitions": {
+                "holder": {
+                  "$id": "http://example.com/holder/",
+                  "$ref": 42,
+                  "definitions": { "nested": { "$id": "nested.json", "title": "nested" } }
+                }
+              }
+            }
+        """
+        assertEquals("nested" to "http://example.com/holder/", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAPointerIntoAKeywordBesideARefUnderTheBaseUriIgnoringItsId() {
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "#/allOf/0/definitions/target" } },
+              "allOf": [
+                {
+                  "$id": "http://example.com/ignored.json",
+                  "$ref": "#/definitions/other",
+                  "definitions": { "target": { "title": "target" } }
+                }
+              ],
+              "definitions": { "other": {} }
+            }
+        """
+        assertEquals("target" to "http://example.com/root.json", resolveField(schema))
+    }
+
+    @Test
     fun resolvesAPointerIntoDefsUnderTheRootsBaseUri() {
         // Draft 7 has no `$defs`, so `outer` is data, whose `$id` sets no base URI for `inner`
         val schema = $$"""
@@ -321,8 +405,7 @@ class IndexedSchemaDocumentsTest {
 
     @Test
     fun resolvesARootRefBesideTheRootIdInTheRootDocument() {
-        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
-        // the root.  `target` is still read under the root's `$id`
+        // `target` is read under the retrieval URI, which is empty here
         val schema = $$"""
             '$id': 'http://example.com/root.json'
             '$ref': '#/$defs/target'
@@ -330,7 +413,7 @@ class IndexedSchemaDocumentsTest {
               target:
                 title: target
         """.trimIndent()
-        assertEquals("target" to "http://example.com/root.json", resolveRoot(schema))
+        assertEquals("target" to "", resolveRoot(schema))
     }
 
     @Test

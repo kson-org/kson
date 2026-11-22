@@ -520,38 +520,32 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testRootRefBesideTheRootIdResolvesInTheRootDocument() {
-        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
-        // the root.  `a` is still read under the root's `$id`, so its `other.json` names `other`
+        // `other.json` resolves against the retrieval URI, not the root's `$id`
         val schema = $$"""
             '$id': 'http://example.com/root.json'
             '$ref': '#/definitions/a'
             definitions:
               a:
                 '$ref': 'other.json'
-                .
-              other:
-                '$id': 'other.json'
-                type: string
         """.trimIndent()
-        assertKsonEnforcesSchema("ok", schema, true)
-        assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+        val externalSchemaSources = mapOf("other.json" to """{ "type": "string" }""")
+        assertKsonEnforcesSchema("ok", schema, true, externalSchemaSources = externalSchemaSources)
+        assertKsonSchemaErrors(
+            "1",
+            schema,
+            listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH),
+            externalSchemaSources = externalSchemaSources
+        )
     }
 
     @Test
     fun testRootRefBesideARelativeRootIdNamesTheSchemaUnderTheRetrievalUri() {
-        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
-        // `$id`.  Resolved against that `$id`, it would name `decoy`
         val schema = $$"""
             '$id': 'sub/root.json'
-            '$ref': 'sub/other.json'
+            '$ref': '#/definitions/target'
             definitions:
               target:
-                '$id': 'other.json'
                 type: string
-                .
-              decoy:
-                '$id': 'sub/other.json'
-                type: number
         """.trimIndent()
         assertKsonEnforcesSchema("ok", schema, true)
         assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))

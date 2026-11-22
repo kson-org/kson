@@ -5,7 +5,10 @@ import kotlin.test.Test
 /**
  * ["Bundled"/Compound Schema](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents) versions
  * of JSON-Schema-Test-Suite's Draft 7 tests of remote references, ensuring our Schema `$id` and `$ref` code also
- * navigates compound schemas that embed those remote schemas
+ * navigates compound schemas that embed those remote schemas.
+ *
+ * Where the suite's schema is a bare `$ref`, the bundle wraps it in an `allOf`, because a `$ref` ignores the
+ * `definitions` bundled beside it.
  */
 class JsonSchemaTestBundledRemotes : JsonSchemaTest {
     /**
@@ -19,7 +22,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo" }],
                   "definitions": {
                     "http://localhost:1234/draft7/detached-ref.json": {
                       "${'$'}schema": "http://json-schema.org/draft-07/schema#",
@@ -51,7 +54,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/integer.json",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/integer.json" }],
                   "definitions": {
                     "http://localhost:1234/integer.json": {
                       "${'$'}id": "http://localhost:1234/integer.json",
@@ -73,7 +76,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/integer.json",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/integer.json" }],
                   "definitions": {
                     "http://localhost:1234/integer.json": {
                       "${'$'}id": "http://localhost:1234/integer.json",
@@ -96,7 +99,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
                       "${'$'}id": "http://localhost:1234/subSchemas.json",
@@ -125,7 +128,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
                       "${'$'}id": "http://localhost:1234/subSchemas.json",
@@ -155,7 +158,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
                       "${'$'}id": "http://localhost:1234/subSchemas.json",
@@ -184,7 +187,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
                       "${'$'}id": "http://localhost:1234/subSchemas.json",
@@ -445,7 +448,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/locationIndependentIdentifierPre2019.json": {
                       "${'$'}id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",
@@ -475,7 +478,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """,
             """
                 {
-                  "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger",
+                  "allOf": [{ "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/locationIndependentIdentifierPre2019.json": {
                       "${'$'}id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",

@@ -698,7 +698,7 @@ class SchemaDefinitionLocationTest {
 
     @Test
     fun testJumpToDefinition_besideARootRefThatDoesNotResolve() {
-        // The keywords beside a root `$ref` that resolves to no schema are read under the root's `$id`, applied once
+        // The keywords beside a root `$ref` that resolves to no schema are still read
         assertDefinitionLocation(
             schemaWithCaret = $$"""
                 {
