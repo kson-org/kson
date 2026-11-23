@@ -498,7 +498,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             jsonSettings = Json(retainEmbedTags = true)
         )
 
-        // Tag with \t escape — raw text "my\ttag" is preserved as the tag value
+        // Tag with \t escape carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %my\ttag
@@ -522,7 +522,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
 
-        // Tag with unicode escape — raw text "\u0041tag" is preserved as the tag value
+        // Tag with unicode escape carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %\u0041tag
@@ -546,7 +546,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
 
-        // Tag with escaped backslash — raw text "path\\to" is preserved as the tag value
+        // Tag with escaped backslash carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %path\\to

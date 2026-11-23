@@ -2785,6 +2785,24 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedRuleTagIsEscaped() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            // note that the quotes here are of course not escaped: escaped quotes are illegal in an embed tag
+            """
+            scripts:
+              build: %"C:\\temp"\nbash
+                make all
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "\"C:\\temp\"\nbash")),
+        )
+    }
+
+    @Test
     fun testWildcardPatternMatchesAllChildren() {
         assertFormatting(
             """
