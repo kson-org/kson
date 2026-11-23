@@ -2,28 +2,31 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.messages.MessageType
+import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * Tests for [IndexedSchemaDocuments.resolveRef] and [IndexedSchemaDocuments.resolveRefIfPresent].
+ * Tests for how [IndexedSchemaDocuments] indexes schemas and resolves `$ref`s among them.
  */
 class IndexedSchemaDocumentsTest {
 
+    private fun value(source: String): KsonObject = KsonCore.parseToAst(source).ksonValue as KsonObject
+
     /** Resolves [ref] as [schema]'s root `$ref` would be. */
     private fun resolveRef(schema: String, ref: String): RefResolution {
-        val indexedDocuments =
-            IndexedSchemaDocuments(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value(schema)))
         return indexedDocuments.resolveRef(ref, indexedDocuments.rootBaseUri)
     }
 
     private fun resolve(schema: String): ResolvedRef {
-        val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
+        val root = value(schema)
         val properties = root.propertyLookup.getValue("properties") as KsonObject
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
         val field = ResolvedRef(root, indexedDocuments.rootBaseUri)
@@ -36,8 +39,7 @@ class IndexedSchemaDocumentsTest {
 
     /** Resolves [schema]'s root, read under the URI it was retrieved from, returning its `title` and base URI. */
     private fun resolveRoot(schema: String): Pair<String?, String> {
-        val indexedDocuments =
-            IndexedSchemaDocuments(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value(schema)))
         return titleAndBaseUri(
             indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, indexedDocuments.rootBaseUri)
         )
@@ -363,6 +365,236 @@ class IndexedSchemaDocumentsTest {
     }
 
     @Test
+    fun resolvesAnIdSharedByADeeperAndALaterSchemaToTheDeeperOne() {
+        val schema = $$"""
+            properties:
+              field:
+                '$ref': 'http://x.test/shared.json'
+                .
+              .
+            definitions:
+              a:
+                definitions:
+                  b:
+                    '$id': 'http://x.test/shared.json'
+                    title: deep
+                    .
+                  .
+                .
+              c:
+                '$id': 'http://x.test/shared.json'
+                title: 'shallow later'
+        """.trimIndent()
+        assertEquals("deep" to "", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAnIdSharedByEquallyDeepValuesToTheLastOne() {
+        // whichever is referenced first, `second` comes after `first` in the document
+        for (refs in listOf(listOf("first", "second"), listOf("second", "first"))) {
+            val schema = $$"""
+                allOf:
+                  - '$ref': '#/extension/$${refs[0]}'
+                  - '$ref': '#/extension/$${refs[1]}'
+                    .
+                properties:
+                  field:
+                    '$ref': 'http://x.test/shared.json'
+                    .
+                  .
+                extension:
+                  first:
+                    '$id': 'http://x.test/shared.json'
+                    title: first
+                    .
+                  second:
+                    '$id': 'http://x.test/shared.json'
+                    title: second
+            """.trimIndent()
+            assertEquals("second" to "", resolveField(schema), "refs in order $refs")
+        }
+    }
+
+    @Test
+    fun resolvesAnIdSharedByDocumentRootsToTheLastDocument() {
+        val documents = listOf("first", "second").map { name ->
+            val source = $$"""
+                '$id': 'http://x.test/shared.json'
+                title: $$name
+            """.trimIndent()
+            SchemaDocument(value(source), UriReference.parse("http://x.test/$name.json"))
+        }
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value("{}")), documents)
+
+        val resolution = indexedDocuments.resolveRef("http://x.test/shared.json", indexedDocuments.rootBaseUri)
+
+        val shared = assertIs<RefResolution.Found>(resolution).target
+        assertEquals("second" to "http://x.test/second.json", titleAndBaseUri(shared))
+    }
+
+    @Test
+    fun resolvesAUriSharedByADocumentAndADeeperIdToTheDocument() {
+        val root = value($$"""
+            definitions:
+              a:
+                definitions:
+                  b:
+                    '$id': 'file:///other.json'
+                    title: embedded
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(
+            SchemaDocument(root, UriReference.parse("file:///root.json")),
+            listOf(SchemaDocument(value("title: supplied"), UriReference.parse("file:///other.json")))
+        )
+
+        val resolution = indexedDocuments.resolveRef("file:///other.json", indexedDocuments.rootBaseUri)
+
+        val other = assertIs<RefResolution.Found>(resolution).target
+        assertEquals("supplied" to "file:///other.json", titleAndBaseUri(other))
+    }
+
+    @Test
+    fun resolvesAUriSharedByADocumentAndALaterIdToTheDocument() {
+        val other = value($$"""
+            '$id': 'file:///root.json'
+            title: other
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(
+            SchemaDocument(value("title: root"), UriReference.parse("file:///root.json")),
+            listOf(SchemaDocument(other, UriReference.parse("file:///other.json")))
+        )
+
+        val resolution = indexedDocuments.resolveRef("file:///root.json", indexedDocuments.rootBaseUri)
+
+        val root = assertIs<RefResolution.Found>(resolution).target
+        assertEquals("root" to "file:///root.json", titleAndBaseUri(root))
+    }
+
+    @Test
+    fun resolvesTheMetaSchemaUriToTheBuiltInOne() {
+        val schema = $$"""
+            properties:
+              field:
+                '$ref': 'http://json-schema.org/draft-07/schema#'
+        """.trimIndent()
+        assertSame(KsonDraft7MetaSchema.schemaValue, resolve(schema).resolvedValue)
+    }
+
+    @Test
+    fun resolvesRefsWithinARootWithTheMetaSchemaIdToThatRoot() {
+        val root = value($$"""
+            '$id': 'http://json-schema.org/draft-07/schema#'
+            title: root
+            definitions:
+              mine:
+                title: mine
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
+        val baseUri = indexedDocuments.rootSubschemaBaseUri
+
+        val mine = assertIs<RefResolution.Found>(indexedDocuments.resolveRef("#/definitions/mine", baseUri)).target
+        val self = assertIs<RefResolution.Found>(indexedDocuments.resolveRef("#", baseUri)).target
+
+        assertEquals("mine" to "http://json-schema.org/draft-07/schema", titleAndBaseUri(mine))
+        assertEquals("root" to "", titleAndBaseUri(self))
+    }
+
+    @Test
+    fun resolvesTheMetaSchemaUriToADocumentSuppliedUnderIt() {
+        val indexedDocuments = IndexedSchemaDocuments(
+            SchemaDocument(value("{}")),
+            listOf(SchemaDocument(value("title: custom"), UriReference.parse(KsonDraft7MetaSchema.ID)))
+        )
+
+        val resolution = indexedDocuments.resolveRef(KsonDraft7MetaSchema.ID, indexedDocuments.rootBaseUri)
+
+        val metaSchema = assertIs<RefResolution.Found>(resolution).target
+        assertEquals("custom" to KsonDraft7MetaSchema.ID, titleAndBaseUri(metaSchema))
+    }
+
+    @Test
+    fun resolvesTheMetaSchemaUriToADocumentWithThatId() {
+        val vendored = value($$"""
+            '$id': 'http://json-schema.org/draft-07/schema#'
+            definitions:
+              custom:
+                title: custom
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(
+            SchemaDocument(value("{}")),
+            listOf(SchemaDocument(vendored, UriReference.parse("file:///vendored.json")))
+        )
+
+        val resolution = indexedDocuments.resolveRef(
+            "http://json-schema.org/draft-07/schema#/definitions/custom",
+            indexedDocuments.rootBaseUri
+        )
+
+        val custom = assertIs<RefResolution.Found>(resolution).target
+        assertEquals("custom" to "http://json-schema.org/draft-07/schema", titleAndBaseUri(custom))
+    }
+
+    @Test
+    fun indexesAPointerTargetWithinTheDeepestSchemaSharingAnId() {
+        // `s1` is read before the deeper `s2`, whichever key comes first
+        val definitions = $$"""
+            definitions: {
+              s1: { '$id': 'http://x.test/shared.json' }
+              a: {
+                definitions: {
+                  s2: { '$id': 'http://x.test/shared.json', extension: { t: { '$ref': 'dep.json' } } }
+                }
+              }
+            }
+        """.trimIndent()
+        val allOf = $$"""allOf: [{ '$ref': 'http://x.test/shared.json#/extension/t' }]"""
+        for (keys in listOf(listOf(definitions, allOf), listOf(allOf, definitions))) {
+            val root = value(keys.joinToString("\n"))
+            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+
+            assertEquals(
+                listOf(UriReference.parse("http://x.test/dep.json")),
+                indexedDocuments.missingDocumentUris,
+                "keys in order ${root.propertyLookup.keys}"
+            )
+        }
+    }
+
+    @Test
+    fun indexesAPointerTargetWithinTheSchemaASharedIdFallsBackTo() {
+        // `a` is read under root.json before `hook` makes `e` a schema, so s.json identifies `a`, deeper than `b`,
+        // until `a` is read again under `e`'s `$id` and the pointer into s.json finds `t` in `b`
+        val allOf = $$"""
+            allOf: [
+              { '$ref': '#/extension/e/a' },
+              { '$ref': 'file:///s.json#/extension/t' },
+              { '$ref': '#/extension/hook' }
+            ]
+        """.trimIndent()
+        val definitions = $$"""
+            definitions: {
+              b: { '$id': 'file:///s.json', extension: { t: { '$ref': 'dep.json' } } }
+            }
+        """.trimIndent()
+        val extension = $$"""
+            extension: {
+              hook: { '$ref': '#/extension/e' }
+              e: { '$id': 'http://e.test/', a: { '$id': 's.json' } }
+            }
+        """.trimIndent()
+        for (keys in listOf(listOf(allOf, definitions, extension), listOf(definitions, allOf, extension))) {
+            val root = value(keys.joinToString("\n"))
+            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+
+            assertEquals(
+                listOf(UriReference.parse("file:///dep.json")),
+                indexedDocuments.missingDocumentUris,
+                "keys in order ${root.propertyLookup.keys}"
+            )
+        }
+    }
+
+    @Test
     fun doesNotResolveARefToAnIdInAKeywordBesideARef() {
         val schema = $$"""
             properties:
@@ -449,6 +681,68 @@ class IndexedSchemaDocumentsTest {
                     title: inner
         """.trimIndent()
         assertEquals("inner" to "http://example.com/root.json", resolveField(schema))
+    }
+
+    @Test
+    fun ignoresAnIdOfDataAlongAPointer() {
+        // only `x` is referenced, so `deep` is data: its `$id` neither sets the base URI for `x` nor identifies `deep`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            properties:
+              field:
+                '$ref': '#/extension/deep/x'
+                .
+              .
+            extension:
+              deep:
+                '$id': 'http://example.com/deep.json'
+                x:
+                  title: x
+        """.trimIndent()
+        assertEquals("x" to "http://example.com/root.json", resolveField(schema))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, "http://example.com/deep.json"))
+    }
+
+    @Test
+    fun readsValuesUnderTheIdOfAnEnclosingSchemaFoundAfterThem() {
+        // only `hook` makes `outer` a schema, so `inner` and `link` may be read before `outer`'s `$id` applies
+        val deepRefs = listOf("#/extension/outer/inner", "#/extension/outer/link")
+        for (refs in listOf(deepRefs + "#/extension/hook", listOf("#/extension/hook") + deepRefs)) {
+            val schema = $$"""
+                allOf:
+                  - '$ref': '$${refs[0]}'
+                  - '$ref': '$${refs[1]}'
+                  - '$ref': '$${refs[2]}'
+                    .
+                properties:
+                  field:
+                    '$ref': 'http://example.com/outer/target.json'
+                    .
+                  .
+                extension:
+                  hook:
+                    '$ref': '#/extension/outer'
+                    .
+                  outer:
+                    '$id': 'http://example.com/outer/'
+                    inner:
+                      '$id': 'inner.json'
+                      title: inner
+                      .
+                    link:
+                      '$ref': '#/extension/target'
+                      .
+                    extension:
+                      target:
+                        '$id': 'target.json'
+                        title: target
+            """.trimIndent()
+            val order = "refs in order $refs"
+            assertEquals("target" to "http://example.com/outer/", resolveField(schema), order)
+            val inner = assertIs<RefResolution.Found>(resolveRef(schema, "http://example.com/outer/inner.json"), order)
+            assertEquals("inner" to "http://example.com/outer/", titleAndBaseUri(inner.target), order)
+            assertEquals(RefResolution.NotFound, resolveRef(schema, "inner.json"), order)
+        }
     }
 
     @Test
