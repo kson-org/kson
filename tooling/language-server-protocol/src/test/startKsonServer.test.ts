@@ -1,6 +1,7 @@
 import {describe, it} from 'mocha';
 import assert from 'assert';
 import {
+    ClientCapabilities,
     Disposable,
     InitializeError,
     InitializeParams,
@@ -10,6 +11,7 @@ import {
 import {ConnectionStub, NOOP_DISPOSABLE} from './ConnectionStub.js';
 import {startKsonServer} from '../startKsonServer.js';
 import {createCommandExecutor} from '../core/commands/createCommandExecutor.node.js';
+import {PULL_DIAGNOSTICS_CAPABILITIES} from './TestHelpers.js';
 
 /**
  * A {@link ConnectionStub} that also accepts the lifecycle and workspace registrations
@@ -43,9 +45,9 @@ class ServerConnectionStub extends ConnectionStub {
     override listen(): void {
     }
 
-    async requestInitialize(): Promise<InitializeResult> {
+    async requestInitialize(capabilities: ClientCapabilities = {}): Promise<InitializeResult> {
         return await this.initializeHandler(
-            {processId: null, rootUri: null, capabilities: {}},
+            {processId: null, rootUri: null, capabilities},
             {} as any, {} as any, undefined
         ) as InitializeResult;
     }
@@ -59,5 +61,26 @@ describe('startKsonServer', () => {
         const {capabilities} = await connection.requestInitialize();
 
         assert.deepStrictEqual(capabilities.completionProvider?.triggerCharacters, ['"', "'", '\n', ' ']);
+    });
+
+    it('should advertise pull diagnostics to a client that can pull them', async () => {
+        const connection = new ServerConnectionStub();
+        startKsonServer(connection, async () => undefined, createCommandExecutor);
+
+        const {capabilities} = await connection.requestInitialize(PULL_DIAGNOSTICS_CAPABILITIES);
+
+        assert.deepStrictEqual(
+            capabilities.diagnosticProvider,
+            {identifier: 'kson', interFileDependencies: false, workspaceDiagnostics: false}
+        );
+    });
+
+    it('should not advertise pull diagnostics to a client that cannot pull them', async () => {
+        const connection = new ServerConnectionStub();
+        startKsonServer(connection, async () => undefined, createCommandExecutor);
+
+        const {capabilities} = await connection.requestInitialize({});
+
+        assert.strictEqual(capabilities.diagnosticProvider, undefined);
     });
 });

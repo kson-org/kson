@@ -24,7 +24,7 @@ export class DiagnosticService {
         } as RelatedFullDocumentDiagnosticReport;
     }
 
-    private getDiagnostics(document: KsonDocument): Diagnostic[] {
+    getDiagnostics(document: KsonDocument): Diagnostic[] {
         const toolingDoc = document.getToolingDocument();
         const schemaToolingDoc = isKsonSchemaDocument(document)
             ? document.getMetaSchemaToolingDocument()

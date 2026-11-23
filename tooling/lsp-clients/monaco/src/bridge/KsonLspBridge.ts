@@ -136,6 +136,9 @@ export class KsonLspBridge {
                     semanticTokens: { requests: { full: true }, tokenTypes: [], tokenModifiers: [] },
                     diagnostic: { dynamicRegistration: false },
                 },
+                workspace: {
+                    diagnostics: { refreshSupport: true },
+                },
             },
             rootUri: null,
             workspaceFolders: null,

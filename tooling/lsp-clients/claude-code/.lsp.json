@@ -1,0 +1,9 @@
+{
+  "kson": {
+    "command": "npx",
+    "args": ["-y", "kson-language-server@0.5.0-dev.0", "--stdio"],
+    "extensionToLanguage": {
+      ".kson": "kson"
+    }
+  }
+}

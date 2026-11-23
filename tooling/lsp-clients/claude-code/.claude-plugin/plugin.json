@@ -1,0 +1,21 @@
+{
+  "name": "kson-lsp",
+  "metadata": {
+    "//": "[[kson-version-num]], also pinned in .lsp.json"
+  },
+  "version": "0.5.0-dev.0",
+  "description": "Diagnostics from the KSON language server for .kson files",
+  "author": {
+    "name": "KSON",
+    "email": "kson@kson.org"
+  },
+  "homepage": "https://kson.org",
+  "repository": "https://github.com/kson-org/kson",
+  "license": "Apache-2.0",
+  "keywords": [
+    "kson",
+    "json-schema",
+    "lsp",
+    "diagnostics"
+  ]
+}

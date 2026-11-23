@@ -5,6 +5,7 @@ import {
     TextEdit,
     SemanticTokensParams,
     DocumentFormattingParams,
+    Diagnostic,
     DocumentDiagnosticParams,
     DocumentDiagnosticReport,
     DocumentHighlight,
@@ -25,6 +26,7 @@ import {
     SelectionRange,
     SelectionRangeParams,
 } from 'vscode-languageserver';
+import {KsonDocument} from '../document/KsonDocument.js';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
 import {DiagnosticService} from '../features/DiagnosticService.js';
@@ -53,6 +55,10 @@ import {FormatOptions, IndentType} from 'kson';
 export class KsonTextDocumentService {
     private connection!: Connection;
 
+    readonly clientPullsDiagnostics: boolean;
+
+    private readonly clientSupportsDiagnosticsRefresh: boolean;
+
     private readonly formattingService: FormattingService;
     private diagnosticService: DiagnosticService;
     private semanticTokensService: SemanticTokensService;
@@ -80,6 +86,8 @@ export class KsonTextDocumentService {
     ) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService(distributionId);
+        this.clientPullsDiagnostics = clientCapabilities.textDocument?.diagnostic !== undefined;
+        this.clientSupportsDiagnosticsRefresh = clientCapabilities.workspace?.diagnostics?.refreshSupport === true;
         this.semanticTokensService = new SemanticTokensService();
         this.codeLensService = new CodeLensService();
         this.documentHighlightService = new DocumentHighlightService();
@@ -94,6 +102,8 @@ export class KsonTextDocumentService {
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
+
+        this.keepClientDiagnosticsCurrent();
     }
 
     /**
@@ -136,7 +146,9 @@ export class KsonTextDocumentService {
          */
         this.connection.onDocumentFormatting(this.onDocumentFormatting.bind(this));
         this.connection.languages.semanticTokens.on(this.onSemanticTokensFull.bind(this));
-        this.connection.languages.diagnostics.on(this.onDiagnostic.bind(this));
+        if (this.clientPullsDiagnostics) {
+            this.connection.languages.diagnostics.on(this.onDiagnostic.bind(this));
+        }
         this.connection.onCodeLens(this.onCodeLens.bind(this));
         this.connection.onExecuteCommand(this.onExecuteCommand.bind(this));
         this.connection.onDocumentHighlight(this.onDocumentHighlight.bind(this));
@@ -148,6 +160,27 @@ export class KsonTextDocumentService {
         this.connection.onSelectionRanges(this.onSelectionRanges.bind(this));
     }
 
+    // Register during construction so reconnecting does not add duplicate listeners.
+    private keepClientDiagnosticsCurrent(): void {
+        if (this.clientPullsDiagnostics) {
+            if (this.clientSupportsDiagnosticsRefresh) {
+                this.documentManager.onDidRefreshDocumentSchemas(
+                    () => this.connection.sendRequest('workspace/diagnostic/refresh').catch(
+                        error => this.connection.console.error(`Error requesting diagnostics refresh: ${error}`)
+                    )
+                );
+            }
+        } else {
+            // Fires when a document opens, too
+            this.documentManager.onDidChangeContent(({document}) => this.publishDiagnostics(document));
+            this.documentManager.onDidRefreshDocumentSchemas(
+                () => this.documentManager.all().forEach(document => this.publishDiagnostics(document))
+            );
+            this.documentManager.onDidClose(
+                ({document}) => this.connection.sendDiagnostics({uri: document.uri, diagnostics: []})
+            );
+        }
+    }
 
     private async onSemanticTokensFull(params: SemanticTokensParams): Promise<SemanticTokens> {
         try {
@@ -197,6 +230,16 @@ export class KsonTextDocumentService {
                 items: []
             };
         }
+    }
+
+    private publishDiagnostics(document: KsonDocument): void {
+        let diagnostics: Diagnostic[] = [];
+        try {
+            diagnostics = this.diagnosticService.getDiagnostics(document);
+        } catch (error) {
+            this.connection.console.error(`Error publishing diagnostics: ${error}`);
+        }
+        this.connection.sendDiagnostics({uri: document.uri, version: document.version, diagnostics});
     }
 
     private async onCodeLens(params: CodeLensParams): Promise<CodeLens[]> {
