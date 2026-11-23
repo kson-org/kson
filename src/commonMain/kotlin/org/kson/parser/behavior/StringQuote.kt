@@ -1,24 +1,34 @@
 package org.kson.parser.behavior
 
 /**
- * Represents a string delimiter in KSON, which can be either `'` or `"`, along with helper methods to
- * escape/unescape [quoteChar] in [String]s
+ * Represents a string delimiter in KSON, which can be either `'` or `"`, or no quote at all for a [Quoteless] string,
+ * along with helper methods to escape/unescape [quoteChar] in [String]s
  *
  * Escaping rules: as a superset of Json, Kson's String escaping rules for delimiters work
  *   the same as JSON's rules for escaping backslashes and double-quotes in a string, with the wrinkle that
  *   Kson supports single-quoted strings, in which case the escaping rules are identical but with
  *   respect to single-quote `'` rather than double-quote `"`
  */
-sealed class StringQuote(val quoteChar: Char) {
+sealed class StringQuote(val quoteChar: Char?) {
 
-    private val delimiterString = quoteChar.toString()
-    private val escapedDelimiterString = "\\" + quoteChar
+    private val quoteString = quoteChar?.let {
+        object {
+            val delimiterString = it.toString()
+            val escapedDelimiterString = "\\" + it
+        }
+    }
 
     /** Single-quote delimiter ('), our "primary" delimiter */
     object SingleQuote : StringQuote('\'')
 
     /** Double-quote delimiter ("), our "alternate" delimiter */
     object DoubleQuote : StringQuote('"')
+
+    /**
+     * A "quoteless" string is one that follows all escaping rules but has no delimiters to escape.
+     * This concept is used in KSON syntax for embed tags (see [org.kson.parser.TokenType.EMBED_TAG])
+     */
+    object Quoteless : StringQuote(null)
 
     /**
      * Counts the number of occurrences of this [quoteChar] in the given [rawContent]
@@ -64,12 +74,13 @@ sealed class StringQuote(val quoteChar: Char) {
      * @return a copy of [escapedContent] with all delimiter escapes processed
      */
     fun unescapeQuotes(escapedContent: String): String {
+        val delim = quoteString ?: return escapedContent
         // unescape any escaped internal quotes
-        return escapedContent.replace(escapedDelimiterString, delimiterString)
+        return escapedContent.replace(delim.escapedDelimiterString, delim.delimiterString)
     }
 
     override fun toString(): String {
-        return delimiterString
+        return quoteString?.delimiterString ?: ""
     }
 
     companion object {

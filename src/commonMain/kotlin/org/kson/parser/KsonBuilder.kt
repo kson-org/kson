@@ -203,12 +203,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
 
                         val embedTagNode = childMarkers.find { it.element == EMBED_TAG }?.let{
-                            QuotedStringNode(
-                                it.getSourceTokens(),
-                                // TODO this needs to be formalized as a "quoted" string, even if the quotes are novel
-                                //   then this should pass the quote type, not null
-                                null
-                            )
+                            QuotedStringNode(it.getSourceTokens(), StringQuote.Quoteless)
                         } ?: throw ShouldNotHappenException("The parser ensures we have an embed tag here")
 
                         val embedDelim = EmbedDelim.fromString(embedDelimChar)

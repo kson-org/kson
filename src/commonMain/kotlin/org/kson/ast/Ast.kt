@@ -729,8 +729,7 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
 
 class QuotedStringNode(
     sourceTokens: List<Token>,
-    // TODO this should not be nullable
-    val stringQuote: StringQuote?,
+    val stringQuote: StringQuote,
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
@@ -743,7 +742,7 @@ class QuotedStringNode(
 
     /**
      * Note: [rawStringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
-     *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
+     *   including all escapes, but excluding any outer quotes. A [Kson] string is escaped identically to a Json string,
      *   except that [Kson] allows raw whitespace to be embedded in strings
      */
     override val rawStringContent: String by lazy {
@@ -756,7 +755,7 @@ class QuotedStringNode(
      * to obtain a fully valid KsonString
      */
     override val delimiterUnescapedRawContent: String by lazy {
-        stringQuote?.unescapeQuotes(rawStringContent) ?: rawStringContent
+        stringQuote.unescapeQuotes(rawStringContent)
     }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
