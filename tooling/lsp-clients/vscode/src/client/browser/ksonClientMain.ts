@@ -15,7 +15,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const name = context.extension.packageJSON.name;
 
     // Create log output channel
-    const logOutputChannel = vscode.window.createOutputChannel('Kson Language Server', { log: true });
+    const logOutputChannel = vscode.window.createOutputChannel('KSON Language Server', { log: true });
     context.subscriptions.push(logOutputChannel);
 
     try {

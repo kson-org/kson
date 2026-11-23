@@ -138,7 +138,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
     }
 
     /**
-     * Transform the given [KsonMarker] tree rooted at [marker] into a full Kson [AstNode] tree.
+     * Transform the given [KsonMarker] tree rooted at [marker] into a full KSON [AstNode] tree.
      *
      * WARNING "UNSAFE" CODE: this is the RARE (ideally ONLY???) place where we allow unsafe/loose
      *  coding practices to convert our [KsonMarker] tree in a proper [AstNode]-based AST.  We allow this

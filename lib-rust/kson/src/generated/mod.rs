@@ -11,7 +11,7 @@ use self::sys::jobject;
 use self::util::{AsKotlinObject, FromKotlinObject, KotlinPtr, ToKotlinObject};
 
 
-/// Options for formatting Kson output.
+/// Options for formatting KSON output.
 ///
 /// @param indentType The type of indentation to use (spaces or tabs)
 /// @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
@@ -348,7 +348,7 @@ impl std::hash::Hash for Companion {
 }
 
 
-/// Represents a message logged during Kson processing
+/// Represents a message logged during KSON processing
 #[derive(Clone)]
 pub struct Message {
     kotlin_ptr: KotlinPtr,
@@ -515,7 +515,7 @@ impl std::hash::Hash for Message {
 }
 
 
-/// [Token] produced by the lexing phase of a Kson parse
+/// [Token] produced by the lexing phase of a KSON parse
 #[derive(Clone)]
 pub struct Token {
     kotlin_ptr: KotlinPtr,
@@ -674,7 +674,7 @@ pub mod kson_value {
     use super::*;
 
 
-    /// A Kson array with elements
+    /// A KSON array with elements
     #[derive(Clone)]
     pub struct KsonArray {
         kotlin_ptr: KotlinPtr,
@@ -817,7 +817,7 @@ pub mod kson_value {
         }
     }
 
-    /// A Kson boolean value
+    /// A KSON boolean value
     #[derive(Clone)]
     pub struct KsonBoolean {
         kotlin_ptr: KotlinPtr,
@@ -960,7 +960,7 @@ pub mod kson_value {
         }
     }
 
-    /// A Kson embed block
+    /// A KSON embed block
     #[derive(Clone)]
     pub struct KsonEmbed {
         kotlin_ptr: KotlinPtr,
@@ -1125,7 +1125,7 @@ pub mod kson_value {
         }
     }
 
-    /// A Kson null value
+    /// A KSON null value
     #[derive(Clone)]
     pub struct KsonNull {
         kotlin_ptr: KotlinPtr,
@@ -1245,7 +1245,7 @@ pub mod kson_value {
             util::apply_hash_code(self.to_kotlin_object(), state)
         }
     }
-    /// A Kson number value.
+    /// A KSON number value.
     #[derive(Clone)]
     pub enum KsonNumber {
         Decimal(kson_value::kson_number::Decimal),
@@ -1704,7 +1704,7 @@ pub mod kson_value {
         }
     }
 
-    /// A Kson object with key-value pairs
+    /// A KSON object with key-value pairs
     #[derive(Clone)]
     pub struct KsonObject {
         kotlin_ptr: KotlinPtr,
@@ -1869,7 +1869,7 @@ pub mod kson_value {
         }
     }
 
-    /// A Kson string value
+    /// A KSON string value
     #[derive(Clone)]
     pub struct KsonString {
         kotlin_ptr: KotlinPtr,
@@ -2143,7 +2143,7 @@ impl std::hash::Hash for KsonValue {
 }
 
 
-/// A validator that can check if Kson source conforms to a schema.
+/// A validator that can check if KSON source conforms to a schema.
 #[derive(Clone)]
 pub struct SchemaValidator {
     kotlin_ptr: KotlinPtr,
@@ -2491,7 +2491,7 @@ impl std::hash::Hash for EmbedRuleResult {
 }
 
 
-/// The result of statically analyzing a Kson document
+/// The result of statically analyzing a KSON document
 #[derive(Clone)]
 pub struct Analysis {
     kotlin_ptr: KotlinPtr,
@@ -2613,7 +2613,7 @@ impl std::hash::Hash for Analysis {
     }
 }
 
-/// Result of a Kson conversion operation
+/// Result of a KSON conversion operation
 #[derive(Clone)]
 pub enum Result {
     Failure(result::Failure),
@@ -3130,7 +3130,7 @@ pub mod transpile_options {
     use super::*;
 
 
-    /// Options for transpiling Kson to JSON.
+    /// Options for transpiling KSON to JSON.
     #[derive(Clone)]
     pub struct Json {
         kotlin_ptr: KotlinPtr,
@@ -3224,7 +3224,7 @@ pub mod transpile_options {
         }
     }
 
-    /// Options for transpiling Kson to YAML.
+    /// Options for transpiling KSON to YAML.
     #[derive(Clone)]
     pub struct Yaml {
         kotlin_ptr: KotlinPtr,
@@ -3393,7 +3393,7 @@ impl std::hash::Hash for TranspileOptions {
 }
 
 
-/// The [Kson](https://kson.org) language
+/// The [KSON](https://kson.org) language
 #[derive(Clone)]
 pub struct Kson {
     kotlin_ptr: KotlinPtr,
@@ -3425,11 +3425,11 @@ impl Kson {
 
 impl Kson {
 
-    /// Formats Kson source with the specified formatting options.
+    /// Formats KSON source with the specified formatting options.
     ///
-    /// @param kson The Kson source to format
+    /// @param kson The KSON source to format
     /// @param formatOptions The formatting options to apply
-    /// @return The formatted Kson source
+    /// @return The formatted KSON source
     pub fn format(
         kson: &str,
         format_options: FormatOptions,
@@ -3456,9 +3456,9 @@ impl Kson {
         FromKotlinObject::from_kotlin_object(result)
     }
 
-    /// Converts Kson to Json.
+    /// Converts KSON to Json.
     ///
-    /// @param kson The Kson source to convert
+    /// @param kson The KSON source to convert
     /// @param options Options for the JSON transpilation
     /// @return A Result containing either the Json output or error messages
     pub fn to_json(
@@ -3487,9 +3487,9 @@ impl Kson {
         crate::kson_result_into_rust_result(FromKotlinObject::from_kotlin_object(result))
     }
 
-    /// Converts Kson to Yaml, preserving comments
+    /// Converts KSON to Yaml, preserving comments
     ///
-    /// @param kson The Kson source to convert
+    /// @param kson The KSON source to convert
     /// @param options Options for the YAML transpilation
     /// @return A Result containing either the Yaml output or error messages
     pub fn to_yaml(
@@ -3518,9 +3518,9 @@ impl Kson {
         crate::kson_result_into_rust_result(FromKotlinObject::from_kotlin_object(result))
     }
 
-    /// Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
+    /// Statically analyze the given KSON and return an [Analysis] object containing any messages generated along with a
     /// tokenized version of the source.  Useful for tooling/editor support.
-    /// @param kson The Kson source to analyze
+    /// @param kson The KSON source to analyze
     /// @param filepath (Optional) Filepath of the document being analyzed
     /// @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
     /// able to be validated against a schema
@@ -3554,10 +3554,10 @@ impl Kson {
         FromKotlinObject::from_kotlin_object(result)
     }
 
-    /// Parses a Kson schema definition and returns a validator for that schema.
+    /// Parses a KSON schema definition and returns a validator for that schema.
     ///
-    /// @param schemaKson The Kson source defining a Json Schema
-    /// @return A SchemaValidator that can validate Kson documents against the schema
+    /// @param schemaKson The KSON source defining a Json Schema
+    /// @return A SchemaValidator that can validate KSON documents against the schema
     pub fn parse_schema(
         schema_kson: &str,
     ) -> std::result::Result<schema_result::Success, schema_result::Failure> {
@@ -3774,7 +3774,7 @@ impl std::hash::Hash for EmbedRule {
     }
 }
 
-/// Options for indenting Kson Output
+/// Options for indenting KSON Output
 #[derive(Clone)]
 pub enum IndentType {
     Spaces(indent_type::Spaces),
@@ -4072,7 +4072,7 @@ impl KsonValueType {
         util::enum_name(&obj)
     }
 }
-/// [FormattingStyle] options for Kson Output
+/// [FormattingStyle] options for KSON Output
 #[derive(Copy, Clone)]
 pub enum FormattingStyle {
     Plain,

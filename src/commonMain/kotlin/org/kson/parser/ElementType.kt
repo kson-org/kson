@@ -11,7 +11,7 @@ interface ElementType
 /**
  * [ElementType]s for the tokens produced by [Lexer].
  *
- * Note: these generally correspond to the terminals in the Kson grammar documented on the [Parser] class, though
+ * Note: these generally correspond to the terminals in the KSON grammar documented on the [Parser] class, though
  *   some are produced by [Lexer] for the purpose of helping the parser produce more effective help/errors for
  *   the end user
  */
@@ -66,7 +66,7 @@ enum class TokenType : ElementType {
      */
     UNQUOTED_STRING,
     /**
-     * A char completely outside the Kson grammar. Used to give helpful errors to the user.
+     * A char completely outside the KSON grammar. Used to give helpful errors to the user.
      */
     ILLEGAL_CHAR,
     /**

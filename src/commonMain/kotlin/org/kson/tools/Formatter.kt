@@ -14,9 +14,9 @@ import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguag
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 
 /**
- * Format the given Kson source according to [formatterConfig]
+ * Format the given KSON source according to [formatterConfig]
  *
- * @param ksonSource the Kson to format
+ * @param ksonSource the KSON to format
  * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
  */
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
@@ -64,7 +64,7 @@ data class KsonFormatterConfig(
 )
 
 /**
- * Fast and flexible [Token]-based indentation for Kson.  Note that the given Kson does not need to be valid
+ * Fast and flexible [Token]-based indentation for KSON.  Note that the given KSON does not need to be valid
  * the formatter will still apply whatever appropriate indents it can (which is particularly useful for
  * finding a mismatched brace somewhere, for instance).
  *

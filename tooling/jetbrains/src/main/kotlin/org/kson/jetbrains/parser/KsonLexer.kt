@@ -11,7 +11,7 @@ import org.kson.parser.TokenType
 
 /**
  * [KsonLexer] implements the [com.intellij.lexer.Lexer] interface by delegating to the main
- * Kson [Lexer]
+ * KSON [Lexer]
  */
 class KsonLexer : LexerBase() {
     private var ksonTokens: ImmutableList<Token> = emptyList<Token>().toImmutableList()

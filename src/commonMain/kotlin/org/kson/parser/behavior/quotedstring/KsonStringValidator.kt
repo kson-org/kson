@@ -276,7 +276,7 @@ class KsonStringValidator {
 }
 
 /**
- * Enumerate the set of Kson string escapes valid in every quoted string for easy validation.  A string may also escape
+ * Enumerate the set of KSON string escapes valid in every quoted string for easy validation.  A string may also escape
  * the quote that delimits it (see [StringQuote]), and `\u` is also supported, but is validated separately against
  * [validHexChars]. Note that these are exactly the escapes allowed by [Section 7. Strings of RFC8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7), minus the `"` escape
  */

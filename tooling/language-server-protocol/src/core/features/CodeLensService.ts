@@ -6,12 +6,12 @@ import { FormattingStyle } from 'kson';
 import { formattingStyleId } from '../formattingStyle.js';
 
 /**
- * Service responsible for providing code lenses for Kson documents
+ * Service responsible for providing code lenses for KSON documents
  */
 export class CodeLensService {
     
     /**
-     * Get code lenses for a Kson document.
+     * Get code lenses for a KSON document.
     */
     getCodeLenses(document: KsonDocument): CodeLens[] {
         const plainId = formattingStyleId(FormattingStyle.PLAIN);

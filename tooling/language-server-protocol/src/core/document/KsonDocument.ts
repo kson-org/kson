@@ -12,7 +12,7 @@ export function parseTextDocument(textDocument: TextDocument): ToolingDocument {
 }
 
 /**
- * Kson Document Entry.
+ * KSON Document Entry.
  * This class wraps a standard {@link TextDocument} with its pre-parsed
  * {@link ToolingDocument}, so every tooling operation on the same document
  * version shares a single parse. It implements {@link TextDocument} so the

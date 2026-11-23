@@ -110,7 +110,7 @@ interface AstNode {
 }
 
 /**
- * Base [AstNode] to be subclassed by all Kson AST Node classes
+ * Base [AstNode] to be subclassed by all KSON AST Node classes
  */
 sealed class AstNodeImpl(override val sourceTokens: List<Token>) : AstNode {
     override val location: Location by lazy {
@@ -696,7 +696,7 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
      * Renders this string as an embed block with the given tag.
      *
      * @param indent The indentation to apply
-     * @param compileTarget The Kson compile target with formatting configuration
+     * @param compileTarget The KSON compile target with formatting configuration
      * @param embedTag Optional embed tag to include (e.g., "yaml", "sql")
      * @return The rendered embed block string
      */
@@ -755,7 +755,7 @@ class QuotedStringNode(
     }
 
     /**
-     * An "unquoted" Kson string: i.e. a valid Kson string with all escapes intact except for quote escapes.
+     * An "unquoted" KSON string: i.e. a valid KSON string with all escapes intact except for quote escapes.
      * This string must be [SingleQuote]'ed or [DoubleQuote]'ed and then quote-escaped with [StringQuote.escapeQuotes]
      * to obtain a fully valid KsonString
      */
@@ -766,7 +766,7 @@ class QuotedStringNode(
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (StringUnquoted.isUnquotable(delimiterUnescapedRawContent)) {
             /**
-             * This string does not require quotes in Kson, so we use the [renderUnquotableKsonString]
+             * This string does not require quotes in KSON, so we use the [renderUnquotableKsonString]
              * to get the best rendering for this string across all compile targets
              */
             return renderUnquotableKsonString(delimiterUnescapedRawContent, indent, compileTarget)
@@ -790,7 +790,7 @@ class QuotedStringNode(
     }
 
     /**
-     * Renders this string as a quoted Kson string, preferring single-quotes unless double-quotes would
+     * Renders this string as a quoted KSON string, preferring single-quotes unless double-quotes would
      * require less escaping
      */
     private fun renderWithPreferredQuote(indent: Indent): String {
