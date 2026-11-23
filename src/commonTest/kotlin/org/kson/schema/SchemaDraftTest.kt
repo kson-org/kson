@@ -2,8 +2,10 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.MinimumValidator
 import org.kson.uri.UriReference
+import org.kson.validation.SourceContext
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
 import kotlin.test.Test
@@ -12,6 +14,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class SchemaDraftTest {
@@ -43,6 +46,20 @@ class SchemaDraftTest {
     }
 
     private fun accepts(schema: JsonSchema, instance: String): Boolean = schema.isValid(value(instance), MessageSink())
+
+    private fun validationMessages(schema: JsonSchema, instance: String): List<MessageType> {
+        val messageSink = MessageSink()
+        schema.validate(value(instance), messageSink, SourceContext())
+        return messageSink.loggedMessages().map { it.message.type }
+    }
+
+    private fun indexedIn(draft: SchemaDraft, root: KsonValue): IndexedSchemaDocuments =
+        IndexedSchemaDocuments(SchemaDocument(root), emptyList(), draft)
+
+    private fun schemaAt(root: KsonValue, draft: SchemaDraft, vararg path: String): SchemaNode {
+        val values = path.runningFold(root) { parent, name -> (parent as KsonObject).propertyLookup.getValue(name) }
+        return indexedIn(draft, root).rootSchema.descend(values.drop(1))
+    }
 
     @Test
     fun nestedSchemasAreReadInTheDraft() {
@@ -209,6 +226,167 @@ class SchemaDraftTest {
         val indexed = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
 
         assertEquals(listOf(UriReference.parse("http://example.test/nested/dep.json")), indexed.missingDocumentUris)
+    }
+
+    @Test
+    fun eachRefAlongAChainAppliesTheKeywordsItKeeps() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    '$ref': '#/definitions/positive'
+                    definitions:
+                      positive:
+                        '$ref': '#/definitions/number'
+                        exclusiveMinimum: 0
+                        .
+                      number:
+                        type: number
+                """
+            )
+        )
+
+        val kept = compile(root, draft = keepsSiblings)
+        assertTrue(accepts(kept, "3"))
+        assertFalse(accepts(kept, "-3"))
+        assertFalse(accepts(kept, "'three'"))
+        assertTrue(accepts(compile(root, draft = SchemaDraft.DRAFT_7), "-3"))
+    }
+
+    @Test
+    fun aRefLeadingBackToASchemaThatKeepsItsKeywordsIsACycle() {
+        val throughAnother = SchemaDocument(
+            value(
+                $$"""
+                    '$ref': '#/definitions/a'
+                    definitions:
+                      a:
+                        '$ref': '#/definitions/b'
+                        minimum: 1
+                        .
+                      b:
+                        '$ref': '#/definitions/a'
+                """
+            )
+        )
+        val toItself = SchemaDocument(value($$"{ '$ref': '#', minimum: 1 }"))
+
+        val cycle = MessageType.SCHEMA_REF_CYCLE
+        assertEquals(listOf(cycle), validationMessages(compile(throughAnother, draft = keepsSiblings), "5"))
+        assertEquals(listOf(cycle), validationMessages(compile(toItself, draft = keepsSiblings), "5"))
+        assertEquals(
+            listOf(cycle, MessageType.SCHEMA_VALUE_TOO_SMALL),
+            validationMessages(compile(toItself, draft = keepsSiblings), "0")
+        )
+    }
+
+    @Test
+    fun aCycleOfRefsThatKeepTheKeywordsBesideThemPinsNothing() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    properties:
+                      kind:
+                        '$ref': '#/definitions/a'
+                        .
+                      .
+                    definitions:
+                      a:
+                        '$ref': '#/definitions/b'
+                        .
+                      b:
+                        '$ref': '#/definitions/a'
+                """
+            )
+        )
+
+        val schema = assertIs<JsonObjectSchema>(compile(root, draft = keepsSiblings))
+        assertEquals(emptyMap(), schema.pinnedProperties(setOf("kind")))
+    }
+
+    @Test
+    fun onlyARefThatHidesTheKeywordsBesideItIsFollowedInPlaceOfItsSchema() {
+        val root = value(
+            $$"""
+                definitions:
+                  alias:
+                    '$ref': '#/definitions/number'
+                    .
+                  number:
+                    type: number
+            """
+        )
+        fun resolvedAlias(draft: SchemaDraft): KsonValue {
+            val alias = schemaAt(root, draft, "definitions", "alias")
+            return alias.indexedDocuments.resolveRefIfPresent(alias).value
+        }
+
+        val definitions = (root as KsonObject).propertyLookup.getValue("definitions") as KsonObject
+        assertSame(definitions.propertyLookup.getValue("alias"), resolvedAlias(keepsSiblings))
+        assertSame(definitions.propertyLookup.getValue("number"), resolvedAlias(SchemaDraft.DRAFT_7))
+    }
+
+    @Test
+    fun theSchemaARefThatKeepsTheKeywordsBesideItNamesIsAmongItsSubschemas() {
+        val root = value(
+            $$"""
+                '$ref': '#/definitions/base'
+                properties:
+                  sibling: {}
+                  .
+                definitions:
+                  base:
+                    properties:
+                      inherited: {}
+            """
+        )
+        val base = schemaAt(root, keepsSiblings, "definitions", "base").value
+
+        val kept = indexedIn(keepsSiblings, root).resolvedRootSchema
+        assertSame(root, kept.value)
+        assertEquals(
+            listOf(
+                $$"$ref" to Applies.InPlace,
+                "definitions" to Applies.NotApplied,
+                "properties" to Applies.Property("sibling")
+            ),
+            kept.subschemas.map { it.keyword to it.applies }
+        )
+        assertSame(base, kept.subschemas.first().resolved.value)
+        assertSame(base, IndexedSchemaDocuments(SchemaDocument(root)).resolvedRootSchema.value)
+    }
+
+    @Test
+    fun aRefThatKeepsTheKeywordsBesideItIsAmongTheSubschemasOnlyIfItResolves() {
+        val root = value(
+            $$"{ '$ref': '#', properties: { sibling: {} }, definitions: { other: { '$ref': '#/missing' } } }"
+        )
+
+        val toItself = indexedIn(keepsSiblings, root).resolvedRootSchema
+        assertEquals(listOf($$"$ref", "definitions", "properties"), toItself.subschemas.map { it.keyword })
+        assertSame(root, toItself.subschemas.first().resolved.value)
+        assertEquals(emptyList(), schemaAt(root, keepsSiblings, "definitions", "other").subschemas)
+    }
+
+    @Test
+    fun theSchemaARefBesideOtherKeywordsNamesPinsAndRequiresPropertiesAlongWithThem() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    '$ref': '#/definitions/cat'
+                    required: [name]
+                    definitions:
+                      cat:
+                        required: [kind]
+                        properties:
+                          kind:
+                            const: cat
+                """
+            )
+        )
+
+        val schema = assertIs<JsonObjectSchema>(compile(root, draft = keepsSiblings))
+        assertEquals(mapOf("kind" to setOf(value("cat"))), schema.pinnedProperties(setOf("kind")))
+        assertEquals(setOf("name", "kind"), schema.requiredProperties())
     }
 
     @Test

@@ -67,7 +67,7 @@ class IndexedSchemaDocuments internal constructor(
     /** The root schema, which is [root]'s value with [rootBaseUri] as its base URI */
     val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, draft, this)
 
-    /** The root schema with its chain of `$ref`s followed (see [resolveRefIfPresent]) */
+    /** The root schema, with the `$ref`s that hide the keywords beside them followed (see [resolveRefIfPresent]) */
     val resolvedRootSchema: SchemaNode by lazy { resolveRefIfPresent(rootSchema) }
 
     /** The base URI everything inside [root]'s value is read under */
@@ -113,16 +113,17 @@ class IndexedSchemaDocuments internal constructor(
     }
 
     /**
-     * Follows the chain of `$ref`s from [schema] and returns the schema at the end of the chain, or [schema] itself if
-     * it has no `$ref`.  If a `$ref` doesn't resolve, or leads back into the chain, the chain ends at the schema
-     * containing it, with that `$ref` as the result's [unresolvedRef][SchemaNode.unresolvedRef].
+     * Follows the chain of `$ref`s from [schema] that hide the keywords beside them (see [SchemaDraft.refHidesSiblings])
+     * and returns the schema at the end of the chain, or [schema] itself if it has no such `$ref`.  If a `$ref` doesn't
+     * resolve, or leads back into the chain, the chain ends at the schema containing it, with that `$ref` as the
+     * result's [unresolvedRef][SchemaNode.unresolvedRef].
      */
     internal fun resolveRefIfPresent(schema: SchemaNode): SchemaNode {
         val followed = mutableListOf<KsonValue>()
         var current = schema
         while (true) {
             val ref = (current.value as? KsonObject)?.propertyLookup?.get($$"$ref") as? KsonString
-                ?: return current
+            if (ref == null || !current.draft.refHidesSiblings) return current
             followed.add(current.value)
             val target = when (val resolution = resolveRef(ref.value, current.innerBaseUri)) {
                 is RefResolution.Found -> resolution.target

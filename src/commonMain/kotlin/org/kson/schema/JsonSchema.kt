@@ -78,13 +78,13 @@ internal class JsonObjectSchema(
   private fun branchName(branch: JsonSchema): String? {
     if (branch !is JsonObjectSchema) return null
     branch.title?.let { return it }
-    return branch.soleRefValidator()?.refShortName()
+    return (branch.schemaValidators.singleOrNull() as? RefValidator)?.refShortName()
   }
 
-  private fun soleRefValidator(): RefValidator? = schemaValidators.singleOrNull() as? RefValidator
+  private fun refValidator(): RefValidator? = schemaValidators.filterIsInstance<RefValidator>().firstOrNull()
 
   /**
-   * This schema plus the target of a lone `$ref` and each `allOf` member, transitively: all of them
+   * This schema plus the target of its `$ref` and each `allOf` member, transitively: all of them
    * constrain the same document.  Property schemas aren't followed, so a self-referential
    * `child: { $ref: node }` can't recurse, and the `$ref` that closes a cycle leads to no schema, so
    * neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
@@ -96,7 +96,7 @@ internal class JsonObjectSchema(
     while (pending.isNotEmpty()) {
       val schema = pending.removeFirst()
       sources.add(schema)
-      (schema.soleRefValidator()?.resolvedSchema() as? JsonObjectSchema)?.let(pending::add)
+      (schema.refValidator()?.resolvedSchema() as? JsonObjectSchema)?.let(pending::add)
       schema.schemaValidators.filterIsInstance<AllOfValidator>()
         .flatMapTo(pending) { it.allOf.filterIsInstance<JsonObjectSchema>() }
     }

@@ -12,7 +12,7 @@ import org.kson.value.KsonValue
  * @param baseUri The base URI that [value] inherits from its parent schema, or from its document for a root schema.
  *   It depends only on where [value] sits in its document, so it is the same whether [value] is reached through
  *   subschemas or `$ref`s.
- * @param unresolvedRef The `$ref` in [value] that couldn't be followed, if any
+ * @param unresolvedRef The `$ref` in [value] that hides the keywords beside it but couldn't be followed, if any
  */
 @ConsistentCopyVisibility
 data class SchemaNode internal constructor(
@@ -36,10 +36,13 @@ data class SchemaNode internal constructor(
      */
     fun descend(path: List<KsonValue>): SchemaNode = path.fold(this) { parent, child -> parent.enter(child) }
 
-    /** The direct subschemas of this schema, in the order validation applies their keywords */
+    /**
+     * The direct subschemas of this schema, in the order validation applies their keywords.  The schema its `$ref`
+     * names comes first, if the `$ref` keeps the keywords beside it.
+     */
     val subschemas: List<Subschema> by lazy {
         val schemaObject = value as? KsonObject ?: return@lazy emptyList()
-        draft.keywords.flatMap { keyword ->
+        listOfNotNull(refTarget(schemaObject)) + draft.keywords.flatMap { keyword ->
             val declaredSubschemas = keyword.declaredSubschemas(schemaObject)
             val alternatives = declaredSubschemas.filter { it.applies is Applies.Alternative }.map { enter(it.value) }
             val condition = declaredSubschemas.firstOrNull { it.applies == Applies.Condition }?.value
@@ -55,6 +58,15 @@ data class SchemaNode internal constructor(
                 Subschema(declared.keyword, subschema, declared.applies, choice)
             }
         }
+    }
+
+    /** The schema this schema's `$ref` names, if the `$ref` keeps the keywords beside it and resolves */
+    private fun refTarget(schemaObject: KsonObject): Subschema? {
+        val ref = schemaObject.propertyLookup[$$"$ref"] as? KsonString
+        if (ref == null || draft.refHidesSiblings) return null
+        val target = (indexedDocuments.resolveRef(ref.value, innerBaseUri) as? RefResolution.Found)?.target
+            ?: return null
+        return Subschema($$"$ref", { indexedDocuments.resolveRefIfPresent(target) }, Applies.InPlace, choice = null)
     }
 }
 

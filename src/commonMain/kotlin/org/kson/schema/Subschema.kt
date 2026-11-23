@@ -12,6 +12,9 @@ class Subschema internal constructor(
     val applies: Applies,
     val choice: SchemaChoice?
 ) {
-    /** The subschema with its chain of `$ref`s followed (see [IndexedSchemaDocuments.resolveRefIfPresent]) */
+    /**
+     * The subschema, with the `$ref`s that hide the keywords beside them followed (see
+     * [IndexedSchemaDocuments.resolveRefIfPresent])
+     */
     val resolved: SchemaNode by lazy(resolve)
 }

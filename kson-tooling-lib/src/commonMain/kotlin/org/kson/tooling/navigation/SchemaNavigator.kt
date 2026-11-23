@@ -243,7 +243,8 @@ internal class SchemaNavigator(
      *     other than the one being navigated to) are visible and contradicted branches are
      *     dropped right here, with full ancestor context.  When [docVal] is null, all
      *     branches are emitted (nothing to narrow against).
-     *   - allOf: unconditional expansion, every branch emitted (all must hold).
+     *   - allOf, and a `$ref` that keeps the keywords beside it: unconditional expansion,
+     *     every branch emitted (all must hold).
      *   - if / then / else: see [evaluateIf].  A matching `if` emits `then`; a
      *     failed `if` emits `else`; an undecidable `if` (no document, unparseable
      *     condition, or failing only because a required discriminator isn't present yet)

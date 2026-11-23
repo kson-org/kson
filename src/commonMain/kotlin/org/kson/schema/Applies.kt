@@ -13,7 +13,7 @@ sealed interface Applies {
             NotApplied -> false
         }
 
-    /** `allOf`: validates the same instance. */
+    /** `allOf`, and a `$ref` that keeps the keywords beside it: validates the same instance. */
     data object InPlace : Applies
 
     /** `anyOf` and `oneOf`: the alternative at [index] validates the same instance. */
