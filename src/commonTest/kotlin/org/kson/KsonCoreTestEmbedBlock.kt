@@ -841,6 +841,16 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertEmbedTagRoundTrips("' '", """%\u0020""")
     }
 
+    /**
+     * An embed block's open delimiter is its first `%`, so a tag may itself begin with `%`: `%%sql` is tagged `%sql`
+     */
+    @Test
+    fun testEmbedBlockTagStartingWithDelimiterRoundTrips() {
+        assertEmbedTagRoundTrips("'%sql'", "%%sql")
+        assertEmbedTagRoundTrips("'%'", "%%")
+        assertEmbedTagRoundTrips("'%%'", "%%%")
+    }
+
     @Test
     fun testEmbedBlockTagWithLiteralTabInJsonObjectRendering() {
         val compileSettings = KsonCoreTest.CompileSettings(
