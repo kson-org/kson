@@ -944,12 +944,6 @@ class EmbedBlockNode(
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
-    /**
-     * A "raw" KSON embed tag, with all its escapes needed to embed directly into KSON/JSON/YAML intact
-     */
-    private val rawEmbedTag: String =
-        // embedTags are ended by raw newlines, so we simply escape all raw whitespace
-        escapeRawWhitespace(embedTagNode.delimiterUnescapedRawContent)
     private val embedTagSource: EmbedTagSource = EmbedTagSource.fromTagNode(embedTagNode)
     private val embedContent: String = embedContentNode.processedStringContent
 
@@ -1016,7 +1010,7 @@ class EmbedBlockNode(
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
         return """
             |${indent.firstLineIndent()}{
-            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_TAG.key}": "${DoubleQuote.escapeQuotes(rawEmbedTag)}",
+            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_TAG.key}": "${embedTagSource.doubleQuotedStringSource}",
             |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
             |${indent.bodyLinesIndent()}}
         """.trimMargin()
@@ -1029,7 +1023,7 @@ class EmbedBlockNode(
      * @return The rendered YAML object string
      */
     private fun renderYamlObject(indent: Indent): String {
-        return "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\"\n" +
+        return "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${embedTagSource.doubleQuotedStringSource}\"\n" +
                 "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                 renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }
@@ -1159,12 +1153,12 @@ internal object EmbedBlockRenderer {
                 val indentedContent = escapedContent.lines()
                     .joinToString("\n${contentIndent.bodyLinesIndent()}")
 
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}${embedTagSource.escapedSource}\n" +
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}${embedTagSource.embedBlockSource}\n" +
                     "${contentIndent.bodyLinesIndent()}$indentedContent\n" +
                     "${contentIndent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                "${delimiter.openDelimiter}${embedTagSource.escapedSource}\n$escapedContent\n${delimiter.closeDelimiter}"
+                "${delimiter.openDelimiter}${embedTagSource.embedBlockSource}\n$escapedContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> throw ShouldNotHappenException("Embed blocks are not rendered in CLASSIC format, which is JSON")
         }

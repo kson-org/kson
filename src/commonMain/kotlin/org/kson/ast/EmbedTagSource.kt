@@ -4,17 +4,31 @@ import org.kson.parser.behavior.StringQuote.DoubleQuote
 import org.kson.parser.behavior.Whitespace.isInlineWhitespace
 
 /**
- * The KSON [escapedSource] of an embed block's tag, ready for rendering in embed block syntax.
+ * The KSON source of an embed block's tag, ready for rendering, see [embedBlockSource] and [doubleQuotedStringSource]
  *
  * [EmbedTagSource]s must be created through [fromTag] or [fromTagNode], which ensure all escapes are properly set
  */
-internal class EmbedTagSource private constructor(tagSource: String) {
-    val escapedSource: String = tagSource.takeWhile { isInlineWhitespace(it) }.let { leadingWhitespace ->
-        // leading (raw) whitespace is not considered part of an embed tag (see [org.kson.parser.TokenType.EMBED_TAG]),
-        // so any leading whitespace that wants to be part of the tag must be encoded
-        leadingWhitespace.map { "\\u" + it.code.toString(16).padStart(4, '0') }.joinToString("") +
-            tagSource.substring(leadingWhitespace.length)
-    }
+internal class EmbedTagSource private constructor(private val escapedTag: String) {
+    /**
+     * The tag as written in embed block syntax
+     */
+    val embedBlockSource: String
+        get() = escapedTag.takeWhile { isInlineWhitespace(it) }.let { leadingWhitespace ->
+            buildString {
+                /**
+                 * Leading (raw) whitespace is not part of an embed tag (see [org.kson.parser.TokenType.EMBED_TAG]),
+                 * so any leading whitespace that wants to be part of the tag must be encoded
+                 */
+                leadingWhitespace.forEach { appendUnicodeEscape(this, it.code) }
+                append(escapedTag.substring(leadingWhitespace.length))
+            }
+        }
+
+    /**
+     * The tag as the content of a double-quoted string, for the `embedTag` property in object form
+     */
+    val doubleQuotedStringSource: String
+        get() = DoubleQuote.escapeQuotes(escapedTag)
 
     companion object {
         fun fromTag(embedTag: String): EmbedTagSource {
