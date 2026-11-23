@@ -632,7 +632,7 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         }
         is InternalEmbedBlock -> {
             KsonValue.KsonEmbed(
-                tag = ksonValue.embedTag?.value,
+                tag = ksonValue.embedTag.value,
                 content = ksonValue.embedContent.value,
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -746,7 +746,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
      * A Kson embed block
      */
     class KsonEmbed internal constructor(
-        val tag: String?,
+        val tag: String,
         val content: String,
         internalStart: Position,
         internalEnd: Position

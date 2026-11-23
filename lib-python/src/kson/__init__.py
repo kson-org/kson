@@ -969,7 +969,7 @@ class _KsonValue_KsonEmbed(KsonValue):
 
     def tag(
         self,
-    ) -> Optional[str]:
+    ) -> str:
 
 
         jni_ref = self._jni_ref
@@ -982,7 +982,7 @@ class _KsonValue_KsonEmbed(KsonValue):
             []
         )
 
-        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
+        return cast(Any, (_java_string_to_python_str)(result))
 
     def content(
         self,

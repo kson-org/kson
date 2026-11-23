@@ -51,7 +51,7 @@ enum class TokenType : ElementType {
      */
     EMBED_TAG,
     /**
-     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
+     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
     EMBED_PREAMBLE_NEWLINE,

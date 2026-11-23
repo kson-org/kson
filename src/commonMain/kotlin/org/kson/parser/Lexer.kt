@@ -457,29 +457,21 @@ class Lexer(source: String, gapFree: Boolean = false) {
             addLiteralToken(WHITESPACE)
         }
 
+        if (sourceScanner.eof()) {
+            return
+        }
+
+        while (!scannerAtEndOfLine()) {
+            sourceScanner.advance()
+        }
+        // extract our embed tag (note: may be empty, that's supported)
+        addToken(EMBED_TAG, sourceScanner.extractLexeme())
+
+        // consume the newline (or CRLF) from after this embed tag
         if (consumeLineEnding()) {
-            // no embed tag on this block
             addLiteralToken(EMBED_PREAMBLE_NEWLINE)
         } else if (sourceScanner.eof()) {
             return
-        } else {
-            // we have an embed tag, let's scan it
-            while (!scannerAtEndOfLine()) {
-                sourceScanner.advance()
-            }
-
-            // extract our embed tag (note: may be empty, that's supported)
-            val embedTagLexeme = sourceScanner.extractLexeme()
-            addToken(
-                EMBED_TAG, embedTagLexeme
-            )
-
-            // consume the newline (or CRLF) from after this embed tag
-            if (consumeLineEnding()) {
-                addLiteralToken(EMBED_PREAMBLE_NEWLINE)
-            } else if (sourceScanner.eof()) {
-                return
-            }
         }
 
         // read embedded content until the closing delimChar pair (or EOF in the case of an unclosed block)

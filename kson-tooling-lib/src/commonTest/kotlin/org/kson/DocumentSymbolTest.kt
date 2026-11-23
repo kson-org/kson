@@ -232,6 +232,26 @@ class DocumentSymbolTest {
     }
 
     @Test
+    fun testEmbedBlockWithEmptyTag() {
+        val doc = KsonTooling.parse("""
+            untagged: %
+                echo hello
+                %%
+            emptyTag:
+                embedTag: ''
+                embedContent: 'echo hello'
+        """.trimIndent())
+        val properties = KsonTooling.getDocumentSymbols(doc)[0].children
+        assertEquals(listOf("untagged", "emptyTag"), properties.map { it.name })
+
+        properties.forEach { property ->
+            val embed = property.children.single()
+            assertEquals(DocumentSymbolKind.EMBED, embed.kind, "${property.name} should be an embed block")
+            assertEquals("embed", embed.detail, "${property.name} should fall back to a generic detail")
+        }
+    }
+
+    @Test
     fun testUnquotedKeys() {
         val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("name: John"))
 

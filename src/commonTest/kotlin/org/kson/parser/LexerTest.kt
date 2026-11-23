@@ -409,7 +409,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertTokenizesTo(
@@ -456,10 +456,10 @@ class LexerTest {
                 this should have a newline at the end
                 %%
             """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].lexeme.text)
+        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[3].lexeme.text)
 
         val trailingSpacesTokens = assertTokenizesTo(
             """
@@ -469,7 +469,7 @@ class LexerTest {
                     spaces and a newline at the end    
                 %%
             """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
@@ -479,7 +479,7 @@ class LexerTest {
                 spaces and a newline at the end    
 
             """.trimIndent(),
-            trailingSpacesTokens[2].lexeme.text
+            trailingSpacesTokens[3].lexeme.text
         )
 
         val zeroTrailingWhitespaceTokens = assertTokenizesTo(
@@ -488,12 +488,12 @@ class LexerTest {
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
             "    this on the other hand,\n    should have spaces but no newline at the end    ",
-            zeroTrailingWhitespaceTokens[2].lexeme.text
+            zeroTrailingWhitespaceTokens[3].lexeme.text
         )
     }
 
@@ -506,7 +506,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
             "should allow trailing whitespace after the opening '%'"
         )
 
@@ -523,12 +523,27 @@ class LexerTest {
     }
 
     @Test
+    fun testEmbedBlockWithoutTagHasEmptyTag() {
+        // the empty tag sits where a tag would start, after any whitespace following the opening delimiter
+        assertTokenizesTo(
+            "%   \ncontent%%",
+            listOf(
+                Pair(EMBED_OPEN_DELIM, Location.create(0, 0, 0, 1, 0, 1)),
+                Pair(EMBED_TAG, Location.create(0, 4, 0, 4, 4, 4)),
+                Pair(EMBED_PREAMBLE_NEWLINE, Location.create(0, 4, 1, 0, 4, 5)),
+                Pair(EMBED_CONTENT, Location.create(1, 0, 1, 7, 5, 12)),
+                Pair(EMBED_CLOSE_DELIM, Location.create(1, 7, 1, 9, 12, 14))
+            )
+        )
+    }
+
+    @Test
     fun testEmbedBlockDanglingDelim() {
         assertTokenizesTo(
             """
             test: %
             """,
-            listOf(UNQUOTED_STRING, COLON, EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(UNQUOTED_STRING, COLON, EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -569,7 +584,7 @@ class LexerTest {
             %
             This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -709,6 +724,7 @@ class LexerTest {
                 Pair(UNQUOTED_STRING, Location.create(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location.create(3, 9, 3, 10, 48, 49)),
                 Pair(EMBED_OPEN_DELIM, Location.create(3, 11, 3, 12, 50, 51)),
+                Pair(EMBED_TAG, Location.create(3, 12, 3, 12, 51, 51)),
                 Pair(EMBED_PREAMBLE_NEWLINE, Location.create(3, 12, 4, 0, 51, 52)),
                 Pair(EMBED_CONTENT, Location.create(4, 0, 7, 6, 52, 127)),
                 Pair(EMBED_CLOSE_DELIM, Location.create(7, 6, 7, 8, 127, 129)),
@@ -785,10 +801,10 @@ class LexerTest {
                 %
                 these double %\% percents are embedded but escaped%%
             """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[2].lexeme.text)
+        assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[3].lexeme.text)
     }
 
     @Test
@@ -798,10 +814,10 @@ class LexerTest {
                 $
                 these double $\$ dollars are embedded but escaped$$
             """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[2].lexeme.text)
+        assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[3].lexeme.text)
     }
 
     @Test
@@ -918,13 +934,14 @@ class LexerTest {
         assertEquals("# a comment", commentTokens[0].lexeme.text, "the CRLF must not be part of the comment")
         assertEquals("# trailing", commentTokens[7].lexeme.text, "the CRLF must not be part of the comment")
 
-        // an embed block's preamble ends with the whole CRLF, whether or not it has an embed tag
+        // an embed block's preamble ends with the whole CRLF
         val untaggedTokens = assertTokenizesTo(
             "%\r\n  content\r\n%%",
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
             testGapFreeLexing = true
         )
-        assertEquals("\r\n", untaggedTokens[1].lexeme.text)
+        assertEquals("", untaggedTokens[1].lexeme.text)
+        assertEquals("\r\n", untaggedTokens[2].lexeme.text)
 
         val taggedTokens = assertTokenizesTo(
             "%sql\r\n  content\r\n%%",
@@ -936,7 +953,7 @@ class LexerTest {
 
         assertTokenizesTo(
             "% \r\n  content\r\n%%",
-            listOf(EMBED_OPEN_DELIM, WHITESPACE, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            listOf(EMBED_OPEN_DELIM, WHITESPACE, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
             testGapFreeLexing = true
         )
 

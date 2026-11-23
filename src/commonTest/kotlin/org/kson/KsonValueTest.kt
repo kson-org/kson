@@ -92,7 +92,7 @@ class KsonValueTest {
         // Verify embed block
         val embedProp = properties["embedBlock"]!!
         assertTrue(embedProp is EmbedBlock)
-        assertEquals("", embedProp.embedTag?.value ?: "")
+        assertEquals("", embedProp.embedTag.value)
         assertEquals(
             """
             This is an embed block
@@ -142,6 +142,19 @@ class KsonValueTest {
             listOf("nested", "list", "elements"),
             nestedListElements.map { (it as KsonString).value }
         )
+    }
+
+    @Test
+    fun testEmbedBlockWithoutTagEqualsEmptyTagObject() {
+        val untaggedBlock = KsonCore.parseToAst("%\ncontent%%").ast.toKsonValue()
+        val emptyTagObject = KsonCore.parseToAst("embedTag: ''\nembedContent: content").ast.toKsonValue()
+
+        assertTrue(untaggedBlock is EmbedBlock)
+        assertTrue(emptyTagObject is EmbedBlock)
+        assertEquals("", untaggedBlock.embedTag.value)
+        assertEquals(untaggedBlock, emptyTagObject)
+        assertEquals(untaggedBlock.hashCode(), emptyTagObject.hashCode())
+        assertEquals(untaggedBlock.asKsonObject(), emptyTagObject.asKsonObject())
     }
 
     @Test

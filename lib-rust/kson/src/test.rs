@@ -355,12 +355,22 @@ embed:%tag
     let KsonValue::KsonEmbed(embed) = embed_value else {
         panic!("expected embed");
     };
-    assert_eq!(embed.tag(), Some("tag".to_string()));
+    assert_eq!(embed.tag(), "tag");
     assert_eq!(embed.content(), "");
     assert_eq!(embed.start().line(), 5);
     assert_eq!(embed.start().column(), 6);
     assert_eq!(embed.end().line(), 6);
     assert_eq!(embed.end().column(), 2);
+}
+
+#[test]
+fn test_kson_value_untagged_embed_has_empty_tag() {
+    let value = Kson::analyze("%\ncontent%%", None, None).kson_value().unwrap();
+    let KsonValue::KsonEmbed(embed) = value else {
+        panic!("expected embed");
+    };
+    assert_eq!(embed.tag(), "");
+    assert_eq!(embed.content(), "content");
 }
 
 #[test]

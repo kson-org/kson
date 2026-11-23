@@ -209,7 +209,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                                 //   then this should pass the quote type, not null
                                 null
                             )
-                        }
+                        } ?: throw ShouldNotHappenException("The parser ensures we have an embed tag here")
 
                         val embedDelim = EmbedDelim.fromString(embedDelimChar)
 
@@ -389,16 +389,10 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         propertyNodes: List<ObjectPropertyNode>,
         marker: KsonMarker
     ): EmbedBlockNode? {
-        if (propertyNodes.size > 2) { return null }
+        if (propertyNodes.size != EmbedObjectKeys.entries.size) { return null }
 
         val embedTagNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_TAG)
-
-        if (embedTagNode == null && propertyNodes.size > 1) {
-            // if embed tag is null, then in order to be decoded as an embed block,
-            // the object must have exactly one property: the embed content
-            return null
-        }
-
+            ?: return null
         val embedContentNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_CONTENT)
             ?: return null
 

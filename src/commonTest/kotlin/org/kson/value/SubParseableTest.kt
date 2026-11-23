@@ -51,7 +51,7 @@ class SubParseableTest: KsonCoreTestError {
     private fun findEmbeddedSRC(ksonValue: KsonValue): KsonString? {
         when (ksonValue) {
             is EmbedBlock -> {
-                return ksonValue.embedTag?.let { findEmbeddedSRC(it) } ?:
+                return findEmbeddedSRC(ksonValue.embedTag) ?:
                     findEmbeddedSRC(ksonValue.embedContent)
             }
             is KsonString -> {
