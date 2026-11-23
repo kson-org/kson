@@ -710,6 +710,61 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         )
     }
 
+    /**
+     * Verifies the embed tag syntax rule that raw whitespace separating an embed block's open delimiter from its tag
+     * is not part of the tag, while escaped whitespace is
+     */
+    @Test
+    fun testEmbedBlockTagExcludesSeparatingWhitespace() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            "% \t sql\ncontent%%",
+            """
+                %sql
+                content
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "sql"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "sql",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+                %\u0020sql
+                content%%
+            """.trimIndent(),
+            """
+                %\u0020sql
+                content
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "\u0020sql"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "\u0020sql",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
     @Test
     fun testEmbedBlockTagWithLiteralTabInJsonObjectRendering() {
         val compileSettings = KsonCoreTest.CompileSettings(

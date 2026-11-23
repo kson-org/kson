@@ -375,6 +375,8 @@ An [Embed Tag](#embed-tags) adds metadata to an [Embed Block](#embed-blocks). An
 %%
 ```
 
+The tag starts at the first non-whitespace character on the same line as the opening `%`, so `% sql` and `%sql` are both tagged `sql`. A tag that really wants to start with whitespace may express it using escapes, e.g. `%\u0020sql`.
+
 [Embed Tags](#embed-tags) are often used to denote the embed content's type, which is particularly useful to enable tooling enhancements for the embedded content&mdash;for instance to properly highlight the embedded content, or to automatically inject a [full-on embedded editor](https://www.jetbrains.com/help/idea/using-language-injections.html#language_annotation).  Examples:
 
 ```kson
