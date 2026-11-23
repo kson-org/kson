@@ -408,7 +408,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
     ): StringNodeImpl? {
         return propertyNodes.filterIsInstance<ObjectPropertyNodeImpl>().find { prop ->
             val keyString = (prop.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
-            keyString?.rawStringContent == embedKey.key && prop.value is StringNodeImpl
+            keyString?.processedStringContent == embedKey.key && prop.value is StringNodeImpl
         }?.value as? StringNodeImpl
     }
 

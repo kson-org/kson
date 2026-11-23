@@ -411,6 +411,45 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     }
 
     /**
+     * Embed object keys are matched on their value, so any spelling of `embedTag` and `embedContent` decodes as an
+     * embed block, just as it would from the equivalent JSON
+     */
+    @Test
+    fun testEmbedBlockFromObjectWithEscapedKeys() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embed\u0054ag": sql
+                 'embed\u0043ontent': content
+            """.trimIndent(),
+            """
+                embedBlock: %sql
+                  content
+                  %%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "sql"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "sql",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    /**
      * Embed blocks must have both `embedContent` and `embedTag` properties, not just `embedContent`
      */
     @Test
