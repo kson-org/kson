@@ -395,6 +395,49 @@ class SchemaDefinitionLocationTest {
     }
 
     @Test
+    fun testJumpToDefinition_throughADraft2020_12RefAlone() {
+        // the `$ref` applies its target in place, as an `allOf` does, so the schema holding it is a definition too
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                '$schema': 'https://json-schema.org/draft/2020-12/schema'
+                properties:
+                  name:
+                    <caret>'$ref': '#/$defs/Name'
+                    .<caret>
+                  .
+                '$defs':
+                  Name:
+                    <caret>type: string<caret>
+            """.trimIndent(),
+            documentWithCaret = """
+                name: <caret>Ada
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_throughADraft2020_12RefWithKeywordsBesideIt() {
+        // the keywords beside the `$ref` apply along with its target, so both are definitions
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                '$schema': 'https://json-schema.org/draft/2020-12/schema'
+                properties:
+                  name:
+                    <caret>'$ref': '#/$defs/Name'
+                    minLength: 1
+                    .<caret>
+                  .
+                '$defs':
+                  Name:
+                    <caret>type: string<caret>
+            """.trimIndent(),
+            documentWithCaret = """
+                name: <caret>Ada
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testJumpToDefinition_anyOf_filteredByValidation() {
         // For anyOf with discriminator, only the valid branch should be shown
         // Document has type: email, so only the email branch validates

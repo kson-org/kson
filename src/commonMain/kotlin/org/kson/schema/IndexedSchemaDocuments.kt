@@ -17,8 +17,11 @@ data class SchemaDocument(val value: KsonValue, val retrievalUri: UriReference? 
  * Indexes the schemas in [root] and [additionalDocuments] by retrieval URI and `$id`, to resolve `$ref`s among them.
  * It fetches no documents: [missingDocumentUris] lists those still needed.
  *
- * A schema is a document's root, a subschema under one of [draft]'s subschema keywords, or a value a `$ref` points
- * to.  Only the `$id`s of schemas change base URIs.
+ * Each document is read in the draft its `$schema` names, or else in [root]'s draft.  Only a document's top-level
+ * `$schema` is read.
+ *
+ * A schema is a document's root, a subschema under one of the subschema keywords of the document's draft, or a value
+ * a `$ref` points to.  Only the `$id`s of schemas change base URIs.
  *
  * A URI several schemas share identifies the document retrieved from it, or else the deepest schema with that `$id`.
  * Ties go to the last one, in the order: [root], [additionalDocuments].  The built-in meta-schemas yield their URIs
@@ -26,16 +29,17 @@ data class SchemaDocument(val value: KsonValue, val retrievalUri: UriReference? 
  *
  * @param root the root schema document, which may have no retrieval URI
  * @param additionalDocuments the documents [root] references, directly or through each other
- * @param draft the draft used to interpret the documents, with its meta-schemas indexed alongside them
+ * @param drafts the drafts a `$schema` can name, with their meta-schemas indexed alongside the documents.  [root] is
+ *   read in the first when its `$schema` names none.
  * @throws IllegalArgumentException if a retrieval URI in [additionalDocuments] is missing, empty or fragment-only
  */
 class IndexedSchemaDocuments internal constructor(
     val root: SchemaDocument,
     additionalDocuments: List<SchemaDocument>,
-    private val draft: SchemaDraft
+    private val drafts: List<SchemaDraft>
 ) {
     constructor(root: SchemaDocument, additionalDocuments: List<SchemaDocument> = emptyList()) :
-        this(root, additionalDocuments, SchemaDraft.DRAFT_7)
+        this(root, additionalDocuments, listOf(SchemaDraft.DRAFT_7, SchemaDraft.DRAFT_2020_12))
 
     /**
      * The location of a value: the index of its document in [documents], and the JSON Pointer tokens from that
@@ -47,6 +51,9 @@ class IndexedSchemaDocuments internal constructor(
 
     /** The meta-schemas, the root and the additional documents */
     private val documents: List<SchemaDocument>
+
+    /** The draft each of the [documents] is read in, in the same order */
+    private val documentDrafts: List<SchemaDraft>
 
     /** The root of the last of [root] and [additionalDocuments] retrieved from each URI, by that URI */
     private val documentRootsByUri: Map<UriReference, Place>
@@ -61,11 +68,13 @@ class IndexedSchemaDocuments internal constructor(
     private val idOrder =
         compareBy<Place>({ it.path.size }, { it.document }, { schemas.getValue(it).location.startOffset })
 
+    private val rootDraft: SchemaDraft = root.declaredDraft() ?: drafts.first()
+
     /** The base URI [root]'s value is read under: its retrieval URI without a fragment, or else empty */
     val rootBaseUri: UriReference = root.initialBaseUri
 
     /** The root schema, which is [root]'s value with [rootBaseUri] as its base URI */
-    val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, draft, this)
+    val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, rootDraft, this)
 
     /** The root schema, with the `$ref`s that hide the keywords beside them followed (see [resolveRefIfPresent]) */
     val resolvedRootSchema: SchemaNode by lazy { resolveRefIfPresent(rootSchema) }
@@ -77,8 +86,9 @@ class IndexedSchemaDocuments internal constructor(
         require(additionalDocuments.all { it.initialBaseUri.toString().isNotEmpty() }) {
             "Each additional schema document needs the URI it was retrieved from"
         }
-        val metaSchemas = draft.metaSchemas()
+        val metaSchemas = drafts.flatMap { it.metaSchemas() }
         documents = metaSchemas + root + additionalDocuments
+        documentDrafts = documents.map { it.declaredDraft() ?: rootDraft }
         // only their `$id`s identify the meta-schemas
         documentRootsByUri = documents.indices.drop(metaSchemas.size)
             .associateBy({ documents[it].initialBaseUri }) { Place(it, emptyList()) }
@@ -88,6 +98,7 @@ class IndexedSchemaDocuments internal constructor(
     /** The retrieval URIs of referenced documents that were not supplied */
     val missingDocumentUris: List<UriReference>
         get() = schemas.mapNotNull { (place, schema) ->
+            val draft = draftOf(place)
             val ref = keywordsOf(schema, draft)[$$"$ref"] as? KsonString ?: return@mapNotNull null
             val refUri = baseUriOf(place).withIdOf(schema, draft).resolve(ref.value)
             refUri.withoutFragment().takeIf {
@@ -109,7 +120,9 @@ class IndexedSchemaDocuments internal constructor(
             is FragmentPointer.Malformed -> RefResolution.MalformedPointer(fragmentPointer.message)
             else -> RefResolution.NotFound
         }
-        return RefResolution.Found(SchemaNode(checkNotNull(valueAt(target)), baseUriOf(target), draft, this))
+        return RefResolution.Found(
+            SchemaNode(checkNotNull(valueAt(target)), baseUriOf(target), draftOf(target), this)
+        )
     }
 
     /**
@@ -158,12 +171,22 @@ class IndexedSchemaDocuments internal constructor(
     /** Returns the base URI of the value at [place] */
     private fun baseUriOf(place: Place): UriReference =
         enclosingPlaces(place).fold(documents[place.document].initialBaseUri) { baseUri, enclosing ->
-            schemas[enclosing]?.let { baseUri.withIdOf(it, draft) } ?: baseUri
+            schemas[enclosing]?.let { baseUri.withIdOf(it, draftOf(enclosing)) } ?: baseUri
         }
 
     /** Returns the places of the values enclosing the value at [place], outermost first */
     private fun enclosingPlaces(place: Place): List<Place> =
         place.path.indices.map { Place(place.document, place.path.subList(0, it)) }
+
+    /** Returns the draft the value at [place] is read in */
+    private fun draftOf(place: Place): SchemaDraft = documentDrafts[place.document]
+
+    /** The draft among the [drafts] whose meta-schema this document's `$schema` names, if any */
+    private fun SchemaDocument.declaredDraft(): SchemaDraft? {
+        val schemaUri = (value as? KsonObject)?.propertyLookup?.get($$"$schema") as? KsonString ?: return null
+        val metaSchemaUri = UriReference.parse(schemaUri.value).withoutEmptyFragment()
+        return drafts.find { it.metaSchemaUri == metaSchemaUri }
+    }
 
     /** Returns the value at [place], or null if there is none. */
     private fun valueAt(place: Place): KsonValue? =
@@ -209,7 +232,7 @@ class IndexedSchemaDocuments internal constructor(
             unread += place
             awaitingEnclosingSchema.remove(place)?.let(unread::addAll)
             for (enclosing in enclosingPlaces(place).filter { it !in schemas }) {
-                if (keywordsOf(checkNotNull(valueAt(enclosing)), draft)[$$"$id"] is KsonString) {
+                if (keywordsOf(checkNotNull(valueAt(enclosing)), draftOf(enclosing))[$$"$id"] is KsonString) {
                     awaitingEnclosingSchema.getOrPut(enclosing, ::mutableListOf) += place
                 }
             }
@@ -217,6 +240,7 @@ class IndexedSchemaDocuments internal constructor(
 
         private fun read(schema: Place) {
             val value = schemas.getValue(schema)
+            val draft = draftOf(schema)
             val keywords = keywordsOf(value, draft)
             val innerBaseUri = baseUriOf(schema).withIdOf(value, draft)
             if (keywords[$$"$id"] is KsonString) identifyById(schema, innerBaseUri)

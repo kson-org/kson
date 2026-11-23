@@ -61,6 +61,6 @@ sealed interface Applies {
     /** `contains`: validates each of the instance's items, at least one of which must pass. */
     data object SomeItem : Applies
 
-    /** `definitions`, and `additionalItems` without a list of `items`: validates no part of the instance. */
+    /** `definitions`, `$defs`, and `additionalItems` without a list of `items`: validates no part of the instance. */
     data object NotApplied : Applies
 }

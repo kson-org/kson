@@ -375,6 +375,29 @@ class SchemaRefResolutionTest {
     }
 
     @Test
+    fun testResolveRef_besideAnIdInDraft2020_12() {
+        // the ref resolves against the `$id` beside it, which Draft 7 ignores
+        assertRefResolution($$"""
+            '$schema': 'https://json-schema.org/draft/2020-12/schema'
+            '$id': 'http://example.com/root.json'
+            properties:
+              a:
+                '$id': 'http://example.com/nested/a.json'
+                '$ref': 'b.json<cursor>'
+                .
+              .
+            '$defs':
+              nested:
+                <target>'$id': 'http://example.com/nested/b.json'
+                type: string
+                .</target>
+              root:
+                '$id': 'http://example.com/b.json'
+                type: number
+        """.trimIndent())
+    }
+
+    @Test
     fun testResolveRef_afterListElementInError() {
         // The element in error keeps its index in the cursor's pointer, so the cursor's ref resolves
         // to `y`, not to the `z` that dropping the broken element would shift into its place

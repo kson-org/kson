@@ -1091,6 +1091,19 @@ class SchemaNavigationTest {
         assertEquals(listOf("http://x/root/", "http://x/root/"), visitsToN.map { it.schema.baseUri.toString() })
     }
 
+    /** The root's 2020-12 `$ref` applies the root within itself.  `flatten` stops the second time it meets the root. */
+    @Test
+    fun testDraft2020_12RefBackToItsOwnSchemaStopsOnItsFirstReturn() {
+        val schema = $$"""
+            '$schema': 'https://json-schema.org/draft/2020-12/schema'
+            '$ref': '#'
+            type: object
+        """.trimIndent()
+        val root = assertNotNull(KsonCore.parseToAst(schema).ksonValue)
+
+        assertEquals(listOf(root, root), navigateSchema(schema, emptyList()))
+    }
+
     /** `x`'s ref resolves against the root's `$id` to sub/other.json, so it names `other`, read under sub/root.json. */
     @Test
     fun testRefUnderARelativeRootIdResolvesUnderItOnce() {

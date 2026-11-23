@@ -572,7 +572,7 @@ KSON's status as a superset of JSON is verified by [JsonSuiteTest.kt](../src/com
 
 ## JSON Schema support
 
-KSON is compatible with JsonSchema (Draft7, more to come), verified by the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+KSON is compatible with JSON Schema Draft 7, verified by the [`SchemaDraft7SuiteTest*.kt` files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite). Support for Draft 2020-12 is in progress.
 
 ## Embed Block JSON Compatibility
 

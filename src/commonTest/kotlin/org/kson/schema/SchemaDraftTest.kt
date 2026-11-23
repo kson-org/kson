@@ -22,6 +22,7 @@ class SchemaDraftTest {
 
     /** Draft 7 without `maximum`, so a schema compiled in this draft accepts values above its `maximum`. */
     private val withoutMaximum = SchemaDraft(
+        metaSchemaUri = UriReference.parse("urn:example:without-maximum"),
         refHidesSiblings = true,
         keywords = SchemaDraft.DRAFT_7.keywords.filterNot { "maximum" in it.names },
         metaSchemas = { emptyList() }
@@ -29,18 +30,28 @@ class SchemaDraftTest {
 
     /** Draft 7 where a `$ref` keeps the keywords beside it. */
     private val keepsSiblings = SchemaDraft(
+        metaSchemaUri = UriReference.parse("urn:example:keeps-siblings"),
         refHidesSiblings = false,
         keywords = SchemaDraft.DRAFT_7.keywords,
         metaSchemas = { emptyList() }
     )
 
+    private val draft2020Uri = "https://json-schema.org/draft/2020-12/schema"
+
     private fun compile(
         root: SchemaDocument,
         additionalDocuments: List<SchemaDocument> = emptyList(),
         draft: SchemaDraft = withoutMaximum
-    ): JsonSchema {
+    ): JsonSchema = compiled(IndexedSchemaDocuments(root, additionalDocuments, listOf(draft)))
+
+    private fun compileAsDeclared(
+        root: SchemaDocument,
+        additionalDocuments: List<SchemaDocument> = emptyList()
+    ): JsonSchema = compiled(IndexedSchemaDocuments(root, additionalDocuments))
+
+    private fun compiled(indexedDocuments: IndexedSchemaDocuments): JsonSchema {
         val messageSink = MessageSink()
-        val schema = SchemaParser.parseSchemaRoot(IndexedSchemaDocuments(root, additionalDocuments, draft), messageSink)
+        val schema = SchemaParser.parseSchemaRoot(indexedDocuments, messageSink)
         assertEquals(emptyList(), messageSink.loggedMessages())
         return assertNotNull(schema)
     }
@@ -54,7 +65,7 @@ class SchemaDraftTest {
     }
 
     private fun indexedIn(draft: SchemaDraft, root: KsonValue): IndexedSchemaDocuments =
-        IndexedSchemaDocuments(SchemaDocument(root), emptyList(), draft)
+        IndexedSchemaDocuments(SchemaDocument(root), emptyList(), listOf(draft))
 
     private fun schemaAt(root: KsonValue, draft: SchemaDraft, vararg path: String): SchemaNode {
         val values = path.runningFold(root) { parent, name -> (parent as KsonObject).propertyLookup.getValue(name) }
@@ -138,10 +149,15 @@ class SchemaDraftTest {
         }
         val metaSchema =
             SchemaDocument(value($$"{ '$id': 'urn:example:meta', const: 7 }"), UriReference.parse("urn:example:meta"))
-        val draft = SchemaDraft(refHidesSiblings = true, keywords = listOf(nested), metaSchemas = { listOf(metaSchema) })
+        val draft = SchemaDraft(
+            metaSchemaUri = UriReference.parse("urn:example:nested-draft"),
+            refHidesSiblings = true,
+            keywords = listOf(nested),
+            metaSchemas = { listOf(metaSchema) }
+        )
         val root = SchemaDocument(value($$"nested: { '$id': 'urn:example:nested' }"))
 
-        val inDraft = IndexedSchemaDocuments(root, emptyList(), draft)
+        val inDraft = IndexedSchemaDocuments(root, emptyList(), listOf(draft))
         assertIs<RefResolution.Found>(inDraft.resolveRef("urn:example:nested", inDraft.rootSubschemaBaseUri))
         assertIs<RefResolution.Found>(inDraft.resolveRef("urn:example:meta", inDraft.rootSubschemaBaseUri))
         assertEquals(RefResolution.NotFound, inDraft.resolveRef(KsonDraft7MetaSchema.ID, inDraft.rootSubschemaBaseUri))
@@ -172,7 +188,7 @@ class SchemaDraftTest {
 
         assertFalse(accepts(compile(root, draft = keepsSiblings), "3"))
         assertTrue(accepts(compile(root, draft = SchemaDraft.DRAFT_7), "3"))
-        val siblingsKept = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
+        val siblingsKept = IndexedSchemaDocuments(root, emptyList(), listOf(keepsSiblings))
         assertIs<RefResolution.Found>(siblingsKept.resolveRef("https://example.test/root/", siblingsKept.rootBaseUri))
         assertIs<RefResolution.Found>(siblingsKept.resolveRef("urn:example:unreferenced", siblingsKept.rootBaseUri))
         val siblingsHidden = IndexedSchemaDocuments(root)
@@ -203,7 +219,7 @@ class SchemaDraftTest {
             )
         )
 
-        val indexed = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
+        val indexed = IndexedSchemaDocuments(root, emptyList(), listOf(keepsSiblings))
 
         assertIs<RefResolution.Found>(indexed.resolveRef("http://example.test/inner.json", indexed.rootBaseUri))
         assertEquals(RefResolution.NotFound, indexed.resolveRef("http://example.test/outer.json", indexed.rootBaseUri))
@@ -223,7 +239,7 @@ class SchemaDraftTest {
             UriReference.parse("file:///root.json")
         )
 
-        val indexed = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
+        val indexed = IndexedSchemaDocuments(root, emptyList(), listOf(keepsSiblings))
 
         assertEquals(listOf(UriReference.parse("http://example.test/nested/dep.json")), indexed.missingDocumentUris)
     }
@@ -390,9 +406,131 @@ class SchemaDraftTest {
     }
 
     @Test
+    fun aRootIsReadInTheDraftItsSchemaNamesAndOtherwiseInDraft7() {
+        val draftsByDeclaredUri = mapOf(
+            draft2020Uri to SchemaDraft.DRAFT_2020_12,
+            "$draft2020Uri#" to SchemaDraft.DRAFT_2020_12,
+            "http://json-schema.org/draft-07/schema#" to SchemaDraft.DRAFT_7,
+            "http://json-schema.org/draft-07/schema" to SchemaDraft.DRAFT_7,
+            "https://json-schema.org/draft/2019-09/schema" to SchemaDraft.DRAFT_7
+        )
+        for ((declaredUri, draft) in draftsByDeclaredUri) {
+            val root = SchemaDocument(value($$"'$schema': '$$declaredUri'"))
+            assertSame(draft, IndexedSchemaDocuments(root).rootSchema.draft, declaredUri)
+        }
+        assertSame(SchemaDraft.DRAFT_7, IndexedSchemaDocuments(SchemaDocument(value("type: object"))).rootSchema.draft)
+    }
+
+    @Test
+    fun aSuppliedDocumentIsReadInTheDraftItsSchemaNamesAndOtherwiseInTheRootsDraft() {
+        // `maximum` sits beside a `$ref`, which hides it in Draft 7 and keeps it in Draft 2020-12
+        fun bounded(schemaLine: String) = SchemaDocument(
+            value(
+                $$"""
+                    $$schemaLine
+                    '$ref': '#/definitions/number'
+                    maximum: 1
+                    definitions:
+                      number:
+                        type: number
+                """
+            ),
+            UriReference.parse("https://example.test/bounded.json")
+        )
+        val root = SchemaDocument(
+            value($$"{ '$schema': '$$draft2020Uri', '$ref': 'bounded.json' }"),
+            UriReference.parse("https://example.test/root.json")
+        )
+
+        val declaresDraft7 = bounded($$"'$schema': 'http://json-schema.org/draft-07/schema#'")
+        assertTrue(accepts(compileAsDeclared(root, listOf(declaresDraft7)), "7"))
+        assertFalse(accepts(compileAsDeclared(root, listOf(bounded(""))), "7"))
+    }
+
+    @Test
+    fun aSuppliedDocumentIsIndexedInTheDraftItsSchemaNames() {
+        val defs = SchemaDocument(
+            value(
+                $$"""
+                    '$schema': '$$draft2020Uri'
+                    '$defs':
+                      number:
+                        '$id': 'urn:example:number'
+                """
+            ),
+            UriReference.parse("https://example.test/defs.json")
+        )
+        // the root is read in Draft 7, which has no `$defs`
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value("type: object")), listOf(defs))
+
+        assertIs<RefResolution.Found>(indexedDocuments.resolveRef("urn:example:number", indexedDocuments.rootBaseUri))
+    }
+
+    @Test
+    fun draft2020_12ReadsTheKeywordsOfDraft7WithDefsForDefinitionsAndWithoutAdditionalItems() {
+        assertEquals(
+            SchemaDraft.DRAFT_7.keywordsByName.keys - setOf("definitions", "additionalItems") + $$"$defs",
+            SchemaDraft.DRAFT_2020_12.keywordsByName.keys
+        )
+    }
+
+    @Test
+    fun draft2020_12IdentifiesAndCompilesTheSchemasUnderDefsButNotUnderDefinitions() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    '$schema': '$$draft2020Uri'
+                    '$defs':
+                      current:
+                        '$id': 'urn:example:current'
+                        minimum: low
+                        .
+                      .
+                    definitions:
+                      legacy:
+                        '$id': 'urn:example:legacy'
+                """
+            )
+        )
+
+        val indexedDocuments = IndexedSchemaDocuments(root)
+        val baseUri = indexedDocuments.rootSubschemaBaseUri
+        assertIs<RefResolution.Found>(indexedDocuments.resolveRef("urn:example:current", baseUri))
+        assertEquals(RefResolution.NotFound, indexedDocuments.resolveRef("urn:example:legacy", baseUri))
+        val messageSink = MessageSink()
+        SchemaParser.parseSchemaRoot(indexedDocuments, messageSink)
+        assertEquals(listOf(MessageType.SCHEMA_NUMBER_REQUIRED), messageSink.loggedMessages().map { it.message.type })
+    }
+
+    @Test
+    fun draft2020_12ReadsItemsAsOneSchemaForEveryItem() {
+        val oneSchema = SchemaDocument(value($$"{ '$schema': '$$draft2020Uri', items: { type: number } }"))
+        val schema = compileAsDeclared(oneSchema)
+        assertTrue(accepts(schema, "[1, 2]"))
+        assertFalse(accepts(schema, "[1, two]"))
+
+        val listOfSchemas = SchemaDocument(value($$"{ '$schema': '$$draft2020Uri', items: [{ type: number }] }"))
+        val messageSink = MessageSink()
+        SchemaParser.parseSchemaRoot(IndexedSchemaDocuments(listOfSchemas), messageSink)
+        assertEquals(listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN), messageSink.loggedMessages().map { it.message.type })
+    }
+
+    @Test
+    fun aSchemaCanReferenceTheMetaSchemaOfAnotherDraftWithoutSupplyingIt() {
+        val draft7MetaSchemaUri = "http://json-schema.org/draft-07/schema#"
+        val root = SchemaDocument(value($$"{ '$schema': '$$draft2020Uri', '$ref': '$$draft7MetaSchemaUri' }"))
+
+        assertEquals(emptyList(), IndexedSchemaDocuments(root).missingDocumentUris)
+        val schema = compileAsDeclared(root)
+        assertTrue(accepts(schema, "type: object"))
+        assertFalse(accepts(schema, "type: 5"))
+    }
+
+    @Test
     fun aDraftWhoseKeywordsReadOneNameTwiceFails() {
         assertFailsWith<IllegalArgumentException> {
             SchemaDraft(
+                metaSchemaUri = UriReference.parse("urn:example:two-minimums"),
                 refHidesSiblings = true,
                 keywords = listOf(NumberKeyword("minimum", ::MinimumValidator), NumberKeyword("minimum", ::MinimumValidator)),
                 metaSchemas = { emptyList() }

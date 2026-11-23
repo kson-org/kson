@@ -604,11 +604,7 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      *     "Location-independent identifier in remote ref -> string is invalid"
      *
      * Test ID: "anchor::Location-independent identifier in remote ref::string is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_16() {
         
@@ -690,11 +686,7 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      *     "$ref to $ref finds detached $anchor -> non-number is invalid"
      *
      * Test ID: "anchor::$ref to $ref finds detached $anchor::non-number is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
         

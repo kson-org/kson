@@ -128,15 +128,14 @@ object KsonTooling {
         // Navigate to the node at the cursor position
         val nodeAtPosition = AstNodeWalker.navigate(schemaAst, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
-        val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
+        val ref = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
         // Resolve the reference and return its location
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
-        // a draft 7 `$ref` ignores the `$id` beside it, so it resolves against the base URI its holder is read under
         val pathToHolder = AstNodeWalker.nodesAlong(schemaAst, documentPointer).dropLast(1)
             .map { it.toKsonValueOrNull() ?: return emptyList() }
-        val baseUri = indexedDocuments.rootSchema.descend(pathToHolder).baseUri
-        val target = (indexedDocuments.resolveRef(refString, baseUri) as? RefResolution.Found)
+        val baseUri = indexedDocuments.rootSchema.descend(pathToHolder).innerBaseUri
+        val target = (indexedDocuments.resolveRef(ref, baseUri) as? RefResolution.Found)
             ?.target ?: return emptyList()
 
         return listOf(

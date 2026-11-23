@@ -25,7 +25,7 @@ data class SchemaNode internal constructor(
     val endsAtUnresolvedRef: Boolean get() = unresolvedRef != null
 
     /** The base URI inside [value], which its `$ref` resolves against and its subschemas inherit */
-    internal val innerBaseUri: UriReference by lazy { baseUri.withIdOf(value, draft) }
+    val innerBaseUri: UriReference by lazy { baseUri.withIdOf(value, draft) }
 
     /** Returns a node for [child], a value inside this schema, with [innerBaseUri] as its base URI */
     internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, draft, indexedDocuments)
