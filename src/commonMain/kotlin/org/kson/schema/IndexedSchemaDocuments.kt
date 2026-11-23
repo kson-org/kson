@@ -1,6 +1,8 @@
 package org.kson.schema
 
 import org.kson.parser.messages.Message
+import org.kson.schema.draft.SchemaDraft
+import org.kson.schema.draft.hasHidingRef
 import org.kson.uri.UriReference
 import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.JsonPointer

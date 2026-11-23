@@ -1,6 +1,7 @@
-package org.kson.schema
+package org.kson.schema.draft
 
 import org.kson.KsonCore
+import org.kson.schema.SchemaDocument
 import org.kson.uri.UriReference
 
 /**

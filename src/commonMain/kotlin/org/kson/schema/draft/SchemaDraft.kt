@@ -1,5 +1,6 @@
-package org.kson.schema
+package org.kson.schema.draft
 
+import org.kson.schema.*
 import org.kson.schema.validators.*
 import org.kson.uri.UriReference
 import org.kson.value.KsonObject

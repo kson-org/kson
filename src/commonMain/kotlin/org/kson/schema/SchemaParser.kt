@@ -2,6 +2,7 @@ package org.kson.schema
 
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
+import org.kson.schema.draft.hasHidingRef
 import org.kson.schema.validators.*
 import org.kson.value.*
 

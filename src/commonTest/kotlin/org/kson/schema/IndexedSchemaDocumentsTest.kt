@@ -2,6 +2,7 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.messages.MessageType
+import org.kson.schema.draft.KsonDraft7MetaSchema
 import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonString

@@ -1,6 +1,9 @@
-package org.kson.schema
+package org.kson.schema.draft
 
 import org.kson.parser.MessageSink
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.JsonSchemaTest
+import org.kson.schema.SchemaParser
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import kotlin.test.Test

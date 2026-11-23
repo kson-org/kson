@@ -1,8 +1,9 @@
-package org.kson.schema
+package org.kson.schema.draft
 
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
+import org.kson.schema.*
 import org.kson.schema.validators.MinimumValidator
 import org.kson.uri.UriReference
 import org.kson.validation.SourceContext

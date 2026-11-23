@@ -1,5 +1,6 @@
 package org.kson.schema
 
+import org.kson.schema.draft.SchemaDraft
 import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
