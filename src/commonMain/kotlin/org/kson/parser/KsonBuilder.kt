@@ -233,7 +233,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                                 throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
                             }
                         }
-                        return ObjectKeyNodeImpl(objectKey)
+                        ObjectKeyNodeImpl(objectKey)
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
