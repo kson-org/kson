@@ -6,54 +6,67 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.measureTimedValue
+import kotlin.time.Duration
+import kotlin.time.measureTime
 
 /**
- * Indexing a long chain of `$ref`s stays fast
+ * Checks how the time to index a chain of `$ref`s grows with the chain's length.  The test divides the time for one
+ * length by the time for another on the same machine, which cancels out how fast the machine is overall.
  *
  * TODO: This is not a reliable timing test.  It would probably benefit from being replaced by a benchmark test.
  */
 class IndexedSchemaDocumentsPerformanceTest {
-    private val chainLength = 2000
-    private val limit = 5.seconds
+    private val shortChainLength = 250
+    private val longChainLength = 2000
 
     /** The properties `link0`, `link1`, ... of [container], each holding a `$ref` to the next, the last to end.json */
-    private fun chainLinks(container: String): String = (0 until chainLength).joinToString(", ") { index ->
-        val next = if (index < chainLength - 1) "#/$container/link${index + 1}" else "end.json"
+    private fun chainLinks(container: String, length: Int): String = (0 until length).joinToString(", ") { index ->
+        val next = if (index < length - 1) "#/$container/link${index + 1}" else "end.json"
         $$"""link$$index: { '$ref': '$$next' }"""
     }
 
-    /** Asserts that indexing the schema [source] finds the missing end.json, and does so quickly */
-    private fun assertIndexesChainQuickly(source: String) {
+    /** The quickest of five times to index the chain [source], once warmed up */
+    private fun timeToIndex(source: String): Duration {
         val root = assertNotNull(KsonCore.parseToAst(source).ksonValue)
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
+        assertEquals(
+            listOf(UriReference.parse("file:///schemas/end.json")),
+            IndexedSchemaDocuments(rootDocument).missingDocumentUris
+        )
+        repeat(3) { IndexedSchemaDocuments(rootDocument) }
+        return (1..5).minOf { measureTime { IndexedSchemaDocuments(rootDocument) } }
+    }
 
-        val (indexedDocuments, elapsed) = measureTimedValue { IndexedSchemaDocuments(rootDocument) }
+    /** Asserts that indexing time grows in proportion to the length of the chain that [chainSource] writes */
+    private fun assertIndexingTakesTimeInProportionToTheChain(chainSource: (Int) -> String) {
+        val growth = timeToIndex(chainSource(longChainLength)) / timeToIndex(chainSource(shortChainLength))
 
-        assertEquals(listOf(UriReference.parse("file:///schemas/end.json")), indexedDocuments.missingDocumentUris)
+        val chainGrowth = longChainLength / shortChainLength
+        val limit = 2 * chainGrowth
         assertTrue(
-            elapsed < limit,
-            $$"Indexing a chain of $$chainLength `$ref`s took $$elapsed, over the $$limit limit.  " +
-                "It normally takes well under a second, and rebuilding the index for each link took over 30 s, " +
-                "so the limit is loose enough that a slow machine doesn't trip it."
+            growth < limit,
+            "$chainGrowth times the links took $growth times as long to index, past the limit of $limit: linear " +
+                "indexing grows up to $chainGrowth times, quadratic up to " +
+                "${chainGrowth * chainGrowth}."
         )
     }
 
     @Test
-    fun indexesALongChainOfRefsBesideARootRefQuickly() {
-        assertIndexesChainQuickly(
-            $$"""{ '$ref': '#/definitions/link0', definitions: { $${chainLinks("definitions")} } }"""
-        )
+    fun indexingTakesTimeInProportionToAChainOfRefsBesideARootRef() {
+        assertIndexingTakesTimeInProportionToTheChain { length ->
+            $$"""{ '$ref': '#/definitions/link0', definitions: { $${chainLinks("definitions", length)} } }"""
+        }
     }
 
     @Test
-    fun indexesALongChainOfRefsBesideADeeperRefQuickly() {
-        assertIndexesChainQuickly($$"""
-            {
-              allOf: [{ '$ref': '#/extension/deep/x' }, { '$ref': '#/extension/link0' }],
-              extension: { deep: { x: { type: string } }, $${chainLinks("extension")} }
-            }
-        """)
+    fun indexingTakesTimeInProportionToAChainOfRefsBesideADeeperRef() {
+        assertIndexingTakesTimeInProportionToTheChain { length ->
+            $$"""
+                {
+                  allOf: [{ '$ref': '#/extension/deep/x' }, { '$ref': '#/extension/link0' }],
+                  extension: { deep: { x: { type: string } }, $${chainLinks("extension", length)} }
+                }
+            """
+        }
     }
 }

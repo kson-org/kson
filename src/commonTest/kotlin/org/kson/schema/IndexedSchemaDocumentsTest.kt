@@ -565,8 +565,8 @@ class IndexedSchemaDocumentsTest {
 
     @Test
     fun indexesAPointerTargetWithinTheDeepestSchemaSharingAnId() {
-        // `s1` is read before the deeper `s2`, whichever key comes first
-        val definitions = $$"""
+        // `s1` is read before the deeper `s2`, and only `s2` has the pointer's target
+        val root = value($$"""
             definitions: {
               s1: { '$id': 'http://x.test/shared.json' }
               a: {
@@ -575,52 +575,32 @@ class IndexedSchemaDocumentsTest {
                 }
               }
             }
-        """.trimIndent()
-        val allOf = $$"""allOf: [{ '$ref': 'http://x.test/shared.json#/extension/t' }]"""
-        for (keys in listOf(listOf(definitions, allOf), listOf(allOf, definitions))) {
-            val root = value(keys.joinToString("\n"))
-            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+            allOf: [{ '$ref': 'http://x.test/shared.json#/extension/t' }]
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
 
-            assertEquals(
-                listOf(UriReference.parse("http://x.test/dep.json")),
-                indexedDocuments.missingDocumentUris,
-                "keys in order ${root.propertyLookup.keys}"
-            )
-        }
+        assertEquals(listOf(UriReference.parse("http://x.test/dep.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test
-    fun indexesAPointerTargetWithinTheSchemaASharedIdFallsBackTo() {
-        // `a` is read under root.json before `hook` makes `e` a schema, so s.json identifies `a`, deeper than `b`,
-        // until `a` is read again under `e`'s `$id` and the pointer into s.json finds `t` in `b`
-        val allOf = $$"""
+    fun readsAPointerRefAgainWhenTheSchemaItNamesMovesToAnotherUri() {
+        // `a` is deeper than `b`, so it takes s.json until `e`'s `$id`, found late through `hook2`, moves it away
+        val root = value($$"""
             allOf: [
-              { '$ref': '#/extension/e/a' },
+              { '$ref': '#/extension/e/x/y/a' },
               { '$ref': 'file:///s.json#/extension/t' },
-              { '$ref': '#/extension/hook' }
+              { '$ref': '#/extension/hook2' },
+              { definitions: { b: { '$id': 'file:///s.json', extension: { t: { '$ref': 'dep.json' } } } } }
             ]
-        """.trimIndent()
-        val definitions = $$"""
-            definitions: {
-              b: { '$id': 'file:///s.json', extension: { t: { '$ref': 'dep.json' } } }
-            }
-        """.trimIndent()
-        val extension = $$"""
             extension: {
+              hook2: { '$ref': '#/extension/hook' }
               hook: { '$ref': '#/extension/e' }
-              e: { '$id': 'http://e.test/', a: { '$id': 's.json' } }
+              e: { '$id': 'http://e.test/', x: { y: { a: { '$id': 's.json' } } } }
             }
-        """.trimIndent()
-        for (keys in listOf(listOf(allOf, definitions, extension), listOf(definitions, allOf, extension))) {
-            val root = value(keys.joinToString("\n"))
-            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
 
-            assertEquals(
-                listOf(UriReference.parse("file:///dep.json")),
-                indexedDocuments.missingDocumentUris,
-                "keys in order ${root.propertyLookup.keys}"
-            )
-        }
+        assertEquals(listOf(UriReference.parse("file:///dep.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test

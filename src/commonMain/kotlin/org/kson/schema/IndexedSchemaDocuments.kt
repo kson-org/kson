@@ -79,7 +79,7 @@ class IndexedSchemaDocuments internal constructor(
         }
         val metaSchemas = draft.metaSchemas()
         documents = metaSchemas + root + additionalDocuments
-        // only their `$id`s identify the meta-schemas, so any other schema claiming one of their URIs wins
+        // only their `$id`s identify the meta-schemas
         documentRootsByUri = documents.indices.drop(metaSchemas.size)
             .associateBy({ documents[it].initialBaseUri }) { Place(it, emptyList()) }
         Indexer().indexDocuments()

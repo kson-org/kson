@@ -12,7 +12,7 @@ import org.kson.value.KsonString
  *   beside such a `$ref` doesn't identify its schema.
  * @param keywords The keywords the draft compiles, in the order validation applies them and reports their errors
  * @param metaSchemas The draft's meta-schemas, which a schema can reference without supplying them.  It is a function
- *   so that they are only parsed when needed.
+ *   so that they are only parsed when needed.  Each meta-schema is identified by its `$id`.
  * @throws IllegalArgumentException if two of [keywords] read the same property
  */
 internal class SchemaDraft(

@@ -24,6 +24,13 @@ class SchemaDraftTest {
         metaSchemas = { emptyList() }
     )
 
+    /** Draft 7 where a `$ref` keeps the keywords beside it. */
+    private val keepsSiblings = SchemaDraft(
+        refHidesSiblings = false,
+        keywords = SchemaDraft.DRAFT_7.keywords,
+        metaSchemas = { emptyList() }
+    )
+
     private fun compile(
         root: SchemaDocument,
         additionalDocuments: List<SchemaDocument> = emptyList(),
@@ -130,11 +137,6 @@ class SchemaDraftTest {
 
     @Test
     fun theKeywordsBesideARefApplyUnlessTheDraftSaysTheRefHidesThem() {
-        val keepsSiblings = SchemaDraft(
-            refHidesSiblings = false,
-            keywords = SchemaDraft.DRAFT_7.keywords,
-            metaSchemas = { emptyList() }
-        )
         val root = SchemaDocument(
             value(
                 $$"""
@@ -165,6 +167,48 @@ class SchemaDraftTest {
             RefResolution.NotFound,
             siblingsHidden.resolveRef("urn:example:unreferenced", siblingsHidden.rootBaseUri)
         )
+    }
+
+    @Test
+    fun siblingKeepingRefIsFollowedUnderItsOwnId() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    allOf: [
+                      {
+                        '$id': 'http://example.test/other.json',
+                        '$ref': '#/extension/x',
+                        extension: { x: { '$id': 'http://example.test/inner.json' } }
+                      }
+                    ]
+                    extension: { x: { '$id': 'http://example.test/outer.json' } }
+                """
+            )
+        )
+
+        val indexed = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
+
+        assertIs<RefResolution.Found>(indexed.resolveRef("http://example.test/inner.json", indexed.rootBaseUri))
+        assertEquals(RefResolution.NotFound, indexed.resolveRef("http://example.test/outer.json", indexed.rootBaseUri))
+    }
+
+    @Test
+    fun siblingKeepingRefsMissingDocumentIsReportedUnderItsOwnId() {
+        val root = SchemaDocument(
+            value(
+                $$"""
+                    properties:
+                      field:
+                        '$id': 'http://example.test/nested/'
+                        '$ref': 'dep.json'
+                """
+            ),
+            UriReference.parse("file:///root.json")
+        )
+
+        val indexed = IndexedSchemaDocuments(root, emptyList(), keepsSiblings)
+
+        assertEquals(listOf(UriReference.parse("http://example.test/nested/dep.json")), indexed.missingDocumentUris)
     }
 
     @Test
