@@ -17,6 +17,13 @@ data class SchemaDocument(val value: KsonValue, val retrievalUri: UriReference? 
  * Indexes the schemas in [root] and [additionalDocuments] by retrieval URI and `$id`, to resolve `$ref`s among them.
  * It fetches no documents: [missingDocumentUris] lists those still needed.
  *
+ * A schema is a document's root, a subschema under one of [draft]'s subschema keywords, or a value a `$ref` points
+ * to.  Only the `$id`s of schemas change base URIs.
+ *
+ * A URI several schemas share identifies the document retrieved from it, or else the deepest schema with that `$id`.
+ * Ties go to the last one, in the order: [root], [additionalDocuments].  The built-in meta-schemas yield their URIs
+ * to any schema that claims them.
+ *
  * @param root the root schema document, which may have no retrieval URI
  * @param additionalDocuments the documents [root] references, directly or through each other
  * @param draft the draft used to interpret the documents, with its meta-schemas indexed alongside them
@@ -30,11 +37,6 @@ class IndexedSchemaDocuments internal constructor(
     constructor(root: SchemaDocument, additionalDocuments: List<SchemaDocument> = emptyList()) :
         this(root, additionalDocuments, SchemaDraft.DRAFT_7)
 
-    /** A `$ref`'s value and the base URI it resolves against */
-    private data class Reference(val ref: String, val baseUri: UriReference) {
-        val uri: UriReference = baseUri.resolve(ref)
-    }
-
     /**
      * The location of a value: the index of its document in [documents], and the JSON Pointer tokens from that
      * document's root to the value
@@ -43,68 +45,27 @@ class IndexedSchemaDocuments internal constructor(
         fun below(tokens: List<String>) = Place(document, path + tokens)
     }
 
-    /**
-     * The schemas found in the documents, and the `$ref`s they hold
-     *
-     * @param placesByUri The place of each schema that a retrieval URI or an `$id` identifies, keyed by that URI
-     */
-    private inner class Index(
-        val placesByUri: Map<UriReference, Place>,
-        val schemasByPlace: Map<Place, SchemaNode>,
-        val references: List<Reference>
-    ) {
-        /** Resolves [ref] within this index */
-        fun resolveRef(ref: String, currentBaseUri: UriReference): RefResolution {
-            val refUri = currentBaseUri.resolve(ref)
-            val identified = placeIdentifiedBy(refUri)
-            if (identified != null) return RefResolution.Found(schemasByPlace.getValue(identified))
-
-            val pointer = when (val fragmentPointer = refUri.fragmentPointer()) {
-                is FragmentPointer.Valid -> fragmentPointer.pointer
-                is FragmentPointer.Malformed -> return RefResolution.MalformedPointer(fragmentPointer.message)
-                null -> return RefResolution.NotFound
-            }
-            val target = pointerTarget(refUri.withoutFragment(), pointer) ?: return RefResolution.NotFound
-            return RefResolution.Found(schemaAt(target))
-        }
-
-        /** The places of the values the [references] lead to that are not indexed */
-        fun unindexedTargetsOf(references: List<Reference>): List<Place> = references.mapNotNull { reference ->
-            if (placeIdentifiedBy(reference.uri) != null) return@mapNotNull null
-            val pointer = (reference.uri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return@mapNotNull null
-            pointerTarget(reference.uri.withoutFragment(), pointer)?.takeIf { it !in schemasByPlace }
-        }
-
-        /** The innermost indexed schema enclosing [place] */
-        fun enclosingSchemaOf(place: Place): SchemaNode = (place.path.size - 1 downTo 0).firstNotNullOf { length ->
-            schemasByPlace[Place(place.document, place.path.subList(0, length))]
-        }
-
-        private fun placeIdentifiedBy(uri: UriReference): Place? = placesByUri[uri.withoutEmptyFragment()]
-
-        /** The place [pointer] names within the schema [resourceUri] identifies, or null if no value is there */
-        private fun pointerTarget(resourceUri: UriReference, pointer: JsonPointer): Place? {
-            val place = placesByUri[resourceUri]?.below(pointer.tokens) ?: return null
-            return place.takeIf { valueAt(it) != null }
-        }
-
-        private fun schemaAt(place: Place): SchemaNode {
-            schemasByPlace[place]?.let { return it }
-
-            // a value that is not indexed gets its base URI from the schemas enclosing it
-            return enclosingSchemaOf(place).enter(checkNotNull(valueAt(place)))
-        }
-    }
-
     /** The meta-schemas, the root and the additional documents */
     private val documents: List<SchemaDocument>
-    private val index: Index
+
+    /** The root of the last of [root] and [additionalDocuments] retrieved from each URI, by that URI */
+    private val documentRootsByUri: Map<UriReference, Place>
+
+    /** The value of each schema found, by its place */
+    private val schemas = mutableMapOf<Place, KsonValue>()
+
+    /** The schemas whose `$id` resolves to each URI, by that URI */
+    private val schemasById = mutableMapOf<UriReference, MutableSet<Place>>()
+
+    /** Ranks schemas whose `$id`s resolve to the same URI: the URI identifies the highest-ranked one */
+    private val idOrder =
+        compareBy<Place>({ it.path.size }, { it.document }, { schemas.getValue(it).location.startOffset })
 
     /** The base URI [root]'s value is read under: its retrieval URI without a fragment, or else empty */
     val rootBaseUri: UriReference = root.initialBaseUri
 
     /** The root schema, which is [root]'s value with [rootBaseUri] as its base URI */
-    val rootSchema: SchemaNode = documentSchema(root)
+    val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, draft, this)
 
     /** The root schema with its chain of `$ref`s followed (see [resolveRefIfPresent]) */
     val resolvedRootSchema: SchemaNode by lazy { resolveRefIfPresent(rootSchema) }
@@ -116,17 +77,22 @@ class IndexedSchemaDocuments internal constructor(
         require(additionalDocuments.all { it.initialBaseUri.toString().isNotEmpty() }) {
             "Each additional schema document needs the URI it was retrieved from"
         }
-        documents = draft.metaSchemas() + root + additionalDocuments
-        index = indexUntilReferencesSettle()
+        val metaSchemas = draft.metaSchemas()
+        documents = metaSchemas + root + additionalDocuments
+        // only their `$id`s identify the meta-schemas, so any other schema claiming one of their URIs wins
+        documentRootsByUri = documents.indices.drop(metaSchemas.size)
+            .associateBy({ documents[it].initialBaseUri }) { Place(it, emptyList()) }
+        Indexer().indexDocuments()
     }
 
     /** The retrieval URIs of referenced documents that were not supplied */
     val missingDocumentUris: List<UriReference>
-        get() = index.references.mapNotNull { reference ->
-            val targetUri = reference.uri
-            val documentUri = targetUri.withoutFragment()
-            val isIndexed = targetUri in index.placesByUri || documentUri in index.placesByUri
-            documentUri.takeUnless { it.toString().isEmpty() || isIndexed }
+        get() = schemas.mapNotNull { (place, schema) ->
+            val ref = keywordsOf(schema, draft)[$$"$ref"] as? KsonString ?: return@mapNotNull null
+            val refUri = baseUriOf(place).withIdOf(schema, draft).resolve(ref.value)
+            refUri.withoutFragment().takeIf {
+                it.toString().isNotEmpty() && schemaIdentifiedBy(refUri) == null && schemaIdentifiedBy(it) == null
+            }
         }.distinct()
 
     /**
@@ -137,7 +103,14 @@ class IndexedSchemaDocuments internal constructor(
      * @param currentBaseUri The current base URI context for resolving relative references
      * @return The schema [ref] names with the base URI it is read under, or why [ref] names none
      */
-    fun resolveRef(ref: String, currentBaseUri: UriReference): RefResolution = index.resolveRef(ref, currentBaseUri)
+    fun resolveRef(ref: String, currentBaseUri: UriReference): RefResolution {
+        val refUri = currentBaseUri.resolve(ref)
+        val target = placeNamedBy(refUri) ?: return when (val fragmentPointer = refUri.fragmentPointer()) {
+            is FragmentPointer.Malformed -> RefResolution.MalformedPointer(fragmentPointer.message)
+            else -> RefResolution.NotFound
+        }
+        return RefResolution.Found(SchemaNode(checkNotNull(valueAt(target)), baseUriOf(target), draft, this))
+    }
 
     /**
      * Follows the chain of `$ref`s from [schema] and returns the schema at the end of the chain, or [schema] itself if
@@ -162,91 +135,34 @@ class IndexedSchemaDocuments internal constructor(
         }
     }
 
-    /** Indexes the [documents], and every value their `$ref`s lead to */
-    private fun indexUntilReferencesSettle(): Index {
-        val referencedPlaces = mutableListOf<Place>()
-        var builder = IndexBuilder(referencedPlaces)
-        while (true) {
-            val unindexedTargets = builder.index.unindexedTargetsOf(builder.takeUncheckedReferences())
-            if (unindexedTargets.isEmpty()) return builder.index
-            // Values go in shallowest first, because a value takes its base URI from the values enclosing it and the
-            // schema added last wins a shared `$id`.  A value shallower than an earlier one forces a rebuild.
-            val deepestReferenced = referencedPlaces.maxOfOrNull { it.path.size } ?: 0
-            referencedPlaces += unindexedTargets
-            if (unindexedTargets.all { it.path.size >= deepestReferenced }) {
-                builder.addReferencedValues(unindexedTargets)
-            } else {
-                builder = IndexBuilder(referencedPlaces)
-            }
-        }
+    /**
+     * Returns the place of the schema [uri] identifies, or null if no document was retrieved from [uri] and no schema's
+     * `$id` resolves to it
+     */
+    private fun schemaIdentifiedBy(uri: UriReference): Place? {
+        val identifyingUri = uri.withoutEmptyFragment()
+        return documentRootsByUri[identifyingUri] ?: schemasById[identifyingUri]?.maxWithOrNull(idOrder)
     }
 
-    /** Collects schemas into its [index], which holds each one as soon as it is added */
-    private inner class IndexBuilder(referencedPlaces: List<Place>) {
-        private val placesByUri = mutableMapOf<UriReference, Place>()
-        private val schemasByPlace = mutableMapOf<Place, SchemaNode>()
-        private val references = mutableListOf<Reference>()
-        val index = Index(placesByUri, schemasByPlace, references)
-
-        private var checkedReferenceCount = 0
-        private val identifiedSinceCheck = mutableSetOf<UriReference>()
-
-        init {
-            documents.forEachIndexed { document, schemaDocument ->
-                addSchema(documentSchema(schemaDocument), Place(document, emptyList()), isDocumentRoot = true)
-            }
-            addReferencedValues(referencedPlaces)
-        }
-
-        fun takeUncheckedReferences(): List<Reference> {
-            val checked = references.subList(0, checkedReferenceCount)
-            // a reference into a schema identified since the last check may lead to a value not indexed yet
-            val pointingIntoNewlyIdentified = if (identifiedSinceCheck.isEmpty()) {
-                emptyList()
-            } else {
-                checked.filter { it.uri.withoutFragment() in identifiedSinceCheck }
-            }
-            val unchecked = pointingIntoNewlyIdentified + references.drop(checkedReferenceCount)
-            checkedReferenceCount = references.size
-            identifiedSinceCheck.clear()
-            return unchecked
-        }
-
-        fun addReferencedValues(referencedPlaces: List<Place>) {
-            for (place in referencedPlaces.sortedBy { it.path.size }) {
-                if (place in schemasByPlace) continue
-                addSchema(index.enclosingSchemaOf(place).enter(checkNotNull(valueAt(place))), place)
-            }
-        }
-
-        /**
-         * Adds [schema] at [place], along with its subschemas, and records their `$ref`s.  [schema] is keyed by its
-         * `$id`, and by the base URI it inherits if [isDocumentRoot].
-         */
-        private fun addSchema(schema: SchemaNode, place: Place, isDocumentRoot: Boolean = false) {
-            val keywords = keywordsOf(schema.value, schema.draft)
-            val id = keywords[$$"$id"] as? KsonString
-            val ref = keywords[$$"$ref"] as? KsonString
-
-            schemasByPlace[place] = schema
-            if (isDocumentRoot) identify(schema.baseUri, place)
-            if (id != null) identify(schema.innerBaseUri, place)
-            if (ref != null) references.add(Reference(ref.value, schema.innerBaseUri))
-            val schemaObject = schema.value as? KsonObject
-            if (schemaObject == null || hasHidingRef(schemaObject, schema.draft)) return
-            schema.draft.keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { declared ->
-                addSchema(schema.enter(declared.value), place.below(declared.path))
-            }
-        }
-
-        private fun identify(uri: UriReference, place: Place) {
-            placesByUri[uri] = place
-            identifiedSinceCheck += uri
-        }
+    /**
+     * Returns the place of the value [uri] names, or null if it names none.  That value is the schema [uri] identifies,
+     * or else the value that [uri]'s JSON Pointer fragment names within the schema the rest of [uri] identifies.
+     */
+    private fun placeNamedBy(uri: UriReference): Place? {
+        schemaIdentifiedBy(uri)?.let { return it }
+        val pointer = (uri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
+        return schemaIdentifiedBy(uri.withoutFragment())?.below(pointer.tokens)?.takeIf { valueAt(it) != null }
     }
 
-    private fun documentSchema(document: SchemaDocument): SchemaNode =
-        SchemaNode(document.value, document.initialBaseUri, draft, this)
+    /** Returns the base URI of the value at [place] */
+    private fun baseUriOf(place: Place): UriReference =
+        enclosingPlaces(place).fold(documents[place.document].initialBaseUri) { baseUri, enclosing ->
+            schemas[enclosing]?.let { baseUri.withIdOf(it, draft) } ?: baseUri
+        }
+
+    /** Returns the places of the values enclosing the value at [place], outermost first */
+    private fun enclosingPlaces(place: Place): List<Place> =
+        place.path.indices.map { Place(place.document, place.path.subList(0, it)) }
 
     /** Returns the value at [place], or null if there is none. */
     private fun valueAt(place: Place): KsonValue? =
@@ -257,6 +173,80 @@ class IndexedSchemaDocuments internal constructor(
                 else -> null
             }
         }
+
+    /**
+     * Finds the schemas in the [documents].  Reading a schema identifies it by its `$id`, follows its `$ref` and
+     * registers its subschemas.
+     *
+     * A schema is read again when something found later can change its base URI or where its `$ref` leads: an
+     * enclosing value turning out to be a schema with an `$id`, or its `$ref`'s resource gaining or losing an `$id`.
+     *
+     * A value stays a schema once a `$ref` has pointed to it, even if a schema found later redirects that `$ref`.
+     */
+    private inner class Indexer {
+        /** The schemas to read, some of them again */
+        private val unread = ArrayDeque<Place>()
+
+        /** The URI each schema's `$id` resolved to when the schema was last read */
+        private val idUris = mutableMapOf<Place, UriReference>()
+
+        /** The schemas whose `$ref` has pointed into each resource, by the resource's URI */
+        private val referringSchemas = mutableMapOf<UriReference, MutableSet<Place>>()
+
+        /** For each value that has an `$id` but is not a schema yet, the schemas found inside it so far */
+        private val awaitingEnclosingSchema = mutableMapOf<Place, MutableList<Place>>()
+
+        fun indexDocuments() {
+            documents.indices.forEach { register(Place(it, emptyList())) }
+            while (unread.isNotEmpty()) read(unread.removeFirst())
+        }
+
+        /** Makes the value at [place] a schema and queues it for reading, unless it is a schema already */
+        private fun register(place: Place) {
+            if (place in schemas) return
+            schemas[place] = checkNotNull(valueAt(place))
+            unread += place
+            awaitingEnclosingSchema.remove(place)?.let(unread::addAll)
+            for (enclosing in enclosingPlaces(place).filter { it !in schemas }) {
+                if (keywordsOf(checkNotNull(valueAt(enclosing)), draft)[$$"$id"] is KsonString) {
+                    awaitingEnclosingSchema.getOrPut(enclosing, ::mutableListOf) += place
+                }
+            }
+        }
+
+        private fun read(schema: Place) {
+            val value = schemas.getValue(schema)
+            val keywords = keywordsOf(value, draft)
+            val innerBaseUri = baseUriOf(schema).withIdOf(value, draft)
+            if (keywords[$$"$id"] is KsonString) identifyById(schema, innerBaseUri)
+            (keywords[$$"$ref"] as? KsonString)?.let { follow(schema, innerBaseUri.resolve(it.value)) }
+            val schemaObject = value as? KsonObject
+            if (schemaObject == null || hasHidingRef(schemaObject, draft)) return
+            draft.keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { declared ->
+                register(schema.below(declared.path))
+            }
+        }
+
+        private fun follow(schema: Place, refUri: UriReference) {
+            referringSchemas.getOrPut(refUri.withoutFragment(), ::mutableSetOf) += schema
+            placeNamedBy(refUri)?.let(::register)
+        }
+
+        /**
+         * Identifies [schema] by [idUri], the URI its `$id` resolves to under its current base URI.  [schema] stops
+         * being identified by the URI its `$id` resolved to before, if that was different.
+         */
+        private fun identifyById(schema: Place, idUri: UriReference) {
+            val previousIdUri = idUris.put(schema, idUri)
+            if (previousIdUri == idUri) return
+            if (previousIdUri != null) {
+                schemasById.getValue(previousIdUri) -= schema
+                unread += referringSchemas[previousIdUri].orEmpty()
+            }
+            schemasById.getOrPut(idUri, ::mutableSetOf) += schema
+            unread += referringSchemas[idUri].orEmpty()
+        }
+    }
 }
 
 /** The base URI this document's root `$id` resolves against: its retrieval URI without a fragment, or else empty */

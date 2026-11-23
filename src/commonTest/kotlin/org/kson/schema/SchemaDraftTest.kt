@@ -112,7 +112,8 @@ class SchemaDraftTest {
                 subschemas: List<CompilableSubschema>
             ): JsonSchemaValidator? = null
         }
-        val metaSchema = SchemaDocument(value("const: 7"), UriReference.parse("urn:example:meta"))
+        val metaSchema =
+            SchemaDocument(value($$"{ '$id': 'urn:example:meta', const: 7 }"), UriReference.parse("urn:example:meta"))
         val draft = SchemaDraft(refHidesSiblings = true, keywords = listOf(nested), metaSchemas = { listOf(metaSchema) })
         val root = SchemaDocument(value($$"nested: { '$id': 'urn:example:nested' }"))
 

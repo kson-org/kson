@@ -642,6 +642,28 @@ class SchemaDefinitionLocationTest {
     }
 
     @Test
+    fun testJumpToDefinition_throughARefWithinASchemaWithTheMetaSchemaId() {
+        // the schema's own `$id` outranks the built-in Draft 7 meta-schema's
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                '$id': 'http://json-schema.org/draft-07/schema#'
+                properties:
+                  count:
+                    '$ref': '#/definitions/nonNegativeInteger'
+                    .
+                  .
+                definitions:
+                  nonNegativeInteger:
+                    <caret>type: integer
+                    minimum: 0<caret>
+            """.trimIndent(),
+            documentWithCaret = """
+                count: <caret>3
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testJumpToDefinition_belowAFalseSchemaFindsNothing() {
         // `a` allows no value, and the `false` saying so isn't offered as the definition of what's below it
         assertDefinitionLocation(

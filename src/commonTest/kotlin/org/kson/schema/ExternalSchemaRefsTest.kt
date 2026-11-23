@@ -147,6 +147,39 @@ class ExternalSchemaRefsTest {
     }
 
     @Test
+    fun doesNotDiscoverTheEmptyUriAsAMissingResource() {
+        // against the relative retrieval URI root.json, `.` resolves to the empty URI
+        val root = value($$"""
+            properties:
+              field:
+                '$ref': '.'
+        """.trimIndent())
+        val rootDocument = SchemaDocument(root, UriReference.parse("root.json"))
+
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
+
+        // quoted, as an empty URI prints as nothing
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris.map { "'$it'" })
+    }
+
+    @Test
+    fun discoversTheDependenciesOfAValueSuppliedAsTwoDocuments() {
+        val shared = value($$"""
+            properties:
+              field:
+                '$ref': 'dependency.json'
+        """.trimIndent())
+        val documents = listOf("a", "b").map { SchemaDocument(shared, UriReference.parse("file:///$it/shared.json")) }
+
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value("{}")), documents)
+
+        assertEquals(
+            listOf(UriReference.parse("file:///a/dependency.json"), UriReference.parse("file:///b/dependency.json")),
+            indexedDocuments.missingDocumentUris
+        )
+    }
+
+    @Test
     fun loadedSharedAndCyclicDependenciesTerminateDiscoveryAndRefResolution() {
         val root = value($$"""'$ref': 'a.json'""")
         val a = value($$"""'$ref': 'b.json'""")

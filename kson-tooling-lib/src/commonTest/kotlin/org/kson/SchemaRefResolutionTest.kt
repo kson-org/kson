@@ -357,6 +357,24 @@ class SchemaRefResolutionTest {
     }
 
     @Test
+    fun testResolveRef_withinASchemaWithTheMetaSchemaId() {
+        // the schema's own `$id` outranks the built-in Draft 7 meta-schema's
+        assertRefResolution($$"""
+            '$id': 'http://json-schema.org/draft-07/schema#'
+            properties:
+              count:
+                '$ref': '#/definitions/nonNegativeInteger<cursor>'
+                .
+              .
+            definitions:
+              nonNegativeInteger:
+                <target>type: integer
+                minimum: 0
+                .</target>
+        """.trimIndent())
+    }
+
+    @Test
     fun testResolveRef_afterListElementInError() {
         // The element in error keeps its index in the cursor's pointer, so the cursor's ref resolves
         // to `y`, not to the `z` that dropping the broken element would shift into its place
