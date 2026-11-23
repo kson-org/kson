@@ -5,7 +5,7 @@ import {DiagnosticSeverity} from "vscode";
 
 describe('Diagnostic Tests', () => {
 
-    it('Should report errors for an invalid Kson file', async () => {
+    it('Should report errors for an invalid KSON file', async () => {
         const errorContent = 'key: "value" extraValue';
         const [testFileUri, document] = await createTestFile(errorContent);
 
@@ -31,7 +31,7 @@ describe('Diagnostic Tests', () => {
         await cleanUp(testFileUri);
     }).timeout(10000);
 
-    it('Should not report errors for an valid Kson file', async () => {
+    it('Should not report errors for an valid KSON file', async () => {
         const errorContent = 'key: "value"';
         const [testFileUri, document] = await createTestFile(errorContent);
 

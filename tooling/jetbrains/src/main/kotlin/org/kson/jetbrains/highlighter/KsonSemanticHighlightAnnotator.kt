@@ -9,7 +9,7 @@ import org.kson.jetbrains.parser.elem
 import org.kson.parser.ParsedElementType
 
 /**
- * [KsonSemanticHighlightAnnotator] provides semantic highlighting for Kson files.
+ * [KsonSemanticHighlightAnnotator] provides semantic highlighting for KSON files.
  *
  * Since we don't require any indices we can implement [DumbAware]
  */

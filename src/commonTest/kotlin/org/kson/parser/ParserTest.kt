@@ -8,7 +8,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * NOTE: most Kson parsing tests are done the more holistic level in [org.kson.KsonCoreTest].  If/when we have
+ * NOTE: most KSON parsing tests are done the more holistic level in [org.kson.KsonCoreTest].  If/when we have
  * a need to test specifically at the [Parser] class level, those tests belong here.
  */
 class ParserTest {

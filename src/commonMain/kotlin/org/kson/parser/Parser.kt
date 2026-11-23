@@ -7,7 +7,7 @@ import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
- * Defines the Kson parser, implemented as a recursive descent parser which directly implements
+ * Defines the KSON parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])

@@ -69,7 +69,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unable to parse a blank file.  A Kson document must describe a value."
+            return "Unable to parse a blank file.  A KSON document must describe a value."
         }
     },
     EMBED_BLOCK_NO_CLOSE {
@@ -88,7 +88,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected trailing content. The previous content parsed as a complete Kson document."
+            return "Unexpected trailing content. The previous content parsed as a complete KSON document."
         }
     },
     ONLY_UNEXPECTED_CONTENT {
@@ -97,7 +97,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected content. No content can be parsed as a Kson document."
+            return "Unexpected content. No content can be parsed as a KSON document."
         }
     },
     LIST_NO_CLOSE {
@@ -124,7 +124,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unable to parse this list element as a legal Kson value"
+            return "Unable to parse this list element as a legal KSON value"
         }
     },
     OBJECT_BAD_INTERNALS {
@@ -289,7 +289,7 @@ enum class MessageType(
     },
 
     /**
-     * Catch-all for characters we don't recognize as legal Kson that don't (yet?) have a more specific and
+     * Catch-all for characters we don't recognize as legal KSON that don't (yet?) have a more specific and
      * helpful error such as [OBJECT_NO_OPEN] or [DANGLING_LIST_DASH]
      */
     ILLEGAL_CHARACTERS {
@@ -299,7 +299,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val illegalCharacter = parsedArgs.getArg("The Illegal Characters")
-            return "Kson does not allow \"$illegalCharacter\" here"
+            return "KSON does not allow \"$illegalCharacter\" here"
         }
 
     },
@@ -356,7 +356,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxNestingLevel = parsedArgs.getArg("Max Nesting Level")
-            return "The nesting of objects and/or lists in this Kson " +
+            return "The nesting of objects and/or lists in this KSON " +
                     "exceeds the configured maximum supported nesting level of $maxNestingLevel"
         }
     },
@@ -1088,7 +1088,7 @@ enum class MessageType(
      * messages should be factored into constants in this file (see [UNQUOTED_STRING_START_RULE] and
      * [STRING_QUOTING_HINT]), and no message wording should be composed anywhere else.  Keeping every
      * string a user might see behind this method is what makes localization a tractable future
-     * project: localizing these implementations localizes Kson's messages.
+     * project: localizing these implementations localizes KSON's messages.
      */
     protected abstract fun doFormat(parsedArgs: ParsedErrorArgs): String
 

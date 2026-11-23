@@ -4,9 +4,9 @@ package org.kson.parser.behavior
  * Represents a string delimiter in KSON, which can be either `'` or `"`, along with helper methods to
  * escape/unescape [quoteChar] in [String]s
  *
- * Escaping rules: as a superset of Json, Kson's String escaping rules for delimiters work
+ * Escaping rules: as a superset of Json, KSON's String escaping rules for delimiters work
  *   the same as JSON's rules for escaping backslashes and double-quotes in a string, with the wrinkle that
- *   Kson supports single-quoted strings, in which case the escaping rules are identical but with
+ *   KSON supports single-quoted strings, in which case the escaping rules are identical but with
  *   respect to single-quote `'` rather than double-quote `"`
  */
 sealed class StringQuote(val quoteChar: Char) {

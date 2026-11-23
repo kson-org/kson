@@ -3,7 +3,7 @@ package org.kson.jetbrains.editor
 import com.intellij.lang.Commenter
 
 /**
- * Configure a [Commenter] for Kson.  Note this returns mostly nulls since Kson does not have
+ * Configure a [Commenter] for KSON.  Note this returns mostly nulls since KSON does not have
  * a Block Comment construct
  */
 internal class KsonCommenter : Commenter {

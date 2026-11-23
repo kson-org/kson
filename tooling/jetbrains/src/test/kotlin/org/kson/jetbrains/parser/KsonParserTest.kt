@@ -18,7 +18,7 @@ import org.kson.parser.messages.MessageType.BLANK_SOURCE
  *
  * By convention based on the test name, say `fun testKsonFileName()){...}` this will look for two files
  * inside [testData.parser]:
- * - `KsonFileName.kson` containing the Kson source to parse in the test
+ * - `KsonFileName.kson` containing the KSON source to parse in the test
  * - `KsonFileName.txt` contains a text representation of the expected PSI tree to be parsed from `KsonFileName.kson`
  *
  * NOTES:
@@ -29,7 +29,7 @@ import org.kson.parser.messages.MessageType.BLANK_SOURCE
 class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
 
     /**
-     * Sanity check parse of a file containing many Kson constructs
+     * Sanity check parse of a file containing many KSON constructs
      */
     fun testManyConstructs() {
         doTest(true)
@@ -80,7 +80,7 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     }
 
     /**
-     * Sanity check we do not error on a blank file: strictly speaking, an empty Kson file should produce
+     * Sanity check we do not error on a blank file: strictly speaking, an empty KSON file should produce
      * a [BLANK_SOURCE] error, but in an editor, it makes no sense to be so strict
      */
     fun testBlankFile() {

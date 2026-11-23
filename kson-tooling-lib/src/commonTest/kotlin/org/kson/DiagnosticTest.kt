@@ -15,7 +15,7 @@ class DiagnosticTest {
           properties: { age: { type: number } }
     """.trimIndent()
 
-    /** A schema that parses as Kson, but describes no schema: `type` must name a type */
+    /** A schema that parses as KSON, but describes no schema: `type` must name a type */
     private val schemaWithBadType = "{ type: 5 }"
 
     private fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
@@ -176,7 +176,7 @@ class DiagnosticTest {
         val ksonDocWithError = "key: \"value\" extra"
         val diagnostics = validateDocument(ksonDocWithError)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity, "should be the Kson doc's parse error")
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity, "should be the KSON doc's parse error")
 
         val diagnosticsWithBrokenSchema = validateDocument(ksonDocWithError, schemaWithError)
         assertEquals(2, diagnosticsWithBrokenSchema.size)
@@ -184,7 +184,7 @@ class DiagnosticTest {
         assertEquals(
             diagnostics,
             diagnosticsWithBrokenSchema.drop(1),
-            "the Kson doc's own diagnostics should be untouched by the schema report"
+            "the KSON doc's own diagnostics should be untouched by the schema report"
         )
     }
 

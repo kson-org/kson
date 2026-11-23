@@ -23,16 +23,16 @@ import org.kson.value.KsonValue
 import org.kson.value.toKsonValue
 
 /**
- * Top-level entry point for "core" Kson implementation. This is the key interface for all the services provided by
- * Kson.
+ * Top-level entry point for "core" KSON implementation. This is the key interface for all the services provided by
+ * KSON.
  */
 object KsonCore {
     /**
-     * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
+     * Parse the given KSON [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
      * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonValue]
      * from [AstParseResult.ksonValue]
      *
-     * @param source The Kson source to parse
+     * @param source The KSON source to parse
      * @param coreCompileConfig the [CoreCompileConfig] for this parse
      * @return An [AstParseResult]
      */
@@ -92,9 +92,9 @@ object KsonCore {
     }
 
     /**
-     * Parse the give Kson [source] as a Json Schema declaration
+     * Parse the give KSON [source] as a Json Schema declaration
      *
-     * @param source The Kson source to parse into a Json Schema
+     * @param source The KSON source to parse into a Json Schema
      * @return A [SchemaParseResult]
      */
     fun parseSchema(source: String): SchemaParseResult {
@@ -115,9 +115,9 @@ object KsonCore {
     }
 
     /**
-     * Parse the given Kson [source] and compile it to Yaml
+     * Parse the given KSON [source] and compile it to Yaml
      *
-     * @param source The Kson source to parse
+     * @param source The KSON source to parse
      * @param compileConfig a [CompileTarget.Yaml] object with this compilation's config
      * @return A [YamlParseResult]
      */
@@ -126,9 +126,9 @@ object KsonCore {
     }
 
     /**
-     * Parse the given Kson [source] and compile it to Json
+     * Parse the given KSON [source] and compile it to Json
      *
-     * @param source The Kson source to parse
+     * @param source The KSON source to parse
      * @param compileConfig a [Json] object with this compilation's config
      * @return A [JsonParseResult]
      */
@@ -137,11 +137,11 @@ object KsonCore {
     }
 
     /**
-     * Parse the given Kson [source] and re-compile it out to Kson.  Useful for testing and transformations
-     * like re-writing Json into Kson (the Json is itself Kson since Kson is a superset of Json, whereas the
-     * compiled Kson output is in more canonical Kson syntax)
+     * Parse the given KSON [source] and re-compile it out to KSON.  Useful for testing and transformations
+     * like re-writing Json into KSON (the Json is itself KSON since KSON is a superset of Json, whereas the
+     * compiled KSON output is in more canonical KSON syntax)
      *
-     * @param source The Kson source to parse
+     * @param source The KSON source to parse
      * @param compileConfig a [CompileTarget.Kson] object with this compilation's config
      * @return A [KsonParseResult]
      */
@@ -177,8 +177,8 @@ interface ParseResult {
 }
 
 /**
- * Core [ParseResult] produced by the [Kson] parser attempting to create a Kson abstract syntax tree ([ast])
- * from some Kson source
+ * Core [ParseResult] produced by the [Kson] parser attempting to create a KSON abstract syntax tree ([ast])
+ * from some KSON source
  */
 data class AstParseResult(
     override val ast: KsonRoot,
@@ -252,7 +252,7 @@ class KsonParseResult(
     compileConfig: Kson
 ) : ParseResult by astParseResult {
     /**
-     * The Kson compiled from some Kson source, or null if there were errors trying to parse
+     * The KSON compiled from some KSON source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
     val kson: String? = astParseResult.toSourceOrNull(
@@ -266,7 +266,7 @@ class YamlParseResult(
     compileConfig: Yaml
 ) : ParseResult by astParseResult {
     /**
-     * The Yaml compiled from some Kson source, or null if there were errors trying to parse
+     * The Yaml compiled from some KSON source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
     val yaml: String? = astParseResult.toSourceOrNull(AstNode.Indent(), compileConfig)
@@ -277,7 +277,7 @@ class JsonParseResult(
     compileConfig: Json
 ) : ParseResult by astParseResult {
     /**
-     * The Json compiled from some Kson source, or null if there were errors trying to parse
+     * The Json compiled from some KSON source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
     val json: String? = astParseResult.toSourceOrNull(AstNode.Indent(), compileConfig)
@@ -285,7 +285,7 @@ class JsonParseResult(
 
 
 /**
- * Type to denote a supported Kson compilation target and hold the compilation's configuration
+ * Type to denote a supported KSON compilation target and hold the compilation's configuration
  */
 sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     /**
@@ -294,9 +294,9 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     abstract val preserveComments: Boolean
 
     /**
-     * Compile target for serializing a Kson AST out to Kson source
+     * Compile target for serializing a KSON AST out to KSON source
      *
-     * @param formatConfig the settings for formatting the compiler Kson output
+     * @param formatConfig the settings for formatting the compiler KSON output
      * @param embedBlockResolution pre-computed resolution of nodes to their matching embed block rules
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */

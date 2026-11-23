@@ -6,7 +6,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 /**
- * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests
+ * Tests for general/mixed KSON values that don't fit neatly into the other [KsonCoreTest] tests
  */
 class KsonCoreTestGeneralValue : KsonCoreTest {
     /**
@@ -14,7 +14,7 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
      * trying to use one syntax element (the end-dot `.`) for closing both lists and objects.  In
      * a multi-level mixed nest situation, the parser cannot distinguish which order to unnest things
      * in, and so in specific cases like the one demonstrated here, would collapse two different
-     * data structures into one Kson representation (which is of course incorrect on some of the input)
+     * data structures into one KSON representation (which is of course incorrect on some of the input)
      */
     @Test
     fun testParseAmbiguityRegression(){
@@ -49,7 +49,7 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
 
         // under no circumstances should these parse results be the same
         assertNotEquals(doubleParseTwoOuterKeys, parseTwoInnerKeys,
-            "should never format two different data structures into identical Kson")
+            "should never format two different data structures into identical KSON")
     }
 
     @Test

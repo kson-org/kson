@@ -19,7 +19,7 @@ class KsonLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider(
 
     override fun getCodeSample(settingsType: SettingsType): String {
         return """
-            "Kson constructs are": {
+            "KSON constructs are": {
               lists:  [ 1,2,3 ]
               strings: [ "foo", "bar", "\u0062\u0061\u0072" ]
               numbers: [ 42, 6.62606975e-34 ]

@@ -3,7 +3,7 @@ import {FormattingStyle} from "kson";
 import {formattingStyleFromId} from "./formattingStyle.js";
 
 /**
- * Configuration settings for the Kson language server.
+ * Configuration settings for the KSON language server.
  *
  * These are the already-unwrapped settings — the server has stripped the
  * configuration namespace (e.g. "kson") before calling

@@ -3,7 +3,7 @@ import {KsonDocument} from '../document/KsonDocument.js';
 import {FormatOptions, Kson} from 'kson';
 
 /**
- * Service responsible for formatting Kson documents
+ * Service responsible for formatting KSON documents
  */
 export class FormattingService {
 

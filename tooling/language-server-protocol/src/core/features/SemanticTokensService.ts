@@ -38,7 +38,7 @@ function mapTokenKind(kind: SemanticTokenKind): number | undefined {
 }
 
 /**
- * Service responsible for providing semantic token information for Kson documents.
+ * Service responsible for providing semantic token information for KSON documents.
  */
 export class SemanticTokensService {
 

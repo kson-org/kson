@@ -9,7 +9,7 @@ import {isKsonSchemaDocument} from '../document/KsonSchemaDocument';
 import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from 'kson-tooling';
 
 /**
- * Service responsible for providing diagnostic information for Kson documents.
+ * Service responsible for providing diagnostic information for KSON documents.
  * Delegates to Kotlin's KsonTooling for validation.
  */
 export class DiagnosticService {

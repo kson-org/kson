@@ -11,7 +11,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /**
- * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTestError] tests
+ * Tests for general/mixed KSON values that don't fit neatly into the other [KsonCoreTestError] tests
  */
 class KsonCoreTestGeneralError: KsonCoreTestError {
     @Test
@@ -23,7 +23,7 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
 
     /**
      * Regression test for an issue where we would throw an exception trying
-     * to validate invalid Kson against a schema
+     * to validate invalid KSON against a schema
      */
     @Test
     fun testSchemaValidationForIllegalKson() {

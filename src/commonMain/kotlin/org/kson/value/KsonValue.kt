@@ -7,8 +7,8 @@ import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
- * The [KsonValue] classes provide a client-friendly API interface for fully valid Kson [AstNode] trees that
- * exposes just the data properties of the represented Kson and can be traversed confidently without
+ * The [KsonValue] classes provide a client-friendly API interface for fully valid KSON [AstNode] trees that
+ * exposes just the data properties of the represented KSON and can be traversed confidently without
  * any error- or null-checking
  *
  * NOTE: [KsonValue] classes implement a "logical" equals/hashcode which compares just the values, not the

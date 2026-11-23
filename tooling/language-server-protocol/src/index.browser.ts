@@ -5,7 +5,7 @@ import { createSchemaProvider } from './core/schema/createSchemaProvider.browser
 import { createCommandExecutor } from './core/commands/createCommandExecutor.browser.js';
 
 /**
- * Starts the Kson Language Server for browser environments.
+ * Starts the KSON Language Server for browser environments.
  * No schema provider or file system-based command support.
  */
 export function startKsonServer(connection: Connection): void {

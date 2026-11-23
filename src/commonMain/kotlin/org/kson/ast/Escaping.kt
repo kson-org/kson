@@ -41,10 +41,10 @@ fun renderForJsonString(content: String): String {
 }
 
 /**
- * Kson strings allow raw whitespace, but otherwise escapes are identical to Json (modulo which [StringQuote] the
- * Kson string uses), so this function can help prepare an escaped Kson string for rendering as a Json string
+ * KSON strings allow raw whitespace, but otherwise escapes are identical to Json (modulo which [StringQuote] the
+ * KSON string uses), so this function can help prepare an escaped KSON string for rendering as a Json string
  *
- * @param ksonEscapedString a string escaped according to Kson string escaping rules
+ * @param ksonEscapedString a string escaped according to KSON string escaping rules
  * @return a string escaped according to Json's rules (modulo the [StringQuote] of the [ksonEscapedString])
  */
 fun escapeRawWhitespace(ksonEscapedString: String): String {
@@ -102,7 +102,7 @@ private fun appendSurrogatePair(sb: StringBuilder, codePoint: Int) {
  *
  * This is implemented as a standalone unescape to support YAML use-cases which does not allow the `\/` escape
  *
- * @param ksonEscapedString a string with Kson escape sequences intact
+ * @param ksonEscapedString a string with KSON escape sequences intact
  * @return the string with `\/` escapes resolved to `/`
  */
 fun unescapeForwardSlashes(ksonEscapedString: String): String {

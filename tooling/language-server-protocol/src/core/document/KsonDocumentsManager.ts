@@ -35,7 +35,7 @@ function resolveDocument(
 }
 
 /**
- * Document management for the Kson Language Server.
+ * Document management for the KSON Language Server.
  * The {@link KsonDocumentsManager} keeps track of all {@link KsonDocument}'s that
  * we are watching. It extends {@link TextDocuments} to handle {@link KsonDocument}
  * instances.

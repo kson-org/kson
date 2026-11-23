@@ -16,7 +16,7 @@ import org.kson.parser.ParsedElementType
  * (see [com.intellij.psi.tree.IElementType.ourRegistry]) as an optimization, so two different instances are
  * ALWAYS considered different by Intellij internals, even if they have well-defined equals and hashcode.  So:
  *
- * [IElementType]s for Kson are created once in this file, carefully encapsulated to make it difficult to introduce
+ * [IElementType]s for KSON are created once in this file, carefully encapsulated to make it difficult to introduce
  * bugs by violating this "only-once-instantiated IElementTypes" invariant, and exposed here in [elem] by "name"
  */
 fun elem(elementType: ElementType): IElementType {
@@ -61,11 +61,11 @@ private val PARSED_ELEMENT: Map<ParsedElementType, IElementType> =
 private data class IElementTokenType(override val tokenType: TokenType) :
     ElementType by tokenType,
     KsonLexedElementType,
-    IElementType("[Kson-lexed] " + tokenType.name, KsonLanguage)
+    IElementType("[KSON-lexed] " + tokenType.name, KsonLanguage)
 
 /**
  * A class adapting [ParsedElementType] to [IElementType] for our plugin
  */
 private class IElementParserElementType(parsedElementType: ParsedElementType) :
     ElementType by parsedElementType,
-    IElementType("[Kson-parsed] " + parsedElementType.name, KsonLanguage)
+    IElementType("[KSON-parsed] " + parsedElementType.name, KsonLanguage)
