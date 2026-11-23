@@ -2,6 +2,8 @@ FILE(0,35)
   PsiErrorElement:Unclosed "%"(0,35)
     KsonPsiElement(IElementTokenType(tokenType=EMBED_OPEN_DELIM))(0,1)
       PsiElement(IElementTokenType(tokenType=EMBED_OPEN_DELIM))('%')(0,1)
+    KsonPsiElement(IElementTokenType(tokenType=EMBED_TAG))(1,1)
+      <empty list>
     PsiElement(IElementTokenType(tokenType=EMBED_PREAMBLE_NEWLINE))('\n')(1,2)
     KsonEmbedContent(IElementTokenType(tokenType=EMBED_CONTENT))(2,35)
       PsiElement(IElementTokenType(tokenType=EMBED_CONTENT))('This embed block is not closed...')(2,35)

@@ -939,8 +939,11 @@ class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     }
 }
 
+/**
+ * An embed block, equivalent to an object with exactly the two string properties described by [EmbedObjectKeys]
+ */
 class EmbedBlockNode(
-    val embedTagNode: StringNodeImpl?,
+    val embedTagNode: StringNodeImpl,
     val embedContentNode: StringNodeImpl,
     sourceTokens: List<Token>
 ) :
@@ -949,10 +952,9 @@ class EmbedBlockNode(
     /**
      * A "raw" KSON embed tag, with all its escapes needed to embed directly into KSON/JSON/YAML intact
      */
-    private val rawEmbedTag: String = embedTagNode?.delimiterUnescapedRawContent?.let {
+    private val rawEmbedTag: String =
         // embedTags are ended by raw newlines, so we simply escape all raw whitespace
-        escapeRawWhitespace(it)
-    } ?: ""
+        escapeRawWhitespace(embedTagNode.delimiterUnescapedRawContent)
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -1016,13 +1018,10 @@ class EmbedBlockNode(
      * @return The rendered JSON object string
      */
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
-        val embedTagLine = if (rawEmbedTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\",\n"
-        } else ""
-
         return """
             |${indent.firstLineIndent()}{
-            |$embedTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
+            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_TAG.key}": "${DoubleQuote.escapeQuotes(rawEmbedTag)}",
+            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
             |${indent.bodyLinesIndent()}}
         """.trimMargin()
     }
@@ -1034,11 +1033,7 @@ class EmbedBlockNode(
      * @return The rendered YAML object string
      */
     private fun renderYamlObject(indent: Indent): String {
-        val embedTagLine = if (rawEmbedTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\"\n"
-        } else ""
-
-        return embedTagLine +
+        return "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\"\n" +
                 "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                 renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }

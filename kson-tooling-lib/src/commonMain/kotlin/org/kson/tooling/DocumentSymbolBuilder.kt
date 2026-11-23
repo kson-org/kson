@@ -82,7 +82,7 @@ internal object DocumentSymbolBuilder {
     }
 
     private fun createEmbedSymbol(embed: EmbedBlock, name: String, range: Range): DocumentSymbol {
-        val tag = embed.embedTag?.value ?: "embed"
+        val tag = embed.embedTag.value.ifEmpty { "embed" }
         return DocumentSymbol(
             name = name,
             kind = DocumentSymbolKind.EMBED,

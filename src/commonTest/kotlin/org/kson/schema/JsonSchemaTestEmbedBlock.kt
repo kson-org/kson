@@ -202,15 +202,15 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             %%
             """,
             schema,
-            listOf(MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING),
+            listOf(MessageType.SCHEMA_VALUE_NOT_EQUAL_TO_CONST),
             listOf(
                 Location(
-                    Coordinates(0, 0),
-                    Coordinates(0, 5),  // Length 5 due to trimToFirstLine
-                    0, 5
+                    Coordinates(0, 1),
+                    Coordinates(0, 1),
+                    1, 1
                 )
             ),
-            "Missing tag error should be reported at the embed block location"
+            "Empty tag mismatch error should be reported at the empty tag, just after the opening delimiter"
         )
     }
 

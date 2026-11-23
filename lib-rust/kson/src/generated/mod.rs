@@ -995,7 +995,7 @@ pub mod kson_value {
 
         pub fn tag(
             &self,
-        ) -> Option<String> {
+        ) -> String {
             let self_ptr = self.to_kotlin_object();
             let self_obj = self_ptr.as_kotlin_object();
 

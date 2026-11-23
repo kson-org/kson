@@ -239,11 +239,13 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """.trimIndent(),
             """
+                embedTag: ""
                 embedContent: |
                   content
             """.trimIndent(),
             """
                 {
+                  "embedTag": "",
                   "embedContent": "content"
                 }
             """.trimIndent(), compileSettings = compileSettings
@@ -329,6 +331,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "content\n"
             """.trimIndent(),
             """
@@ -339,6 +342,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     content
                     
@@ -346,6 +350,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "content\n"
                   }
                 }
@@ -373,6 +378,39 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   "embedBlock": {
                     "embedContent": "content\n",
                     "unrelatedKey": "is not an embed block"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    /**
+     * Embed blocks must have both `embedContent` and `embedTag` properties, not just `embedContent`
+     */
+    @Test
+    fun testEmbedContentWithoutTagNotDecodedAsEmbedBlock() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "content\n"
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: 'content\n'
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: "content\n"
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "content\n"
                   }
                 }
             """.trimIndent(), compileSettings = compileSettings
@@ -857,6 +895,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
             """.trimIndent(),
             """
@@ -869,6 +908,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     embeddedEmbed: %
                     EMBED CONTENT
@@ -878,6 +918,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
                   }
                 }
@@ -887,6 +928,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "embeddedEmbed: $\nEMBED WITH %\\% CONTENT\n$$\n"
             """.trimIndent(),
             """
@@ -899,6 +941,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     embeddedEmbed: ${'$'}
                     EMBED WITH %\% CONTENT
@@ -908,6 +951,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %\\% CONTENT\n${'$'}${'$'}\n"
                   }
                 }
@@ -992,13 +1036,15 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "    "
             """.trimIndent(),
             "embedBlock: %\n      \n  %%",
-            "embedBlock:\n  embedContent: |4\n        ",
+            "embedBlock:\n  embedTag: \"\"\n  embedContent: |4\n        ",
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "    "
                   }
                 }

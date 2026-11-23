@@ -239,6 +239,14 @@ class KsonSmokeTest {
         assertEquals(6, embedValue.end.line)
         assertEquals(2, embedValue.end.column)
     }
+
+    @Test
+    fun testAnalyze_untaggedEmbedHasEmptyTag() {
+        val value = Kson.analyze("%\ncontent%%").ksonValue
+        assertTrue(value is KsonValue.KsonEmbed)
+        assertEquals("", value.tag)
+        assertEquals("content", value.content)
+    }
     
     @Test
     fun testParseSchema_success() {

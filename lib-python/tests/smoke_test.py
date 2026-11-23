@@ -314,6 +314,13 @@ embed:%tag
     assert embed_value.end().column() == 2
 
 
+def test_kson_value_untagged_embed_has_empty_tag():
+    value = Kson.analyze("%\ncontent%%", None, None).kson_value()
+    assert isinstance(value, KsonValue.KsonEmbed)
+    assert value.tag() == ""
+    assert value.content() == "content"
+
+
 def test_property_keys_basic_access():
     input = """name: John
 age: 30

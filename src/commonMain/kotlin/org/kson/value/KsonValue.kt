@@ -83,7 +83,7 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     private val embedTagNode = embedBlockNode.embedTagNode
     private val embedContentNode = embedBlockNode.embedContentNode
 
-    val embedTag: KsonString? = embedTagNode?.let { KsonString(it) }
+    val embedTag: KsonString = KsonString(embedTagNode)
     val embedContent: KsonString = KsonString(embedContentNode)
 
     override fun equals(other: Any?): Boolean {
@@ -96,16 +96,14 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     fun asKsonObject(): KsonObject {
         return KsonObject(
             buildMap {
-                embedTagNode?.let {
-                    val embedTagStringNode = object: UnquotedStringNode(embedTagNode.sourceTokens) {
-                        override val rawStringContent = EmbedObjectKeys.EMBED_TAG.key
-                        override val delimiterUnescapedRawContent = EmbedObjectKeys.EMBED_TAG.key
-                        override val processedStringContent = EmbedObjectKeys.EMBED_TAG.key
-                    }
-                    put(EmbedObjectKeys.EMBED_TAG.key,
-                        KsonObjectProperty(KsonString(embedTagStringNode),
-                            KsonString(it)))
+                val embedTagStringNode = object: UnquotedStringNode(embedTagNode.sourceTokens) {
+                    override val rawStringContent = EmbedObjectKeys.EMBED_TAG.key
+                    override val delimiterUnescapedRawContent = EmbedObjectKeys.EMBED_TAG.key
+                    override val processedStringContent = EmbedObjectKeys.EMBED_TAG.key
                 }
+                put(EmbedObjectKeys.EMBED_TAG.key,
+                    KsonObjectProperty(KsonString(embedTagStringNode),
+                        embedTag))
                 val embedContentStringNode = object: UnquotedStringNode(embedContentNode.sourceTokens) {
                     override val rawStringContent = EmbedObjectKeys.EMBED_CONTENT.key
                     override val delimiterUnescapedRawContent = EmbedObjectKeys.EMBED_CONTENT.key
@@ -113,7 +111,7 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
                 }
                 put(EmbedObjectKeys.EMBED_CONTENT.key,
                     KsonObjectProperty(KsonString(embedContentStringNode),
-                        KsonString(embedContentNode)))
+                        embedContent))
             },
             astNode
         )
