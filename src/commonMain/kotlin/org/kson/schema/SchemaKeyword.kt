@@ -42,8 +42,17 @@ internal class CompilableSubschema(private val declared: DeclaredSubschema, comp
     val compiled: JsonSchema? by lazy(compile)
 }
 
-/** The [schema] that a keyword compiles for, and the [messageSink] that compiling reports errors to */
-internal class KeywordContext(private val schema: SchemaNode, val messageSink: MessageSink) {
+/**
+ * The [schema] that a keyword compiles for, and the [messageSink] that compiling reports errors to
+ *
+ * @param sameInstanceSchemas The schemas on the way to [schema] that validate the same instance as [schema], and
+ *   [schema] itself
+ */
+internal class KeywordContext(
+    private val schema: SchemaNode,
+    val messageSink: MessageSink,
+    val sameInstanceSchemas: SameInstanceSchemas
+) {
     val properties: Map<String, KsonValue> = (schema.value as KsonObject).propertyLookup
 
     val title: String? get() = (properties["title"] as? KsonString)?.value

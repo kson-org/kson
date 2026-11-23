@@ -18,7 +18,7 @@ internal object RefKeyword : SchemaKeyword(setOf($$"$ref")) {
                 return null
             }
         }
-        return RefValidator(target, ref.value)
+        return RefValidator(target, ref, context.sameInstanceSchemas)
     }
 }
 

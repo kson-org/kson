@@ -20,11 +20,17 @@ internal object SchemaParser {
      *  Parse [schema] as a JSON sub-schema. See [parseSchemaRoot] for full schema parsing.
      *
      *  @param propertyName The name of the property that [schema] validates, if any, to mention in `type` errors
+     *  @param sameInstanceSchemas The schemas on the way to [schema] that validate the same instance as [schema]
      */
-    fun parseSchemaElement(schema: SchemaNode, messageSink: MessageSink, propertyName: String? = null): JsonSchema? {
+    fun parseSchemaElement(
+        schema: SchemaNode,
+        messageSink: MessageSink,
+        propertyName: String? = null,
+        sameInstanceSchemas: SameInstanceSchemas = SameInstanceSchemas.NONE
+    ): JsonSchema? {
         return when (val schemaValue = schema.value) {
             is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-            is KsonObject -> parseObjectSchema(schema, schemaValue, messageSink, propertyName)
+            is KsonObject -> parseObjectSchema(schema, schemaValue, messageSink, propertyName, sameInstanceSchemas)
             else -> {
                 messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
                 null
@@ -36,11 +42,12 @@ internal object SchemaParser {
         schema: SchemaNode,
         schemaObject: KsonObject,
         messageSink: MessageSink,
-        propertyName: String?
+        propertyName: String?,
+        sameInstanceSchemas: SameInstanceSchemas
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
         val draft = schema.draft
-        val context = KeywordContext(schema, messageSink)
+        val context = KeywordContext(schema, messageSink, sameInstanceSchemas.with(schemaObject))
 
         // `$ref` comes first, as it may hide every keyword beside it
         val refKeyword = draft.keywordsByName[$$"$ref"]
@@ -76,8 +83,9 @@ internal object SchemaParser {
         if (keyword.names.none { it in schemaObject.propertyLookup }) return null
         val compilableSubschemas = keyword.declaredSubschemas(schemaObject).map { declared ->
             val propertyName = (declared.applies as? Applies.Property)?.name
+            val sameInstanceSchemas = context.sameInstanceSchemas.into(declared.applies)
             CompilableSubschema(declared) {
-                parseSchemaElement(schema.enter(declared.value), context.messageSink, propertyName)
+                parseSchemaElement(schema.enter(declared.value), context.messageSink, propertyName, sameInstanceSchemas)
             }
         }
         return keyword.compile(context, compilableSubschemas)

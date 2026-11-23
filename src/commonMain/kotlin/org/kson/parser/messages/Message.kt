@@ -1044,7 +1044,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val reference = parsedArgs.getArg("Reference")
-            return "Schema reference \"$reference\" leads back to itself without reaching a schema"
+            return "Schema reference \"$reference\" leads back to itself without descending into a property or item"
         }
     };
 

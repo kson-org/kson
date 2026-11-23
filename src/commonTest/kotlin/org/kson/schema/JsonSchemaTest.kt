@@ -56,14 +56,17 @@ interface JsonSchemaTest {
         message: String? = null,
         sourceContext: SourceContext = SourceContext(),
         externalSchemaSources: Map<String, String> = emptyMap()): List<LoggedMessage> {
-        val jsonSchema = assertValidSchema(schemaJson, externalSchemaSources = externalSchemaSources)
+        val jsonSchema = assertValidSchema(schemaJson, message, externalSchemaSources)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)
         )
 
-        assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")
-        assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type })
+        assertTrue(
+            parseResult.messages.isNotEmpty(),
+            listOfNotNull("Expected schema validation errors but got none", message).joinToString(": ")
+        )
+        assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type }, message)
         return parseResult.messages
     }
 

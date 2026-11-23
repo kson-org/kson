@@ -5,6 +5,14 @@ package org.kson.schema
  * example, a subschema under `properties/name` validates the parent instance's `name` property.
  */
 sealed interface Applies {
+    /** Whether the subschema validates the same instance as its parent schema */
+    val toSameInstance: Boolean
+        get() = when (this) {
+            InPlace, is Alternative, Negated, Condition, Then, Else, is IfPresent -> true
+            is Property, is PatternProperty, OtherProperties, PropertyNames, is Item, is ItemsFrom, SomeItem,
+            NotApplied -> false
+        }
+
     /** `allOf`: validates the same instance. */
     data object InPlace : Applies
 

@@ -25,7 +25,8 @@ class SchemaKeywordTest {
         val subschemas = keyword.declaredSubschemas(schemaObject).map { declared ->
             CompilableSubschema(declared) { SchemaParser.parseSchemaElement(schema.enter(declared.value), messageSink) }
         }
-        return keyword.compile(KeywordContext(schema, messageSink), subschemas)
+        val context = KeywordContext(schema, messageSink, SameInstanceSchemas.NONE.with(schemaObject))
+        return keyword.compile(context, subschemas)
     }
 
     private fun titleOf(schema: JsonSchema?): String? = (schema as JsonObjectSchema?)?.title

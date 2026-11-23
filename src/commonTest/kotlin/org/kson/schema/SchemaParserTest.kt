@@ -457,6 +457,57 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefCycleThroughAnAllOfReportsTheRefThatClosesIt() {
+        // the root `$ref` leads to `a`, whose `allOf` applies `a` again to the same value
+        val schema = $$"""
+            '$ref': '#/definitions/a'
+            definitions:
+              a:
+                minimum: 1
+                allOf:
+                  - '$ref': '#/definitions/a'
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "0",
+            schema,
+            listOf(MessageType.SCHEMA_VALUE_TOO_SMALL, MessageType.SCHEMA_REF_CYCLE),
+            listOf(
+                Location(Coordinates(0, 0), Coordinates(0, 1), 0, 1),
+                Location(Coordinates(5, 17), Coordinates(5, 32), 87, 102)
+            )
+        )
+    }
+
+    @Test
+    fun testRefCycleThroughAnySubschemaOfTheSameValueReportsError() {
+        val cycles = listOf(
+            $$"allOf: [{ '$ref': '#' }]",
+            $$"anyOf: [{ '$ref': '#' }]",
+            $$"oneOf: [{ '$ref': '#' }]",
+            $$"if: true, then: { '$ref': '#' }",
+            $$"if: false, else: { '$ref': '#' }"
+        )
+        for (cycle in cycles) {
+            assertKsonSchemaErrors("key: value", "{ $cycle }", listOf(MessageType.SCHEMA_REF_CYCLE), cycle)
+        }
+
+        val dependencyError = assertKsonSchemaErrors(
+            "key: value",
+            $$"{ dependencies: { key: { '$ref': '#' } } }",
+            listOf(MessageType.SCHEMA_DEPENDENCIES_SCHEMA_ERROR)
+        ).single()
+        val cycle = MessageType.SCHEMA_REF_CYCLE.create("#").toString()
+        assertEquals(MessageType.SCHEMA_DEPENDENCIES_SCHEMA_ERROR.create("key", cycle), dependencyError.message)
+    }
+
+    @Test
+    fun testRefCycleFailsOnlyTheSubschemaOfANotOrIf() {
+        // `not` and `if` keep their subschema's errors to themselves, so the cycle only fails that subschema
+        assertKsonEnforcesSchema("key: value", $$"{ not: { '$ref': '#' } }", true)
+        assertKsonEnforcesSchema("key: value", $$"{ if: { '$ref': '#' }, else: false }", false)
+    }
+
+    @Test
     fun testPointerRefUnderAPlainNameIdResolvesInItsDocument() {
         // a plain-name `$id` names a fragment of the document, so `#/definitions/target` still addresses the
         // document's root

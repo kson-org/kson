@@ -65,6 +65,6 @@ sealed interface UnresolvedRef {
     /** [ref] names no schema, for the reason [failure] gives */
     data class MissingTarget(override val ref: KsonString, val failure: RefResolution.Failure) : UnresolvedRef
 
-    /** [ref] leads back to a schema earlier in its chain of `$ref`s */
+    /** Following [ref] leads back to a schema already being applied to the same instance */
     data class Cycle(override val ref: KsonString) : UnresolvedRef
 }

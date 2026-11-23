@@ -86,23 +86,19 @@ internal class JsonObjectSchema(
   /**
    * This schema plus the target of a lone `$ref` and each `allOf` member, transitively: all of them
    * constrain the same document.  Property schemas aren't followed, so a self-referential
-   * `child: { $ref: node }` can't recurse, and a `$ref` to a target already followed on the way to it is skipped,
-   * so neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
+   * `child: { $ref: node }` can't recurse, and the `$ref` that closes a cycle leads to no schema, so
+   * neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
    * visited once per path, which only gets expensive in schemas nobody writes.
    */
   private fun compositionSources(): List<JsonObjectSchema> {
     val sources = mutableListOf<JsonObjectSchema>()
-    val pending = ArrayDeque(listOf(this to emptyList<RefValidator>()))
+    val pending = ArrayDeque(listOf(this))
     while (pending.isNotEmpty()) {
-      val (schema, followedRefs) = pending.removeFirst()
+      val schema = pending.removeFirst()
       sources.add(schema)
-      val ref = schema.soleRefValidator()
-      if (ref != null && followedRefs.none(ref::hasSameTargetAs)) {
-        (ref.resolvedSchema() as? JsonObjectSchema)?.let { pending.add(it to followedRefs + ref) }
-      }
+      (schema.soleRefValidator()?.resolvedSchema() as? JsonObjectSchema)?.let(pending::add)
       schema.schemaValidators.filterIsInstance<AllOfValidator>()
-        .flatMap { it.allOf.filterIsInstance<JsonObjectSchema>() }
-        .mapTo(pending) { it to followedRefs }
+        .flatMapTo(pending) { it.allOf.filterIsInstance<JsonObjectSchema>() }
     }
     return sources
   }
