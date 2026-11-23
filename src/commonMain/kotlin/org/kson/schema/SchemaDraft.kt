@@ -71,7 +71,7 @@ internal class SchemaDraft(
         )
 
         val DRAFT_2020_12 = SchemaDraft(
-            metaSchemaUri = UriReference.parse("https://json-schema.org/draft/2020-12/schema"),
+            metaSchemaUri = UriReference.parse(KsonDraft202012MetaSchemas.ID),
             refHidesSiblings = false,
             keywords = listOf(
                 RefKeyword,
@@ -106,7 +106,7 @@ internal class SchemaDraft(
                 DependenciesKeyword,
                 SubschemaKeyword("propertyNames", Applies.PropertyNames, ::PropertyNamesValidator)
             ),
-            metaSchemas = { emptyList() }
+            metaSchemas = { KsonDraft202012MetaSchemas.documents }
         )
     }
 }
