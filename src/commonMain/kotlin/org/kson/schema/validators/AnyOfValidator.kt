@@ -7,7 +7,14 @@ import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
 import org.kson.validation.SourceContext
 
-internal class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator {
+/**
+ * `anyOf`, validated against the branches that compile.  [declared] holds every branch at its index in the `anyOf`
+ * list, with null where a branch doesn't compile.
+ */
+internal class AnyOfValidator(internal val declared: List<JsonSchema?>) : JsonSchemaValidator {
+    /** The branches that compile, in the order they are declared */
+    internal val anyOf: List<JsonSchema> = declared.filterNotNull()
+
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val matchAttemptMessageSinks: MutableList<LabelledMessageSink> = mutableListOf()
         val anyValid = anyOf.any {

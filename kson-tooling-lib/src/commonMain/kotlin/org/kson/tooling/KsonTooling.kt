@@ -12,9 +12,9 @@ import org.kson.tooling.navigation.extractSchemaInfo
 import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.RefResolution
-import org.kson.schema.SchemaIdLookup
-import org.kson.schema.descend
+import org.kson.schema.SchemaDocument
 import org.kson.validation.SourceContext
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonString
@@ -57,10 +57,10 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.partialKsonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return null
-        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
+        val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val schemaInfos = validSchemas.mapNotNull { ref ->
-            ref.resolvedValue.extractSchemaInfo()
+        val schemaInfos = validSchemas.mapNotNull { validSchema ->
+            validSchema.value.extractSchemaInfo()
         }
 
         return schemaInfos.distinct().joinToString("\n\n---\n\n")
@@ -88,15 +88,15 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
-        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
+        val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val definitions = validSchemas.filterNot { it.resolvedValue is KsonBoolean }.ifEmpty { validSchemas }
+        val definitions = validSchemas.filterNot { it.value is KsonBoolean }.ifEmpty { validSchemas }
         return definitions.map {
             Range(
-                it.resolvedValue.location.start.line,
-                it.resolvedValue.location.start.column,
-                it.resolvedValue.location.end.line,
-                it.resolvedValue.location.end.column
+                it.value.location.start.line,
+                it.value.location.start.column,
+                it.value.location.end.line,
+                it.value.location.end.column
             )
         }
     }
@@ -128,23 +128,22 @@ object KsonTooling {
         // Navigate to the node at the cursor position
         val nodeAtPosition = AstNodeWalker.navigate(schemaAst, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
-        val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
+        val ref = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
         // Resolve the reference and return its location
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        // a draft 7 `$ref` ignores the `$id` beside it, so it resolves against the base URI its holder is read under
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
         val pathToHolder = AstNodeWalker.nodesAlong(schemaAst, documentPointer).dropLast(1)
             .map { it.toKsonValueOrNull() ?: return emptyList() }
-        val baseUri = schemaIdLookup.root.descend(pathToHolder).resolvedValueBaseUri
-        val resolvedRef = (schemaIdLookup.resolveRef(refString, baseUri) as? RefResolution.Found)
+        val baseUri = indexedDocuments.rootSchema.descend(pathToHolder).innerBaseUri
+        val target = (indexedDocuments.resolveRef(ref, baseUri) as? RefResolution.Found)
             ?.target ?: return emptyList()
 
         return listOf(
             Range(
-                resolvedRef.resolvedValue.location.start.line,
-                resolvedRef.resolvedValue.location.start.column,
-                resolvedRef.resolvedValue.location.end.line,
-                resolvedRef.resolvedValue.location.end.column
+                target.value.location.start.line,
+                target.value.location.start.column,
+                target.value.location.end.line,
+                target.value.location.end.column
             )
         )
     }
@@ -170,8 +169,8 @@ object KsonTooling {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val caret = Coordinates(line, column)
         val caretPath = KsonValuePathBuilder(document, caret).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val validSchemas = resolveSchemas(schemaIdLookup, document, caretPath.pointer, caretPath.placeholderLocation)
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
+        val validSchemas = resolveSchemas(indexedDocuments, document, caretPath.pointer, caretPath.placeholderLocation)
 
         val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.rootAstNode)
 
@@ -184,7 +183,7 @@ object KsonTooling {
         } else {
             completions
         }
-        return PropertySnippetBuilder.addSnippetEdits(offered, document, caret, schemaIdLookup)
+        return PropertySnippetBuilder.addSnippetEdits(offered, document, caret, indexedDocuments)
     }
 
     /**
@@ -333,12 +332,12 @@ object KsonTooling {
      * null so the committed leaf narrows.
      */
     private fun resolveSchemas(
-        schemaIdLookup: SchemaIdLookup,
+        indexedDocuments: IndexedSchemaDocuments,
         document: ToolingDocument,
         documentPointer: TreePointer<AstNode>,
         placeholderLocation: Location? = null
     ): List<NavigatedSchema> {
-        return SchemaNavigator(schemaIdLookup, placeholderLocation)
+        return SchemaNavigator(indexedDocuments, placeholderLocation)
             .navigate(documentPointer, document.rootAstNode)
     }
 }

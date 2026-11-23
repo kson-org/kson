@@ -1,7 +1,6 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -19,11 +18,7 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      *     "base URI change -> base URI change ref valid"
      *
      * Test ID: "id::base URI change::base URI change ref valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
         
@@ -48,7 +43,15 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::base URI change::base URI change ref valid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -56,11 +59,7 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      *     "base URI change -> base URI change ref invalid"
      *
      * Test ID: "id::base URI change::base URI change ref invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
         
@@ -85,7 +84,15 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -285,11 +292,7 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      *     "retrieved nested refs resolve relative to their URI not $id -> number is invalid"
      *
      * Test ID: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
         
@@ -313,7 +316,26 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "$ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -321,11 +343,7 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      *     "retrieved nested refs resolve relative to their URI not $id -> string is valid"
      *
      * Test ID: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
         
@@ -349,6 +367,25 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "$ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 }

@@ -1,5 +1,6 @@
-package org.kson.schema
+package org.kson.schema.draft
 
+import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 
 class KsonDraft7MetaSchemaTest : JsonSchemaTest {

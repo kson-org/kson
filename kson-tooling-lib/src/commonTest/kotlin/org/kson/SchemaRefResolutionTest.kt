@@ -60,7 +60,7 @@ class SchemaRefResolutionTest {
         if (expectedRange == null) {
             // No expected range means we expect empty list
             assertTrue(locations.isEmpty(),
-                "Expected empty list when \$ref should not resolve")
+                $$"Expected empty list when $ref should not resolve")
         } else {
             // We expect locations to match the expected range
             assertEquals(1, locations.size, "Expected exactly one location")
@@ -75,142 +75,113 @@ class SchemaRefResolutionTest {
 
     @Test
     fun testResolveRef_simpleDefinition() {
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "user": {
-                  "${'$'}ref": "#/${'$'}defs/User<cursor>"
-                }
-              },
-              "${'$'}defs": {
-                "User": <target>{
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    }
-                  }
-                }</target>
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              user:
+                '$ref': '#/$defs/User<cursor>'
+                .
+              .
+            '$defs':
+              User:
+                <target>type: object
+                properties:
+                  name:
+                    type: string</target>
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_jsonPointer() {
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "${'$'}ref": "#/properties/user/properties/name<cursor>"
-                },
-                "user": {
-                  "type": "object",
-                  "properties": {
-                    "name": <target>{
-                      "type": "string"
-                    }</target>
-                  }
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              data:
+                '$ref': '#/properties/user/properties/name<cursor>'
+                .
+              user:
+                type: object
+                properties:
+                  name:
+                    <target>type: string
+                    .</target>
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_nestedDefinitions() {
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "company": {
-                  "${'$'}ref": "#/${'$'}defs/Company<cursor>"
-                }
-              },
-              "${'$'}defs": {
-                "Company": <target>{
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "employees": {
-                      "type": "array",
-                      "items": {
-                        "${'$'}ref": "#/${'$'}defs/Person"
-                      }
-                    }
-                  }
-                }</target>,
-                "Person": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              company:
+                '$ref': '#/$defs/Company<cursor>'
+                .
+              .
+            '$defs':
+              Company:
+                <target>type: object
+                properties:
+                  name:
+                    type: string
+                    .
+                  employees:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/Person'
+                      .
+                    .
+                  .
+                .</target>
+              Person:
+                type: object
+                properties:
+                  name:
+                    type: string
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_refToRef() {
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "${'$'}ref": "#/${'$'}defs/Alias<cursor>"
-                }
-              },
-              "${'$'}defs": {
-                "Alias": <target>{
-                  "${'$'}ref": "#/${'$'}defs/Target"
-                }</target>,
-                "Target": {
-                  "type": "string"
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              data:
+                '$ref': '#/$defs/Alias<cursor>'
+                .
+              .
+            '$defs':
+              Alias:
+                <target>'$ref': '#/$defs/Target'
+                .</target>
+              Target:
+                type: string
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_invalidRef() {
         // Ref points to non-existent definition
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "${'$'}ref": "#/${'$'}defs/NonExistent<cursor>"
-                }
-              },
-              "${'$'}defs": {
-                "Other": {
-                  "type": "string"
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              data:
+                '$ref': '#/$defs/NonExistent<cursor>'
+                .
+              .
+            '$defs':
+              Other:
+                type: string
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_externalRef() {
         // External refs (not starting with #) should not resolve
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "${'$'}ref": "./external.schema.kson#/${'$'}defs/User<cursor>"
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              data:
+                '$ref': './external.schema.kson#/$defs/User<cursor>'
         """.trimIndent())
     }
 
@@ -218,95 +189,94 @@ class SchemaRefResolutionTest {
     fun testResolveRef_cursorNotOnRef() {
         // Cursor on a property that is not a $ref
         assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string<cursor>"
-                }
-              }
-            }
+            type: object
+            properties:
+              name:
+                type: string<cursor>
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_cursorOnRefKey() {
         // Cursor on the "$ref" key itself, not the value
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "user": {
-                  "${'$'}ref<cursor>": "#/${'$'}defs/User"
-                }
-              },
-              "${'$'}defs": {
-                "User": {
-                  "type": "object"
-                }
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              user:
+                '$ref<cursor>': '#/$defs/User'
+                .
+              .
+            '$defs':
+              User:
+                type: object
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_definitions() {
         // Test with "definitions" (older JSON Schema draft) instead of "$defs"
-        assertRefResolution("""
-            {
-              "type": "object",
-              "properties": {
-                "item": {
-                  "${'$'}ref": "#/definitions/Item<cursor>"
-                }
-              },
-              "definitions": {
-                "Item": <target>{
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number"
-                    }
-                  }
-                }</target>
-              }
-            }
+        assertRefResolution($$"""
+            type: object
+            properties:
+              item:
+                '$ref': '#/definitions/Item<cursor>'
+                .
+              .
+            definitions:
+              Item:
+                <target>type: object
+                properties:
+                  id:
+                    type: number</target>
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_rootRef() {
         // Ref to root schema
-        assertRefResolution("""
-            <target>{
-              "type": "object",
-              "properties": {
-                "recursive": {
-                  "${'$'}ref": "#<cursor>"
-                }
-              }
-            }</target>
+        assertRefResolution($$"""
+            <target>type: object
+            properties:
+              recursive:
+                '$ref': '#<cursor>'
+                .
+              .
+            .</target>
         """.trimIndent())
     }
 
     @Test
     fun testResolveRef_withSchemaId() {
         // Schema with $id should still resolve internal refs correctly
-        assertRefResolution("""
-            {
-              "${'$'}id": "https://example.com/my-schema",
-              "type": "object",
-              "properties": {
-                "data": {
-                  "${'$'}ref": "#/${'$'}defs/Data<cursor>"
-                }
-              },
-              "${'$'}defs": {
-                "Data": <target>{
-                  "type": "string"
-                }</target>
-              }
-            }
+        assertRefResolution($$"""
+            '$id': 'https://example.com/my-schema'
+            type: object
+            properties:
+              data:
+                '$ref': '#/$defs/Data<cursor>'
+                .
+              .
+            '$defs':
+              Data:
+                <target>type: string
+                .</target>
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_relativeToSchemaId() {
+        // `other.json` resolves against the root's $id to the $id of `Other`
+        assertRefResolution($$"""
+            '$id': 'https://example.com/root.json'
+            properties:
+              data:
+                '$ref': 'other.json<cursor>'
+                .
+              .
+            definitions:
+              Other:
+                <target>'$id': 'other.json'
+                type: string</target>
         """.trimIndent())
     }
 
@@ -348,19 +318,13 @@ class SchemaRefResolutionTest {
 
     @Test
     fun testResolveRef_rootRefBesideARelativeRootId() {
-        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
-        // `$id`.  Resolved against that `$id`, it would name `decoy`
         assertRefResolution($$"""
             '$id': 'sub/root.json'
-            '$ref': 'sub/other.json<cursor>'
+            '$ref': '#/definitions/target<cursor>'
             definitions:
               target:
-                <target>'$id': 'other.json'
-                type: string
+                <target>type: string
                 .</target>
-              decoy:
-                '$id': 'sub/other.json'
-                type: number
         """.trimIndent())
     }
 
@@ -388,6 +352,47 @@ class SchemaRefResolutionTest {
             definitions:
               b:
                 '$id': 'b.json'
+                type: number
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_withinASchemaWithTheMetaSchemaId() {
+        // the schema's own `$id` outranks the built-in Draft 7 meta-schema's
+        assertRefResolution($$"""
+            '$id': 'http://json-schema.org/draft-07/schema#'
+            properties:
+              count:
+                '$ref': '#/definitions/nonNegativeInteger<cursor>'
+                .
+              .
+            definitions:
+              nonNegativeInteger:
+                <target>type: integer
+                minimum: 0
+                .</target>
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_besideAnIdInDraft2020_12() {
+        // the ref resolves against the `$id` beside it, which Draft 7 ignores
+        assertRefResolution($$"""
+            '$schema': 'https://json-schema.org/draft/2020-12/schema'
+            '$id': 'http://example.com/root.json'
+            properties:
+              a:
+                '$id': 'http://example.com/nested/a.json'
+                '$ref': 'b.json<cursor>'
+                .
+              .
+            '$defs':
+              nested:
+                <target>'$id': 'http://example.com/nested/b.json'
+                type: string
+                .</target>
+              root:
+                '$id': 'http://example.com/b.json'
                 type: number
         """.trimIndent())
     }

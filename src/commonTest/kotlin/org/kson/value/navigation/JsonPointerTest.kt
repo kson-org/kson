@@ -200,4 +200,19 @@ class JsonPointerTest {
         val pointer = JsonPointer.fromTokens(originalTokens)
         assertEquals(originalTokens, pointer.tokens)
     }
+
+    @Test
+    fun `arrayIndex reads 0 and digits without a leading zero`() {
+        assertEquals(0, JsonPointer.arrayIndex("0"))
+        assertEquals(1, JsonPointer.arrayIndex("1"))
+        assertEquals(10, JsonPointer.arrayIndex("10"))
+        assertEquals(Int.MAX_VALUE, JsonPointer.arrayIndex("${Int.MAX_VALUE}"))
+    }
+
+    @Test
+    fun `arrayIndex reads no index from other tokens`() {
+        val arabicIndicDigitOne = Char(0x0661).toString()
+        val tokens = listOf("01", "00", "+1", "-0", "-1", "-", "", "1.0", "${Int.MAX_VALUE + 1L}", arabicIndicDigitOne)
+        assertEquals(tokens.associateWith { null }, tokens.associateWith { JsonPointer.arrayIndex(it) })
+    }
 }

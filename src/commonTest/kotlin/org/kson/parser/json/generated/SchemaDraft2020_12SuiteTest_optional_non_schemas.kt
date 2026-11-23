@@ -72,11 +72,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an enum is not a real identifier ($id/$defs) -> match $ref to $id"
      *
      * Test ID: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::match $ref to $id"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
         // the implementation must not be confused by an $id buried in the enum
@@ -176,11 +172,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an unknown keyword is not a real identifier ($defs) -> type matches second anyOf, which has a real schema in it"
      *
      * Test ID: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches second anyOf, which has a real schema in it"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
         // the implementation must not be confused by an $id in locations we do not know how to parse
@@ -298,11 +290,7 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an unknown keyword is not a real identifier ($defs) -> type matches non-schema in third anyOf"
      *
      * Test ID: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches non-schema in third anyOf"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_6() {
         // the implementation must not be confused by an $id in locations we do not know how to parse

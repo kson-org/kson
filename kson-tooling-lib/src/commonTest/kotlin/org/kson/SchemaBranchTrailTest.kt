@@ -1,6 +1,8 @@
 package org.kson
 
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.SchemaChoice
+import org.kson.schema.SchemaDocument
 import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.BranchStep
@@ -26,7 +28,7 @@ class SchemaBranchTrailTest {
         carryDeadEnds: Boolean = false,
         narrow: Boolean = true
     ): List<NavigatedSchema> =
-        SchemaNavigator(SchemaIdLookup(schemaValue), carryDeadEnds = carryDeadEnds, narrow = narrow)
+        SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(schemaValue)), carryDeadEnds = carryDeadEnds, narrow = narrow)
             .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { KsonTooling.parse(it).rootAstNode })
 
     private fun trails(
@@ -38,7 +40,7 @@ class SchemaBranchTrailTest {
     ): List<String> {
         val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         return navigate(schemaValue, path, document, carryDeadEnds, narrow).map { schemaTrail ->
-            val value = schemaTrail.resolvedValue
+            val value = schemaTrail.value
             val type = ((value as? KsonObject)?.propertyLookup?.get("type") as? KsonString)?.value
             val typeLabel = if (value is KsonBoolean) value.value.toString() else type ?: "untyped"
             val label = if (schemaTrail.endsAtUnresolvedRef) "$typeLabel at an unresolved \$ref" else typeLabel
@@ -58,7 +60,7 @@ class SchemaBranchTrailTest {
     }
 
     private fun describe(step: BranchStep, schemaValue: KsonValue): String {
-        val node = pointerTo(step.choice.node, schemaValue) ?: fail("choice not in the schema")
+        val node = pointerTo(step.choice.schemaChoice, schemaValue) ?: fail("choice not in the schema")
         return "$node took ${describe(step.branch)} at depth ${step.choice.depth}"
     }
 
@@ -66,6 +68,12 @@ class SchemaBranchTrailTest {
         is Branch.Index -> branch.index.toString()
         Branch.Then -> "then"
         Branch.Else -> "else"
+    }
+
+    /** Returns the pointer to [choice]'s `if` condition, or to the list of its alternatives. */
+    private fun pointerTo(choice: SchemaChoice, root: KsonValue): String? = when (choice) {
+        is SchemaChoice.By -> pointerTo(choice.condition.value, root)
+        is SchemaChoice.Among -> pointerTo(choice.alternatives.first().value, root)?.substringBeforeLast('/')
     }
 
     private fun pointerTo(node: KsonValue, root: KsonValue, path: String = ""): String? = when {

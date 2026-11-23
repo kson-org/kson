@@ -2922,7 +2922,7 @@ class SchemaCompletionLocationTest {
                     .
                   .
                 .
-            '$defs':
+            definitions:
               N:
                 '$id': 'sub/'
                 type: array
@@ -2938,5 +2938,32 @@ class SchemaCompletionLocationTest {
             """.trimIndent(),
             setOf("note")
         )
+    }
+
+    @Test
+    fun testPropertiesBesideADraft2020_12RefAreOfferedWithThoseOfItsTarget() {
+        fun schema(schemaKeyword: String) = $$"""
+            $$schemaKeyword
+            '$ref': '#/$defs/base'
+            properties:
+              sibling: {}
+              nested:
+                '$ref': '#/$defs/base'
+                properties:
+                  nestedSibling: {}
+                  .
+                .
+              .
+            '$defs':
+              base:
+                properties:
+                  inherited: {}
+        """.trimIndent()
+        val draft2020Schema = schema($$"'$schema': 'https://json-schema.org/draft/2020-12/schema'")
+        val draft7Schema = schema("")
+
+        assertCompletionLabels(draft2020Schema, "{\n  <caret>\n}", setOf("sibling", "nested", "inherited"))
+        assertCompletionLabels(draft2020Schema, "{nested: {<caret>}}", setOf("nestedSibling", "inherited"))
+        assertCompletionLabels(draft7Schema, "{\n  <caret>\n}", setOf("inherited"))
     }
 }

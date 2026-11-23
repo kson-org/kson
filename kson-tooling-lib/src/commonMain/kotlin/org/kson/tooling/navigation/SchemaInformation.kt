@@ -89,7 +89,7 @@ internal object SchemaInformation{
  */
 private fun extractCompletionsWithNarrowing(resolvedSchemas: List<NavigatedSchema>): List<CompletionItem> {
     val (propertyCompletions, valueCompletions) = resolvedSchemas
-        .flatMap { it.resolvedValue.extractCompletions() }
+        .flatMap { it.value.extractCompletions() }
         .partition { it.kind == CompletionKind.PROPERTY }
     val allowedValues = resolvedSchemas.allowedAlongTrails(::valueLabels)
     val offeredValues = valueCompletions.filter { allowedValues == null || it.label in allowedValues }

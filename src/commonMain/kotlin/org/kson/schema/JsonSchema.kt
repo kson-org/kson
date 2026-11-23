@@ -1,6 +1,5 @@
 package org.kson.schema
 import org.kson.value.KsonNumber
-import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
@@ -48,7 +47,6 @@ internal class JsonObjectSchema(
     val description: String?,
     val comment: String?,
     val default: KsonValue?,
-    val definitions: Map<KsonString, JsonSchema?>?,
 
     private val typeValidator: TypeValidator?,
     private val schemaValidators: List<JsonSchemaValidator>
@@ -80,31 +78,27 @@ internal class JsonObjectSchema(
   private fun branchName(branch: JsonSchema): String? {
     if (branch !is JsonObjectSchema) return null
     branch.title?.let { return it }
-    return branch.soleRefValidator()?.refShortName()
+    return (branch.schemaValidators.singleOrNull() as? RefValidator)?.refShortName()
   }
 
-  private fun soleRefValidator(): RefValidator? = schemaValidators.singleOrNull() as? RefValidator
+  private fun refValidator(): RefValidator? = schemaValidators.filterIsInstance<RefValidator>().firstOrNull()
 
   /**
-   * This schema plus the target of a lone `$ref` and each `allOf` member, transitively: all of them
+   * This schema plus the target of its `$ref` and each `allOf` member, transitively: all of them
    * constrain the same document.  Property schemas aren't followed, so a self-referential
-   * `child: { $ref: node }` can't recurse, and a `$ref` to a target already followed on the way to it is skipped,
-   * so neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
+   * `child: { $ref: node }` can't recurse, and the `$ref` that closes a cycle leads to no schema, so
+   * neither can a `$ref` cycle.  A schema reached along several `allOf`/`$ref` paths is
    * visited once per path, which only gets expensive in schemas nobody writes.
    */
   private fun compositionSources(): List<JsonObjectSchema> {
     val sources = mutableListOf<JsonObjectSchema>()
-    val pending = ArrayDeque(listOf(this to emptyList<RefValidator>()))
+    val pending = ArrayDeque(listOf(this))
     while (pending.isNotEmpty()) {
-      val (schema, followedRefs) = pending.removeFirst()
+      val schema = pending.removeFirst()
       sources.add(schema)
-      val ref = schema.soleRefValidator()
-      if (ref != null && followedRefs.none(ref::hasSameTargetAs)) {
-        (ref.resolvedSchema() as? JsonObjectSchema)?.let { pending.add(it to followedRefs + ref) }
-      }
+      (schema.refValidator()?.resolvedSchema() as? JsonObjectSchema)?.let(pending::add)
       schema.schemaValidators.filterIsInstance<AllOfValidator>()
-        .flatMap { it.allOf.filterIsInstance<JsonObjectSchema>() }
-        .mapTo(pending) { it to followedRefs }
+        .flatMapTo(pending) { it.allOf.filterIsInstance<JsonObjectSchema>() }
     }
     return sources
   }
@@ -131,12 +125,12 @@ internal class JsonObjectSchema(
   /** The properties required or declared across every [compositionSources] schema. */
   internal fun knownProperties(): Set<String> =
     compositionSources().flatMapTo(mutableSetOf()) { source ->
-      source.ownRequiredProperties() + source.ownPropertySchemas().keys.map { it.value }
+      source.ownRequiredProperties() + source.ownPropertySchemas().keys
     }
 
   private fun ownPinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> =
-    ownPropertySchemas().filterKeys { it.value in present }.mapNotNull { (name, propertySchema) ->
-      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name.value to it }
+    ownPropertySchemas().filterKeys { it in present }.mapNotNull { (name, propertySchema) ->
+      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name to it }
     }.toMap()
 
   /** The values this schema's lone validator restricts its target to, or `null` if it doesn't pin. */
@@ -148,7 +142,7 @@ internal class JsonObjectSchema(
       ?.required
       ?.mapTo(mutableSetOf()) { it.value } ?: emptySet()
 
-  private fun ownPropertySchemas(): Map<KsonString, JsonSchema?> =
+  private fun ownPropertySchemas(): Map<String, JsonSchema?> =
     schemaValidators.filterIsInstance<PropertiesValidator>()
       .firstOrNull()
       ?.propertySchemas ?: emptyMap()

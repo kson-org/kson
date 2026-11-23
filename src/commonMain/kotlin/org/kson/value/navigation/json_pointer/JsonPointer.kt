@@ -66,5 +66,16 @@ class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(poi
             }
             return JsonPointer(pointerString)
         }
+
+        /**
+         * Returns the array index [token] names, which
+         * [RFC 6901 §4](https://datatracker.ietf.org/doc/html/rfc6901#section-4) writes as `0` or as ASCII digits
+         * without a leading zero.  Returns null for any other token, and for an index too large for an [Int].
+         */
+        fun arrayIndex(token: String): Int? {
+            val isDigits = token.isNotEmpty() && token.all { it in '0'..'9' }
+            val hasLeadingZero = token.length > 1 && token.startsWith('0')
+            return if (isDigits && !hasLeadingZero) token.toIntOrNull() else null
+        }
     }
 }

@@ -58,13 +58,13 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testParseSchemaWithTitle() {
-        val schema = assertValidObjectSchema("""{"title": "Test Schema"}""")
+        val schema = assertValidObjectSchema("title: 'Test Schema'")
         assertEquals("Test Schema", schema.title)
     }
 
     @Test
     fun testParseSchemaWithDescription() {
-        val schema = assertValidObjectSchema("""{"description": "A test schema"}""")
+        val schema = assertValidObjectSchema("description: 'A test schema'")
         assertEquals("A test schema", schema.description)
     }
 
@@ -115,22 +115,22 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithInvalidDescriptionType() {
         assertSchemaHasValidationErrors(
-            """{"description": 123}""",
+            "description: 123",
             listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
         )
     }
 
     @Test
     fun testParseSchemaWithComment() {
-        val schema = assertValidObjectSchema("""{"${'$'}comment": "A comment on this schema"}""")
+        val schema = assertValidObjectSchema($$"""'$comment': 'A comment on this schema'""")
         assertEquals("A comment on this schema", schema.comment)
     }
 
     @Test
     fun testParseSchemaWithEmbedBlockComment() {
         val schema = assertValidObjectSchema(
-            """
-            |'${'$'}comment': %markdown
+            $$"""
+            |'$comment': %markdown
             |  A **rich** comment on this schema.
             |  %%
             |type: object
@@ -142,25 +142,33 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithInvalidCommentType() {
         assertSchemaHasValidationErrors(
-            """{"${'$'}comment": 123}""",
+            $$"""'$comment': 123""",
             listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
         )
     }
 
     @Test
     fun testParseSchemaWithTypeString() {
-        assertValidObjectSchema("""{"type": "string"}""")
+        assertValidObjectSchema("type: string")
     }
 
     @Test
     fun testParseSchemaWithTypeArray() {
-        assertValidObjectSchema("""{"type": ["string", "number"]}""")
+        assertValidObjectSchema("""
+            type:
+              - string
+              - number
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithInvalidTypeArrayEntry() {
         assertSchemaHasValidationErrors(
-            """{"type": ["string", 123]}""",
+            """
+                type:
+                  - string
+                  - 123
+            """.trimIndent(),
             listOf(MessageType.SCHEMA_TYPE_ARRAY_ENTRY_ERROR)
         )
     }
@@ -168,20 +176,18 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithNumericValidators() {
         assertValidObjectSchema("""
-            {
-                "minimum": 0,
-                "maximum": 100,
-                "multipleOf": 5,
-                "exclusiveMinimum": -1,
-                "exclusiveMaximum": 101
-            }
-        """)
+            minimum: 0
+            maximum: 100
+            multipleOf: 5
+            exclusiveMinimum: -1
+            exclusiveMaximum: 101
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithInvalidMinimum() {
         assertSchemaHasValidationErrors(
-            """{"minimum": "not a number"}""",
+            "minimum: 'not a number'",
             listOf(MessageType.SCHEMA_NUMBER_REQUIRED)
         )
     }
@@ -189,45 +195,48 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithStringValidators() {
         assertValidObjectSchema("""
-            {
-                "minLength": 1,
-                "maxLength": 10,
-                "pattern": "^[a-z]+$"
-            }
-        """)
+            minLength: 1
+            maxLength: 10
+            pattern: '^[a-z]+$'
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithArrayValidators() {
         assertValidObjectSchema("""
-            {
-                "minItems": 1,
-                "maxItems": 5,
-                "uniqueItems": true,
-                "items": {"type": "string"}
-            }
-        """)
+            minItems: 1
+            maxItems: 5
+            uniqueItems: true
+            items:
+              type: string
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithObjectValidators() {
         assertValidObjectSchema("""
-            {
-                "minProperties": 1,
-                "maxProperties": 10,
-                "required": ["name", "age"],
-                "properties": {
-                    "name": {"type": "string"},
-                    "age": {"type": "number"}
-                }
-            }
-        """)
+            minProperties: 1
+            maxProperties: 10
+            required:
+              - name
+              - age
+            properties:
+              name:
+                type: string
+                .
+              age:
+                type: number
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithInvalidRequiredArray() {
         assertSchemaHasValidationErrors(
-            """{"required": [123, "name"]}""",
+            """
+                required:
+                  - 123
+                  - name
+            """.trimIndent(),
             listOf(MessageType.SCHEMA_STRING_ARRAY_ENTRY_ERROR)
         )
     }
@@ -235,24 +244,26 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithIfThenElse() {
         assertValidObjectSchema("""
-            {
-                "if": {"type": "string"},
-                "then": {"minLength": 1},
-                "else": {"type": "number"}
-            }
-        """)
+            if:
+              type: string
+              .
+            then:
+              minLength: 1
+              .
+            else:
+              type: number
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithDependencies() {
         assertValidObjectSchema("""
-            {
-                "dependencies": {
-                    "name": ["age"],
-                    "address": {"type": "object"}
-                }
-            }
-        """)
+            dependencies:
+              name:
+                - age
+              address:
+                type: object
+        """.trimIndent())
     }
 
     @Test
@@ -266,24 +277,20 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testParseSchemaWithIntegerLengths() {
         assertValidObjectSchema("""
-            {
-                "minLength": 1.0,
-                "maxLength": 10.0,
-                "minItems": 2.0,
-                "maxItems": 5.0
-            }
-        """)
+            minLength: 1.0
+            maxLength: 10.0
+            minItems: 2.0
+            maxItems: 5.0
+        """.trimIndent())
     }
 
     @Test
     fun testParseSchemaWithInvalidIntegerLengths() {
         assertSchemaHasValidationErrors(
             """
-            {
-                "minLength": 1.5,
-                "maxLength": "not a number"
-            }
-            """,
+            minLength: 1.5
+            maxLength: 'not a number'
+            """.trimIndent(),
             listOf(MessageType.SCHEMA_INTEGER_REQUIRED)
         )
     }
@@ -292,20 +299,18 @@ class SchemaParserTest : JsonSchemaTest {
     fun testRefWithAllowedProperties() {
         // Test that $ref with only title and description does not generate errors
         assertValidObjectSchema(
-            """
-            {
-                "definitions": {
-                    "someType": {"type": "string"}
-                },
-                "properties": {
-                    "myRef": {
-                        "${'$'}ref": "#/definitions/someType",
-                        "title": "Reference with title",
-                        "description": "This is allowed alongside ${'$'}ref"
-                    }
-                }
-            }
-        """
+            $$"""
+            definitions:
+              someType:
+                type: string
+                .
+              .
+            properties:
+              myRef:
+                '$ref': '#/definitions/someType'
+                title: 'Reference with title'
+                description: 'This is allowed alongside $ref'
+            """.trimIndent()
         )
     }
 
@@ -313,14 +318,12 @@ class SchemaParserTest : JsonSchemaTest {
     fun testRefToMalformedDefinitionReportsError() {
         // A $ref pointing to a definition that is not a valid schema (a number,
         // where a schema object or boolean is required) must report an error.
-        val schema = """
-            {
-                "definitions": {
-                    "broken": 42
-                },
-                "${'$'}ref": "#/definitions/broken"
-            }
-        """
+        val schema = $$"""
+            definitions:
+              broken: 42
+              .
+            '$ref': '#/definitions/broken'
+        """.trimIndent()
         val ksonSource = """
             key: value
         """
@@ -328,6 +331,39 @@ class SchemaParserTest : JsonSchemaTest {
             ksonSource,
             schema,
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testMalformedSchemaIsReportedUnderDefinitionsButNotUnderDefs() {
+        // Draft 7 has no `$defs`, so values under it are only compiled as schemas when a `$ref` points to them
+        assertSchemaHasValidationErrors(
+            """
+                definitions:
+                  broken: 42
+            """.trimIndent(),
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+        assertValidObjectSchema($$"""
+            '$defs':
+              broken: 42
+        """.trimIndent())
+    }
+
+    @Test
+    fun testDefinitionsThatIsNoObjectReportsError() {
+        assertSchemaHasValidationErrors("definitions: 42", listOf(MessageType.SCHEMA_OBJECT_REQUIRED))
+    }
+
+    @Test
+    fun testTypeIsReportedBeforeTheDefinitions() {
+        assertSchemaHasValidationErrors(
+            """
+                type: 3
+                definitions:
+                  a: 4
+            """.trimIndent(),
+            listOf(MessageType.SCHEMA_TYPE_TYPE_ERROR, MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
         )
     }
 
@@ -365,6 +401,28 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefToAListItemResolvesOnlyByACanonicalIndex() {
+        fun schema(index: String) = $$"""
+            items:
+              - type: string
+              - type: number
+                .
+            properties:
+              a:
+                '$ref': '#/items/$$index'
+        """.trimIndent()
+        assertKsonEnforcesSchema("a: 1", schema("1"), true)
+        for (index in listOf("01", "+1", "-0")) {
+            val ref = "#/items/$index"
+            assertEquals(
+                listOf(MessageType.SCHEMA_REF_RESOLUTION_FAILED.create(ref)),
+                KsonCore.parseSchema(schema(index)).messages.map { it.message },
+                ref
+            )
+        }
+    }
+
+    @Test
     fun testRefToRefWithMalformedPointerReportsError() {
         // `wrapper` is only parsed once validation follows the root `$ref` to it
         val schema = $$"""
@@ -382,43 +440,119 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefCycleReportsError() {
+        // the root `$ref` leads to `a`, then to `b`, whose `$ref` leads back to `a`
+        val schema = $$"""
+            '$ref': '#/definitions/a'
+            definitions:
+              a: { '$ref': '#/definitions/b' }
+              b: { '$ref': '#/definitions/a' }
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "key: value",
+            schema,
+            listOf(MessageType.SCHEMA_REF_CYCLE),
+            listOf(Location(Coordinates(3, 16), Coordinates(3, 31), 90, 105))
+        )
+    }
+
+    @Test
+    fun testRefCycleThroughAnAllOfReportsTheRefThatClosesIt() {
+        // the root `$ref` leads to `a`, whose `allOf` applies `a` again to the same value
+        val schema = $$"""
+            '$ref': '#/definitions/a'
+            definitions:
+              a:
+                minimum: 1
+                allOf:
+                  - '$ref': '#/definitions/a'
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "0",
+            schema,
+            listOf(MessageType.SCHEMA_VALUE_TOO_SMALL, MessageType.SCHEMA_REF_CYCLE),
+            listOf(
+                Location(Coordinates(0, 0), Coordinates(0, 1), 0, 1),
+                Location(Coordinates(5, 17), Coordinates(5, 32), 87, 102)
+            )
+        )
+    }
+
+    @Test
+    fun testRefCycleThroughAnySubschemaOfTheSameValueReportsError() {
+        val cycles = listOf(
+            $$"allOf: [{ '$ref': '#' }]",
+            $$"anyOf: [{ '$ref': '#' }]",
+            $$"oneOf: [{ '$ref': '#' }]",
+            $$"if: true, then: { '$ref': '#' }",
+            $$"if: false, else: { '$ref': '#' }"
+        )
+        for (cycle in cycles) {
+            assertKsonSchemaErrors("key: value", "{ $cycle }", listOf(MessageType.SCHEMA_REF_CYCLE), cycle)
+        }
+
+        val dependencyError = assertKsonSchemaErrors(
+            "key: value",
+            $$"{ dependencies: { key: { '$ref': '#' } } }",
+            listOf(MessageType.SCHEMA_DEPENDENCIES_SCHEMA_ERROR)
+        ).single()
+        val cycle = MessageType.SCHEMA_REF_CYCLE.create("#").toString()
+        assertEquals(MessageType.SCHEMA_DEPENDENCIES_SCHEMA_ERROR.create("key", cycle), dependencyError.message)
+    }
+
+    @Test
+    fun testRefCycleFailsOnlyTheSubschemaOfANotOrIf() {
+        // `not` and `if` keep their subschema's errors to themselves, so the cycle only fails that subschema
+        assertKsonEnforcesSchema("key: value", $$"{ not: { '$ref': '#' } }", true)
+        assertKsonEnforcesSchema("key: value", $$"{ if: { '$ref': '#' }, else: false }", false)
+    }
+
+    @Test
     fun testPointerRefUnderAPlainNameIdResolvesInItsDocument() {
         // a plain-name `$id` names a fragment of the document, so `#/definitions/target` still addresses the
         // document's root
         assertValidObjectSchema(
             $$"""
-            {
-                "properties": { "field": { "$ref": "#anchored" } },
-                "definitions": {
-                    "anchored": {
-                        "$id": "#anchored",
-                        "properties": { "x": { "$ref": "#/definitions/target" } }
-                    },
-                    "target": { "type": "number" }
-                }
-            }
-            """
+            properties:
+              field:
+                '$ref': '#anchored'
+                .
+              .
+            definitions:
+              anchored:
+                '$id': '#anchored'
+                properties:
+                  x:
+                    '$ref': '#/definitions/target'
+                    .
+                  .
+                .
+              target:
+                type: number
+            """.trimIndent()
         )
     }
 
     @Test
     fun testRefWithinASchemaWithARelativeIdResolvesInThatSchema() {
-        // `a` is read under `other`'s `$id`, so its `#/$defs/b` addresses `other`
+        // `a` is read under `other`'s `$id`, so its `#/definitions/b` addresses `other`
         val schema = $$"""
-            {
-                "$id": "http://example.com/root.json",
-                "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
-                "$defs": {
-                    "other": {
-                        "$id": "sub/other.json",
-                        "$defs": {
-                            "a": { "$ref": "#/$defs/b" },
-                            "b": { "type": "string" }
-                        }
-                    }
-                }
-            }
-        """
+            '$id': 'http://example.com/root.json'
+            properties:
+              field:
+                '$ref': 'sub/other.json#/definitions/a'
+                .
+              .
+            definitions:
+              other:
+                '$id': 'sub/other.json'
+                definitions:
+                  a:
+                    '$ref': '#/definitions/b'
+                    .
+                  b:
+                    type: string
+        """.trimIndent()
         assertKsonEnforcesSchema("field: ok", schema, true)
         assertKsonSchemaErrors("field: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
     }
@@ -503,38 +637,32 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testRootRefBesideTheRootIdResolvesInTheRootDocument() {
-        // the root's `$ref` ignores the `$id` beside it and resolves against the retrieval URI, which also identifies
-        // the root.  `a` is still read under the root's `$id`, so its `other.json` names `other`
+        // `other.json` resolves against the retrieval URI, not the root's `$id`
         val schema = $$"""
             '$id': 'http://example.com/root.json'
             '$ref': '#/definitions/a'
             definitions:
               a:
                 '$ref': 'other.json'
-                .
-              other:
-                '$id': 'other.json'
-                type: string
         """.trimIndent()
-        assertKsonEnforcesSchema("ok", schema, true)
-        assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+        val externalSchemaSources = mapOf("other.json" to "type: string")
+        assertKsonEnforcesSchema("ok", schema, true, externalSchemaSources = externalSchemaSources)
+        assertKsonSchemaErrors(
+            "1",
+            schema,
+            listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH),
+            externalSchemaSources = externalSchemaSources
+        )
     }
 
     @Test
     fun testRootRefBesideARelativeRootIdNamesTheSchemaUnderTheRetrievalUri() {
-        // the root's `$ref` ignores the `$id` beside it, so `sub/other.json` names `target`: `other.json` under that
-        // `$id`.  Resolved against that `$id`, it would name `decoy`
         val schema = $$"""
             '$id': 'sub/root.json'
-            '$ref': 'sub/other.json'
+            '$ref': '#/definitions/target'
             definitions:
               target:
-                '$id': 'other.json'
                 type: string
-                .
-              decoy:
-                '$id': 'sub/other.json'
-                type: number
         """.trimIndent()
         assertKsonEnforcesSchema("ok", schema, true)
         assertKsonSchemaErrors("1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
@@ -544,24 +672,28 @@ class SchemaParserTest : JsonSchemaTest {
     fun testPointerRefUnderARootIdWithAnEmptyFragmentResolves() {
         // `http://example.com/root.json#` identifies the same schema as `http://example.com/root.json`
         val schema = $$"""
-            {
-                "$id": "http://example.com/root.json#",
-                "properties": { "x": { "$ref": "#/definitions/a" } },
-                "definitions": { "a": { "type": "string" } }
-            }
-        """
+            '$id': 'http://example.com/root.json#'
+            properties:
+              x:
+                '$ref': '#/definitions/a'
+                .
+              .
+            definitions:
+              a:
+                type: string
+        """.trimIndent()
         assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
     }
 
     @Test
     fun testNonStringIdReportsError() {
-        assertSchemaHasValidationErrors($$"""{"$id": 42}""", listOf(MessageType.SCHEMA_STRING_REQUIRED))
+        assertSchemaHasValidationErrors($$"""'$id': 42""", listOf(MessageType.SCHEMA_STRING_REQUIRED))
     }
 
     @Test
     fun testInvalidRegexInPatternReportsError() {
         assertSchemaHasValidationErrors(
-            """{"pattern": "*"}""",
+            "pattern: '*'",
             listOf(MessageType.SCHEMA_INVALID_REGEX)
         )
     }
@@ -569,7 +701,11 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testInvalidRegexInPatternPropertiesReportsError() {
         assertSchemaHasValidationErrors(
-            """{"patternProperties": {"*": {"type": "string"}}}""",
+            """
+                patternProperties:
+                  '*':
+                    type: string
+            """.trimIndent(),
             listOf(MessageType.SCHEMA_INVALID_REGEX)
         )
     }
@@ -580,7 +716,7 @@ class SchemaParserTest : JsonSchemaTest {
         // Schema parse errors are already reported; the validator must not be created
         // with a null schema that causes it to skip validation entirely.
         assertSchemaHasValidationErrors(
-            """{"not": 42}""",
+            "not: 42",
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
         )
     }
@@ -588,15 +724,40 @@ class SchemaParserTest : JsonSchemaTest {
     @Test
     fun testMalformedIfSubSchemaDoesNotSilentlyAccept() {
         assertSchemaHasValidationErrors(
-            """{"if": 42, "then": {"type": "string"}}""",
+            """
+                if: 42
+                then:
+                  type: string
+            """.trimIndent(),
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testErrorsInThenAndElseAreReportedUnderAnIfThatDoesNotCompile() {
+        assertSchemaHasValidationErrors(
+            $$"""
+                if:
+                  '$ref': '#/missing'
+                  .
+                then:
+                  type: 7
+                  .
+                else:
+                  minimum: low
+            """.trimIndent(),
+            listOf(
+                MessageType.SCHEMA_REF_RESOLUTION_FAILED,
+                MessageType.SCHEMA_TYPE_TYPE_ERROR,
+                MessageType.SCHEMA_NUMBER_REQUIRED
+            )
         )
     }
 
     @Test
     fun testMalformedPropertyNamesSubSchemaDoesNotSilentlyAccept() {
         assertSchemaHasValidationErrors(
-            """{"propertyNames": 42}""",
+            "propertyNames: 42",
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
         )
     }
@@ -605,18 +766,16 @@ class SchemaParserTest : JsonSchemaTest {
     fun testRefOnlyWithNoOtherProperties() {
         // Test that $ref alone works without errors
         assertValidObjectSchema(
-            """
-            {
-                "definitions": {
-                    "simpleType": {"type": "string"}
-                },
-                "properties": {
-                    "myProperty": {
-                        "${'$'}ref": "#/definitions/simpleType"
-                    }
-                }
-            }
-        """
+            $$"""
+            definitions:
+              simpleType:
+                type: string
+                .
+              .
+            properties:
+              myProperty:
+                '$ref': '#/definitions/simpleType'
+            """.trimIndent()
         )
     }
 }

@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.schema.draft
 
 import org.kson.KsonCore
 import java.io.File

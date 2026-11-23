@@ -1,7 +1,6 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -19,11 +18,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "base URI change - change folder -> number is valid"
      *
      * Test ID: "id-legacy::base URI change - change folder::number is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
         
@@ -57,7 +52,15 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::base URI change - change folder::number is valid"    """)
+            """    schemaTestId: "id-legacy::base URI change - change folder::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolder/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -65,11 +68,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "base URI change - change folder -> string is invalid"
      *
      * Test ID: "id-legacy::base URI change - change folder::string is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_2() {
         
@@ -103,7 +102,15 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::base URI change - change folder::string is invalid"    """)
+            """    schemaTestId: "id-legacy::base URI change - change folder::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolder/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -111,11 +118,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "base URI change - change folder in subschema -> number is valid"
      *
      * Test ID: "id-legacy::base URI change - change folder in subschema::number is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
         
@@ -153,7 +156,15 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::base URI change - change folder in subschema::number is valid"    """)
+            """    schemaTestId: "id-legacy::base URI change - change folder in subschema::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -161,11 +172,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "base URI change - change folder in subschema -> string is invalid"
      *
      * Test ID: "id-legacy::base URI change - change folder in subschema::string is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_4() {
         
@@ -203,7 +210,15 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::base URI change - change folder in subschema::string is invalid"    """)
+            """    schemaTestId: "id-legacy::base URI change - change folder in subschema::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1337,11 +1352,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with different $id -> number is invalid"
      *
      * Test ID: "id-legacy::remote HTTP ref with different $id::number is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
         
@@ -1356,7 +1367,25 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/different-id-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "http://localhost:1234/real-id-ref-string.json",
+                        "definitions": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/bar"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1364,11 +1393,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with different $id -> string is valid"
      *
      * Test ID: "id-legacy::remote HTTP ref with different $id::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_34() {
         
@@ -1383,7 +1408,25 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::string is valid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/different-id-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "http://localhost:1234/real-id-ref-string.json",
+                        "definitions": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/bar"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1391,11 +1434,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with different URN $id -> number is invalid"
      *
      * Test ID: "id-legacy::remote HTTP ref with different URN $id::number is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_35() {
         
@@ -1410,7 +1449,25 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::number is invalid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/urn-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "urn:uuid:feebdaed-ffff-0000-2020-1200deadbeef",
+                        "definitions": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/bar"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1418,11 +1475,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with different URN $id -> string is valid"
      *
      * Test ID: "id-legacy::remote HTTP ref with different URN $id::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_36() {
         
@@ -1437,7 +1490,25 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::string is valid"    """)
+            $$"""    schemaTestId: "id-legacy::remote HTTP ref with different URN $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/urn-ref-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "urn:uuid:feebdaed-ffff-0000-2020-1200deadbeef",
+                        "definitions": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/bar"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1445,11 +1516,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with nested absolute ref -> number is invalid"
      *
      * Test ID: "id-legacy::remote HTTP ref with nested absolute ref::number is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_37() {
         
@@ -1464,7 +1531,25 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id-legacy::remote HTTP ref with nested absolute ref::number is invalid"    """)
+            """    schemaTestId: "id-legacy::remote HTTP ref with nested absolute ref::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested-absolute-ref-to-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "bar": {
+                                "$id": "http://localhost:1234/the-nested-id.json",
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "http://localhost:1234/the-nested-id.json"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1472,11 +1557,7 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
      *     "remote HTTP ref with nested absolute ref -> string is valid"
      *
      * Test ID: "id-legacy::remote HTTP ref with nested absolute ref::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_38() {
         
@@ -1491,6 +1572,24 @@ class SchemaDraft7SuiteTest_id_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id-legacy::remote HTTP ref with nested absolute ref::string is valid"    """)
+            """    schemaTestId: "id-legacy::remote HTTP ref with nested absolute ref::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested-absolute-ref-to-string.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "bar": {
+                                "$id": "http://localhost:1234/the-nested-id.json",
+                                "type": "string"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "http://localhost:1234/the-nested-id.json"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }

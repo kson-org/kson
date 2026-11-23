@@ -1,0 +1,83 @@
+package org.kson.schema
+
+import org.kson.schema.draft.SchemaDraft
+import org.kson.uri.UriReference
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
+import org.kson.value.KsonValue
+
+/**
+ * A schema together with the base URI it inherits, the draft that defines its keywords, and the indexed documents
+ * its `$ref`s resolve in.
+ *
+ * @param baseUri The base URI that [value] inherits from its parent schema, or from its document for a root schema.
+ *   It depends only on where [value] sits in its document, so it is the same whether [value] is reached through
+ *   subschemas or `$ref`s.
+ * @param unresolvedRef The `$ref` in [value] that hides the keywords beside it but couldn't be followed, if any
+ */
+@ConsistentCopyVisibility
+data class SchemaNode internal constructor(
+    val value: KsonValue,
+    val baseUri: UriReference,
+    internal val draft: SchemaDraft,
+    internal val indexedDocuments: IndexedSchemaDocuments,
+    val unresolvedRef: UnresolvedRef? = null
+) {
+    val endsAtUnresolvedRef: Boolean get() = unresolvedRef != null
+
+    /** The base URI inside [value], which its `$ref` resolves against and its subschemas inherit */
+    val innerBaseUri: UriReference by lazy { baseUri.withIdOf(value, draft) }
+
+    /** Returns a node for [child], a value inside this schema, with [innerBaseUri] as its base URI */
+    internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, draft, indexedDocuments)
+
+    /**
+     * Returns the node for the last value in [path], or this node when the path is empty.  The first value must sit
+     * directly inside this schema, and each later value directly inside the value before it.
+     */
+    fun descend(path: List<KsonValue>): SchemaNode = path.fold(this) { parent, child -> parent.enter(child) }
+
+    /**
+     * The direct subschemas of this schema, in the order validation applies their keywords.  The schema its `$ref`
+     * names comes first, if the `$ref` keeps the keywords beside it.
+     */
+    val subschemas: List<Subschema> by lazy {
+        val schemaObject = value as? KsonObject ?: return@lazy emptyList()
+        listOfNotNull(refTarget(schemaObject)) + draft.keywords.flatMap { keyword ->
+            val declaredSubschemas = keyword.declaredSubschemas(schemaObject)
+            val alternatives = declaredSubschemas.filter { it.applies is Applies.Alternative }.map { enter(it.value) }
+            val condition = declaredSubschemas.firstOrNull { it.applies == Applies.Condition }?.value
+            val amongAlternatives = if (alternatives.isEmpty()) null else SchemaChoice.Among(alternatives)
+            val byCondition = condition?.let { SchemaChoice.By(enter(it)) }
+            declaredSubschemas.map { declared ->
+                val choice = when (declared.applies) {
+                    is Applies.Alternative -> amongAlternatives
+                    Applies.Condition, Applies.Then, Applies.Else -> byCondition
+                    else -> null
+                }
+                val subschema = { indexedDocuments.resolveRefIfPresent(enter(declared.value)) }
+                Subschema(declared.keyword, subschema, declared.applies, choice)
+            }
+        }
+    }
+
+    /** The schema this schema's `$ref` names, if the `$ref` keeps the keywords beside it and resolves */
+    private fun refTarget(schemaObject: KsonObject): Subschema? {
+        val ref = schemaObject.propertyLookup[$$"$ref"] as? KsonString
+        if (ref == null || draft.refHidesSiblings) return null
+        val target = (indexedDocuments.resolveRef(ref.value, innerBaseUri) as? RefResolution.Found)?.target
+            ?: return null
+        return Subschema($$"$ref", { indexedDocuments.resolveRefIfPresent(target) }, Applies.InPlace, choice = null)
+    }
+}
+
+/** A `$ref` that couldn't be followed to a schema, and why */
+sealed interface UnresolvedRef {
+    val ref: KsonString
+
+    /** [ref] names no schema, for the reason [failure] gives */
+    data class MissingTarget(override val ref: KsonString, val failure: RefResolution.Failure) : UnresolvedRef
+
+    /** Following [ref] leads back to a schema already being applied to the same instance */
+    data class Cycle(override val ref: KsonString) : UnresolvedRef
+}

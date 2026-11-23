@@ -1036,6 +1036,16 @@ enum class MessageType(
             val reference = parsedArgs.getArg("Reference")
             return "Failed to resolve schema reference: $reference"
         }
+    },
+    SCHEMA_REF_CYCLE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Reference")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val reference = parsedArgs.getArg("Reference")
+            return "Schema reference \"$reference\" leads back to itself without descending into a property or item"
+        }
     };
 
     /**

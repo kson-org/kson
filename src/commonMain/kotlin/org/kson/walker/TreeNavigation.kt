@@ -24,7 +24,7 @@ data class TreeNavigationResult<N>(
  *
  * Follows each token in the pointer through the tree:
  * - For object nodes: matches token against property names
- * - For array nodes: matches token as an integer index
+ * - For array nodes: reads token as an index with [JsonPointer.arrayIndex]
  *
  * @return The node [pointer] names under [root], or null if navigation fails
  */
@@ -183,8 +183,8 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
                             children.properties.firstOrNull { it.name == token.value }?.value
 
                         is NodeChildren.Array -> {
-                            val index = token.value.toIntOrNull()
-                            if (index != null && index >= 0 && index < children.elements.size) {
+                            val index = JsonPointer.arrayIndex(token.value)
+                            if (index != null && index < children.elements.size) {
                                 children.elements[index]
                             } else {
                                 null

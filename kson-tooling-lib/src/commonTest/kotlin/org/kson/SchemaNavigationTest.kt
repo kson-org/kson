@@ -1,6 +1,7 @@
 package org.kson
 
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.SchemaDocument
 import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.NavigatedSchema
@@ -22,7 +23,7 @@ class SchemaNavigationTest {
      * Helper to navigate schema and get all result values
      */
     private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
-        return navigateSchemaFull(schema, path).map { it.resolvedValue }
+        return navigateSchemaFull(schema, path).map { it.value }
     }
 
     /**
@@ -30,7 +31,7 @@ class SchemaNavigationTest {
      */
     private fun navigateSchemaFull(schema: String, path: List<String>, document: String? = null): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaNavigator(SchemaIdLookup(it))
+            SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(it)))
                 .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { doc -> KsonTooling.parse(doc).rootAstNode })
         } ?: emptyList()
     }
@@ -345,11 +346,11 @@ class SchemaNavigationTest {
             {
                 type: "object"
                 properties: { p: { '$ref': "http://example.com/a.json" } }
-                '$defs': {
+                definitions: {
                     a: {
                         '$id': "http://example.com/a.json"
-                        anyOf: [ { '$ref': "#/$defs/x" } ]
-                        '$defs': { x: { title: "x under a.json" } }
+                        anyOf: [ { '$ref': "#/definitions/x" } ]
+                        definitions: { x: { title: "x under a.json" } }
                     }
                     x: { title: "x under the root" }
                 }
@@ -466,11 +467,26 @@ class SchemaNavigationTest {
             }
         """
         fun typeAt(document: String?) = navigateSchemaFull(schema, listOf("0", "a"), document)
-            .map { ((it.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+            .map { ((it.value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
 
         assertEquals(listOf("object"), typeAt("'0': {}"))
         assertEquals(listOf("string"), typeAt("[{}]"))
         assertEquals(listOf("string"), typeAt(null), "without the document, a number is taken as an index")
+    }
+
+    @Test
+    fun testNavigatePropertyNamedByDigitsWithALeadingZero() {
+        val schema = """
+            {
+                properties: { "01": { type: "object" } }
+                items: { type: "string" }
+            }
+        """
+        fun typeAt(token: String) = navigateSchema(schema, listOf(token))
+            .map { ((it as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+
+        assertEquals(listOf("string"), typeAt("1"))
+        assertEquals(listOf("object"), typeAt("01"))
     }
 
     @Test
@@ -577,11 +593,11 @@ class SchemaNavigationTest {
         val document = """{ "config": { "mode": "a" } }"""
         val documentAst = KsonTooling.parse(document).rootAstNode
         val results = KsonCore.parseToAst(schema).ksonValue!!.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(listOf("config"))), documentAst)
+            SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(it))).navigate(TreePointer(JsonPointer.fromTokens(listOf("config"))), documentAst)
         }
 
         // [configParent, InnerA] — InnerB is dropped because mode: "a" contradicts its const.
-        val titles = results.mapNotNull { (it.resolvedValue as? InternalKsonObject)?.propertyLookup?.get("title") as? InternalKsonString }
+        val titles = results.mapNotNull { (it.value as? InternalKsonObject)?.propertyLookup?.get("title") as? InternalKsonString }
             .map { it.value }
         assertEquals(listOf("InnerA"), titles,
             "Only the inner branch compatible with the nested document value should survive")
@@ -866,12 +882,12 @@ class SchemaNavigationTest {
         val barkResults = navigateSchemaFull(schema, listOf("bark"))
         assertEquals(1, barkResults.size, "Expected to find 'bark' through then branch")
         assertEquals(Branch.Then, barkResults.single().branchTrail.single().branch)
-        assertEquals("boolean", ((barkResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("boolean", ((barkResults.single().value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
 
         val meowResults = navigateSchemaFull(schema, listOf("meow"))
         assertEquals(1, meowResults.size, "Expected to find 'meow' through else branch")
         assertEquals(Branch.Else, meowResults.single().branchTrail.single().branch)
-        assertEquals("boolean", ((meowResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("boolean", ((meowResults.single().value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -1069,10 +1085,23 @@ class SchemaNavigationTest {
         """.trimIndent()
 
         val visitsToN = navigateSchemaFull(schema, emptyList()).filter {
-            ((it.resolvedValue as? InternalKsonObject)?.propertyLookup?.get("\$id") as? InternalKsonString)?.value == "sub/"
+            ((it.value as? InternalKsonObject)?.propertyLookup?.get("\$id") as? InternalKsonString)?.value == "sub/"
         }
 
-        assertEquals(listOf("http://x/root/", "http://x/root/"), visitsToN.map { it.resolvedValueBaseUri.toString() })
+        assertEquals(listOf("http://x/root/", "http://x/root/"), visitsToN.map { it.schema.baseUri.toString() })
+    }
+
+    /** The root's 2020-12 `$ref` applies the root within itself.  `flatten` stops the second time it meets the root. */
+    @Test
+    fun testDraft2020_12RefBackToItsOwnSchemaStopsOnItsFirstReturn() {
+        val schema = $$"""
+            '$schema': 'https://json-schema.org/draft/2020-12/schema'
+            '$ref': '#'
+            type: object
+        """.trimIndent()
+        val root = assertNotNull(KsonCore.parseToAst(schema).ksonValue)
+
+        assertEquals(listOf(root, root), navigateSchema(schema, emptyList()))
     }
 
     /** `x`'s ref resolves against the root's `$id` to sub/other.json, so it names `other`, read under sub/root.json. */
@@ -1093,7 +1122,7 @@ class SchemaNavigationTest {
 
         val other = navigateSchemaFull(schema, listOf("x")).single()
 
-        assertEquals("string", ((other.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
-        assertEquals("sub/root.json", other.resolvedValueBaseUri.toString())
+        assertEquals("string", ((other.value as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("sub/root.json", other.schema.baseUri.toString())
     }
 }

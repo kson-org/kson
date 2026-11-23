@@ -656,11 +656,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref applies alongside sibling keywords -> ref valid, maxItems invalid"
      *
      * Test ID: "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
         
@@ -1012,11 +1008,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> valid tree"
      *
      * Test ID: "ref::Recursive references between schemas::valid tree"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
         
@@ -1063,7 +1055,42 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "$ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1071,11 +1098,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> invalid tree"
      *
      * Test ID: "ref::Recursive references between schemas::invalid tree"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
         
@@ -1122,7 +1145,42 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "$ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1489,11 +1547,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref valid"
      *
      * Test ID: "ref::remote ref::remote ref valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_42() {
         
@@ -1508,7 +1562,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::remote ref::remote ref valid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1516,11 +1578,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref invalid"
      *
      * Test ID: "ref::remote ref::remote ref invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_43() {
         
@@ -1535,7 +1593,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::remote ref::remote ref invalid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1543,11 +1609,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment valid"
      *
      * Test ID: "ref::fragment within remote ref::remote fragment valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
         
@@ -1562,7 +1624,19 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::fragment within remote ref::remote fragment valid"    """)
+            """    schemaTestId: "ref::fragment within remote ref::remote fragment valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1570,11 +1644,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment invalid"
      *
      * Test ID: "ref::fragment within remote ref::remote fragment invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_45() {
         
@@ -1589,7 +1659,19 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::fragment within remote ref::remote fragment invalid"    """)
+            """    schemaTestId: "ref::fragment within remote ref::remote fragment invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1597,11 +1679,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref valid"
      *
      * Test ID: "ref::ref within remote ref::ref within ref valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_46() {
         
@@ -1616,7 +1694,22 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::ref within remote ref::ref within ref valid"    """)
+            """    schemaTestId: "ref::ref within remote ref::ref within ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "$ref": "#/$defs/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1624,11 +1717,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref invalid"
      *
      * Test ID: "ref::ref within remote ref::ref within ref invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_47() {
         
@@ -1643,7 +1732,22 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref within remote ref::ref within ref invalid"    """)
+            """    schemaTestId: "ref::ref within remote ref::ref within ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "$ref": "#/$defs/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1651,11 +1755,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> string is valid"
      *
      * Test ID: "ref::root ref in remote ref::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_48() {
         
@@ -1677,7 +1777,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::root ref in remote ref::string is valid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1685,11 +1805,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> null is valid"
      *
      * Test ID: "ref::root ref in remote ref::null is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_49() {
         
@@ -1711,7 +1827,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::root ref in remote ref::null is valid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::null is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1719,11 +1855,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "root ref in remote ref -> object is invalid"
      *
      * Test ID: "ref::root ref in remote ref::object is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_50() {
         
@@ -1747,7 +1879,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::root ref in remote ref::object is invalid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::object is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1755,11 +1907,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref with ref to defs -> invalid"
      *
      * Test ID: "ref::remote ref with ref to defs::invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_51() {
         
@@ -1776,7 +1924,24 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::remote ref with ref to defs::invalid"    """)
+            """    schemaTestId: "ref::remote ref with ref to defs::invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-defs.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "$ref": "#/$defs/inner"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1784,11 +1949,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      *     "remote ref with ref to defs -> valid"
      *
      * Test ID: "ref::remote ref with ref to defs::valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_52() {
         
@@ -1805,6 +1966,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::remote ref with ref to defs::valid"    """)
+            """    schemaTestId: "ref::remote ref with ref to defs::valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-defs.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "$ref": "#/$defs/inner"
+                    }
+                """
+            ))
     }
 }

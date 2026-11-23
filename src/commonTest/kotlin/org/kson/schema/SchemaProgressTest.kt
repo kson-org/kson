@@ -13,10 +13,8 @@ class SchemaProgressTest {
     private fun kson(source: String): KsonValue =
         assertNotNull(KsonCore.parseToAst(source).ksonValue, "should parse: $source")
 
-    private fun progressTowards(schema: String): SchemaProgress {
-        val node = kson(schema)
-        return SchemaProgress(node, UriReference.parse(""), SchemaIdLookup(node))
-    }
+    private fun progressTowards(schema: String): SchemaProgress =
+        SchemaProgress(IndexedSchemaDocuments(SchemaDocument(kson(schema))).rootSchema)
 
     private fun locationOf(property: String, document: KsonValue) =
         (document as KsonObject).propertyLookup.getValue(property).location
@@ -40,20 +38,22 @@ class SchemaProgressTest {
     fun refsAreReadUnderTheBaseUriItIsGiven() {
         val root = kson(
             $$"""
-                '$id': 'https://example.org/root'
                 '$ref': '#/$defs/count'
                 '$defs':
                   count:
                     type: number
             """.trimIndent()
         )
-        val idLookup = SchemaIdLookup(root)
+        val retrievalUri = UriReference.parse("https://example.org/root")
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, retrievalUri))
 
-        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), idLookup)
-        assertTrue(underItsId.accepts(kson("3")))
-        assertTrue(underItsId.rejects(kson("three")))
+        val underItsRetrievalUri = SchemaProgress(indexedDocuments.rootSchema)
+        assertTrue(underItsRetrievalUri.accepts(kson("3")))
+        assertTrue(underItsRetrievalUri.rejects(kson("three")))
 
-        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), idLookup)
+        val elsewhere = SchemaProgress(
+            indexedDocuments.rootSchema.copy(baseUri = UriReference.parse("https://example.org/elsewhere"))
+        )
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }
