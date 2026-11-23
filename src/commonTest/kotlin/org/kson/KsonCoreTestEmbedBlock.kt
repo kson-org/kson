@@ -1,8 +1,34 @@
 package org.kson
 
+import org.kson.value.EmbedBlock
+import org.kson.value.toKsonValue
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 class KsonCoreTestEmbedBlock : KsonCoreTest {
+    /**
+     * Assert that an embed object with the given [ksonTag] formats as an embed block opening with
+     * [expectedTagLine], and that this embed block parses back to the value of the original embed object
+     */
+    private fun assertEmbedTagRoundTrips(ksonTag: String, expectedTagLine: String) {
+        val embedObjectSource = "embedTag: $ksonTag\nembedContent: content"
+        val embedBlockSource = assertNotNull(
+            KsonCore.parseToKson(embedObjectSource).kson,
+            "$embedObjectSource should format as KSON"
+        )
+
+        assertEquals("$expectedTagLine\ncontent\n%%", embedBlockSource)
+        assertEquals(parseEmbedTag(embedObjectSource), parseEmbedTag(embedBlockSource))
+    }
+
+    private fun parseEmbedTag(source: String): String {
+        val embedBlock = KsonCore.parseToAst(source).ast.toKsonValue()
+        assertIs<EmbedBlock>(embedBlock)
+        return embedBlock.embedTag.value
+    }
+
     @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
@@ -763,6 +789,17 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 }
             """.trimIndent(), compileSettings = compileSettings
         )
+    }
+
+    /**
+     * Raw whitespace separating an embed block's open delimiter from its tag is not part of the tag, so a tag's
+     * leading whitespace must be rendered escaped to survive a round trip
+     */
+    @Test
+    fun testEmbedBlockTagWithLeadingWhitespaceRoundTrips() {
+        assertEmbedTagRoundTrips("'  sql'", """%\u0020\u0020sql""")
+        assertEmbedTagRoundTrips("""'\tsql'""", """%\tsql""")
+        assertEmbedTagRoundTrips("' '", """%\u0020""")
     }
 
     @Test
