@@ -660,7 +660,7 @@ class PropertySnippetTest {
     @Test
     fun caretTouchingAnotherTokenStaysPlain() {
         assertPlain(keySchema, "name: 'x'\n<caret>tags: []", "settings")
-        assertPlain(keySchema, "settings: {}<caret>", "theme")
+        assertPlain(keySchema, "settings: {}<caret>", "name")
         assertPlain(keySchema, "settings:<caret>", "theme")
     }
 

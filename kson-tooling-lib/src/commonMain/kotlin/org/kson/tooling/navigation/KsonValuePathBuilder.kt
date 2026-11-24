@@ -28,8 +28,8 @@ private fun Coordinates.isAtOrAfter(other: Coordinates): Boolean =
 /**
  * Context information about a token at a specific location.
  *
- * @param lastToken The last token that starts at or before the location
- * @param isInsideToken Whether the location falls within the token's bounds
+ * @param lastToken The last token, other than a comma, that starts at or before the location
+ * @param isInsideToken Whether the location is inside the token rather than past it
  */
 private data class TokenContext(
     val lastToken: Token?,
@@ -208,7 +208,7 @@ class KsonValuePathBuilder(
      * Analyzes the token context at a specific location.
      *
      * Determines which token (if any) is at or before the location,
-     * and whether the location falls within that token's bounds.
+     * and whether the location is inside that token or past it.
      */
     private fun analyzeTokenContext(location: Coordinates): TokenContext {
         val lastToken = meaningfulTokensUpTo(location).lastOrNull()
@@ -217,10 +217,13 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * Navigates to the node holding [token]'s start.  A span includes its end, so past a closer
-     * separated from the caret by whitespace that node is the container's last value (`b` in
-     * `{a: b}`); the closer's end is used instead to find the container itself, unless the parser
-     * ignored the closer (an end-dot inside `{}`) and the container carries on.
+     * Navigates to the node that [token] stands for when the caret is inside or past the token.
+     * By default the token stands for the deepest node whose span contains the token's start.
+     *
+     * A closer the caret is past stands for the container it closes.  A span includes its end, so
+     * the closer's start can find the container's last value instead (`b` in `{a: b}`).
+     * The closer's end finds the container itself, unless the parser ignored the closer (an end-dot
+     * inside `{}`) and the container carries on.
      */
     private fun navigateFromToken(
         rootNode: AstNode,
@@ -236,25 +239,27 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * The meaningful tokens that start at or before the location, in document order.
+     * The meaningful tokens that start at or before the location, in document order, without commas.
+     * A comma separates entries and holds nothing to type, so the caret is resolved against the token before it.
      * The EOF token is excluded from consideration.
      */
     private fun meaningfulTokensUpTo(location: Coordinates): List<Token> {
         return document.meaningfulTokens
             .dropLast(1)  // Exclude EOF token
-            .filter { location.isAtOrAfter(it.lexeme.location.start) }
+            .filter { it.tokenType != TokenType.COMMA && location.isAtOrAfter(it.lexeme.location.start) }
     }
 
     /**
-     * Checks if the given position falls within the bounds of a token.
+     * Whether [position] is inside [token], either end included, except at a closer's end: a closer holds nothing to
+     * type, so a position touching its end is past it.
      */
     private fun isPositionInsideToken(
         token: Token?,
         position: Coordinates
     ): Boolean {
-        return token?.lexeme?.location?.let {
-            Location.containsCoordinates(it, position)
-        } ?: false
+        val tokenLocation = token?.lexeme?.location ?: return false
+        if (token.tokenType in CONTAINER_CLOSERS && position == tokenLocation.end) return false
+        return Location.containsCoordinates(tokenLocation, position)
     }
 
     /**
@@ -295,13 +300,19 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * Finds the nearest COLON at or before [lastToken] in the meaningful token stream.
-     * Returns the COLON token if [lastToken] is itself a COLON, or if the token
-     * immediately preceding [lastToken] is a COLON (handles the case where the cursor
-     * lands on a COMMA or other delimiter right after an empty value position).
+     * Finds the COLON that the caret follows with no value between them.
+     * Returns [lastToken] if it is a COLON.  Returns the token immediately preceding [lastToken] if that is
+     * a COLON and the caret is inside [lastToken]: the caret on a delimiter right after an empty value
+     * position, as at the `}` of `{a: <caret>}`.  A caret past [lastToken] does not follow that colon
+     * directly, whatever token comes before [lastToken].
      */
-    private fun findNearestPrecedingColon(lastToken: Token, meaningfulTokens: List<Token>): Token? {
+    private fun findNearestPrecedingColon(
+        lastToken: Token,
+        isLocationInsideToken: Boolean,
+        meaningfulTokens: List<Token>
+    ): Token? {
         if (lastToken.tokenType == TokenType.COLON) return lastToken
+        if (!isLocationInsideToken) return null
         val idx = meaningfulTokens.indexOf(lastToken)
         if (idx <= 0) return null
         val prev = meaningfulTokens[idx - 1]
@@ -325,7 +336,7 @@ class KsonValuePathBuilder(
         includePropertyKeys: Boolean,
         meaningfulTokens: List<Token>
     ): CaretPath {
-        val colonToken = lastToken?.let { findNearestPrecedingColon(it, meaningfulTokens) }
+        val colonToken = lastToken?.let { findNearestPrecedingColon(it, isLocationInsideToken, meaningfulTokens) }
         val colonPropertyName = colonToken?.let { findPropertyNameBeforeColon(it, meaningfulTokens) }
 
         // Cases are tried in priority order; each helper returns null when its case does not apply,
