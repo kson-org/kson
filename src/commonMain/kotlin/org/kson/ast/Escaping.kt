@@ -73,7 +73,7 @@ fun escapeRawWhitespace(ksonEscapedString: String): String {
  * @param sb The StringBuilder to append to
  * @param codePoint The Unicode code point to escape
  */
-private fun appendUnicodeEscape(sb: StringBuilder, codePoint: Int) {
+internal fun appendUnicodeEscape(sb: StringBuilder, codePoint: Int) {
     sb.append("\\u")
     sb.append(codePoint.toString(16).uppercase().padStart(4, '0'))
 }

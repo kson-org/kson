@@ -47,7 +47,8 @@ enum class TokenType : ElementType {
      */
     EMBED_CLOSE_DELIM,
     /**
-     * The line of text starting at an embed block's [EMBED_OPEN_DELIM], "tagging" that embedded content
+     * The rest of the line after an [EMBED_OPEN_DELIM] and any spaces or tabs following it: the (possibly empty)
+     * string "tagging" the embedded content
      */
     EMBED_TAG,
     /**

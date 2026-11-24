@@ -2785,6 +2785,39 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedRuleTagIsEscaped() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            // note that the quotes here are of course not escaped: escaped quotes are illegal in an embed tag
+            """
+            scripts:
+              build: %"C:\\temp"\nbash
+                make all
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "\"C:\\temp\"\nbash")),
+        )
+
+        // leading spaces are escaped since they would otherwise be skipped as the space between delimiter and tag
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            """
+            scripts:
+              build: %\u0020\u0020bash
+                make all
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "  bash")),
+        )
+    }
+
+    @Test
     fun testWildcardPatternMatchesAllChildren() {
         assertFormatting(
             """

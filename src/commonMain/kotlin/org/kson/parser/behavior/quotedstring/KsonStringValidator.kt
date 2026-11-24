@@ -98,14 +98,13 @@ class KsonStringValidator {
      * Validates the raw string content for invalid escapes, invalid unicode escapes, and illegal control characters.
      *
      * @param rawContent The raw string content (excluding quotes)
-     * @param stringQuote The quote delimiting [rawContent], which is the only quote it may escape, or null if
-     *   [rawContent] is not delimited by quotes
+     * @param stringQuote The [StringQuote] defining how [rawContent] is delimited
      * @param baseLocation The location of the STRING_CONTENT token in the source
      * @param messageSink The sink for reporting validation errors
      */
     private fun validateRawStringContent(
         rawContent: String,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         baseLocation: Location,
         messageSink: MessageSink
     ) {
@@ -132,7 +131,7 @@ class KsonStringValidator {
 
     private fun validateEscapeSequence(
         scanner: StringContentScanner,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         messageSink: MessageSink
     ) {
         val escapeStartLocation = scanner.currentLocation()
@@ -181,7 +180,7 @@ class KsonStringValidator {
     private fun validateRegularEscape(
         scanner: StringContentScanner,
         nextChar: Char,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         escapeStartLocation: Location,
         messageSink: MessageSink
     ) {
@@ -205,8 +204,8 @@ class KsonStringValidator {
     /**
      * A string may escape any of [validNonQuoteEscapes], along with the quote that delimits it
      */
-    private fun isValidStringEscape(escapedChar: Char, stringQuote: StringQuote?): Boolean {
-        return escapedChar in validNonQuoteEscapes || escapedChar == stringQuote?.quoteChar
+    private fun isValidStringEscape(escapedChar: Char, stringQuote: StringQuote): Boolean {
+        return escapedChar in validNonQuoteEscapes || escapedChar == stringQuote.quoteChar
     }
 
     private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {

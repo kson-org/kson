@@ -158,6 +158,20 @@ class KsonValueTest {
     }
 
     @Test
+    fun testEmbedBlockTagEscapesAreProcessed() {
+        val escapedTagBlock = KsonCore.parseToAst("""%a\tb\u0041\\c""" + "\ncontent%%").ast.toKsonValue()
+        val escapedTagObject = KsonCore.parseToAst("""embedTag: 'a\tb\u0041\\c'""" + "\nembedContent: content")
+            .ast.toKsonValue()
+
+        assertTrue(escapedTagBlock is EmbedBlock)
+        assertTrue(escapedTagObject is EmbedBlock)
+        assertEquals("a\tbA\\c", escapedTagBlock.embedTag.value)
+        assertEquals(escapedTagBlock, escapedTagObject)
+        assertEquals(escapedTagBlock.hashCode(), escapedTagObject.hashCode())
+        assertEquals(escapedTagBlock.asKsonObject(), escapedTagObject.asKsonObject())
+    }
+
+    @Test
     fun testksonValueStringProcessing() {
         // Test various escape sequences to ensure KsonString returns properly unescaped content
         val source = """

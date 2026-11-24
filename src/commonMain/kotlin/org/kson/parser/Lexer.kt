@@ -375,6 +375,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
             }
             Percent.char, Dollar.char -> {
                 addLiteralToken(EMBED_OPEN_DELIM)
+                // consume any inline whitespace following our opening delimiter; it's not considered embed tag content
+                if (isInlineWhitespace(sourceScanner.peek())) {
+                    while (isInlineWhitespace(sourceScanner.peek())) {
+                        sourceScanner.advance()
+                    }
+                    addLiteralToken(WHITESPACE)
+                }
                 embeddedBlock(char)
             }
             else -> {
@@ -449,14 +456,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun embeddedBlock(delimChar: Char) {
-        // consume non-newline whitespace right after our opening delimiter
-        if (isInlineWhitespace(sourceScanner.peek())) {
-            while (isInlineWhitespace(sourceScanner.peek())) {
-                sourceScanner.advance()
-            }
-            addLiteralToken(WHITESPACE)
-        }
-
         if (sourceScanner.eof()) {
             return
         }
