@@ -100,7 +100,8 @@ internal data class NewKeySite(val objectPointer: TreePointer<AstNode>, val repl
  * The builder handles several cursor-position scenarios:
  * - **Position after colon**: adds the property name to target the value being entered
  * - **Position on a property key**: includes the property name in the path (for definition lookups)
- * - **Position outside token**: removes the last path element to target the parent (for completions)
+ * - **Position outside token**: removes the last path element to target the parent (for completions),
+ *   or resolves nothing (for definition lookups)
  *
  * [newKeySite] answers a related question: where a key typed at the cursor would go.
  *
@@ -115,11 +116,11 @@ class KsonValuePathBuilder(
     /**
      * Builds a JSON Pointer from the document root to the target location.
      *
-     * @param includePropertyKeys If true, keeps the path to the current property even when
-     *   the cursor is outside a token. This is useful for "jump to definition" where we
-     *   want the property's schema definition, not its parent. Default is true.
-     * @return A [TreePointer] through the document's AST from root to target,
-     *         or null if the document is completely unparseable
+     * @param includePropertyKeys True for a definition or hover lookup: the cursor must be inside a token, and a
+     *   property key resolves to its property rather than to the object holding it.  False for completion, which
+     *   resolves a cursor anywhere.  Default is true.
+     * @return A [TreePointer] through the document's AST from root to target, or null if the document is
+     *         completely unparseable or a definition or hover lookup finds the cursor on no token in the tree
      */
     fun buildTreePointerToPosition(includePropertyKeys: Boolean = true): TreePointer<AstNode>? =
         buildCaretPath(includePropertyKeys)?.pointer
@@ -136,19 +137,24 @@ class KsonValuePathBuilder(
      * A caret can also fall outside the tree entirely: a key with no `:` yet is not a keyword, so an
      * undelimited object ends at it and everything from there on is trailing content.
      *
-     * @return The resolved [CaretPath], or null if the document is completely unparseable
+     * A definition/hover lookup describes the token the caret is inside, so it resolves nothing for a
+     * caret in whitespace, in a comment, at a comma or past a closer, nor for a token outside the tree.
+     *
+     * @return The resolved [CaretPath], or null if the document is completely unparseable or a
+     *   definition/hover lookup finds the caret on no token in the tree
      */
     fun buildCaretPath(includePropertyKeys: Boolean = true): CaretPath? {
-        val rootNode = document.rootAstNode
-            ?: return if (document.content.isBlank()) CaretPath(TreePointer(JsonPointer.ROOT), null) else null
-
         // Analyze token context using meaningful (non-whitespace) tokens
         val tokenContext = analyzeTokenContext(location)
+        if (includePropertyKeys && !tokenContext.isInsideToken) return null
+
+        val rootNode = document.rootAstNode
+            ?: return if (document.content.isBlank()) CaretPath(TreePointer(JsonPointer.ROOT), null) else null
 
         // Navigate to the target node and build the path via the AST walker.  A caret with no token at
         // or before it sits before the tree, which starts at its first meaningful token.
         val navResult = tokenContext.lastToken?.let { navigateFromToken(rootNode, it, tokenContext.isInsideToken) }
-            ?: return caretOutsideTreePath(rootNode, includePropertyKeys)
+            ?: return if (includePropertyKeys) null else caretOutsideTreePath(rootNode)
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
@@ -167,9 +173,7 @@ class KsonValuePathBuilder(
      * the tree, as if the caret sat in the whitespace just after that token, so a key being typed
      * into an undelimited object—which ends that object—still completes against it.
      */
-    private fun caretOutsideTreePath(rootNode: AstNode, includePropertyKeys: Boolean): CaretPath {
-        if (includePropertyKeys) return CaretPath(TreePointer(JsonPointer.ROOT), null)
-
+    private fun caretOutsideTreePath(rootNode: AstNode): CaretPath {
         val (anchor, navResult) = meaningfulTokensUpTo(location).asReversed().firstNotNullOfOrNull { token ->
             navigateFromToken(rootNode, token, isInsideToken = false)?.let { token to it }
         } ?: return CaretPath(TreePointer(JsonPointer.ROOT), null)
@@ -325,8 +329,7 @@ class KsonValuePathBuilder(
      * Handles special cases:
      * 1. Location after a colon: Add the property name to target the value being entered
      * 2. Location on a property key: Add the property name to the path (for definition lookups)
-     * 3. Location outside token bounds: Remove the last path element to target the parent
-     *    (unless includePropertyKeys is true, in which case keep the path to the property)
+     * 3. Location past the token: Remove the last path element to target the parent
      */
     private fun adjustPathForLocationContext(
         pointer: TreePointer<AstNode>,
@@ -342,10 +345,8 @@ class KsonValuePathBuilder(
         // Cases are tried in priority order; each helper returns null when its case does not apply,
         // and the final leaf/as-is case always produces a result.
         afterColonCaretPath(pointer, colonToken, colonPropertyName, targetNode)?.let { return it }
-        propertyKeyCaretPath(
-            pointer, lastToken, isLocationInsideToken, targetNode, includePropertyKeys, meaningfulTokens
-        )?.let { return it }
-        parentCaretPath(pointer, lastToken, isLocationInsideToken, includePropertyKeys)?.let { return it }
+        propertyKeyCaretPath(pointer, lastToken, targetNode, includePropertyKeys, meaningfulTokens)?.let { return it }
+        parentCaretPath(pointer, lastToken, isLocationInsideToken)?.let { return it }
         return leafOrAsIsCaretPath(pointer, lastToken, targetNode, includePropertyKeys)
     }
 
@@ -380,13 +381,11 @@ class KsonValuePathBuilder(
     private fun propertyKeyCaretPath(
         pointer: TreePointer<AstNode>,
         lastToken: Token?,
-        isLocationInsideToken: Boolean,
         targetNode: AstNode,
         includePropertyKeys: Boolean,
         meaningfulTokens: List<Token>
     ): CaretPath? {
-        val onPropertyKey = isLocationInsideToken &&
-                (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
+        val onPropertyKey = (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
                         lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
                         lastToken?.tokenType == TokenType.STRING_CONTENT) &&
                 AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
@@ -414,19 +413,17 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * Location outside the token while completing (not keeping property keys): target the parent element
-     * by dropping the last path segment.  Excludes the tokens that open a value the caret is now inside
-     * and the pointer already names: the container delimiters (`[`, `{`, `<`) and a list dash, which opens
-     * an element the same way.  Dropping a segment at any of those would overshoot to the grandparent.
-     * Returns null when the caret is not in this position.
+     * Location past the token: target the parent element by dropping the last path segment.  Excludes
+     * the tokens that open a value the caret is now inside and the pointer already names: the container
+     * delimiters (`[`, `{`, `<`) and a list dash, which opens an element the same way.  Dropping a segment
+     * at any of those would overshoot to the grandparent.  Returns null when the caret is not in this position.
      */
     private fun parentCaretPath(
         pointer: TreePointer<AstNode>,
         lastToken: Token?,
-        isLocationInsideToken: Boolean,
-        includePropertyKeys: Boolean
+        isLocationInsideToken: Boolean
     ): CaretPath? {
-        val targetsParent = !isLocationInsideToken && !includePropertyKeys &&
+        val targetsParent = !isLocationInsideToken &&
                 lastToken?.tokenType != TokenType.SQUARE_BRACKET_L &&
                 lastToken?.tokenType != TokenType.CURLY_BRACE_L &&
                 lastToken?.tokenType != TokenType.ANGLE_BRACKET_L &&

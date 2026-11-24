@@ -236,10 +236,6 @@ class KsonValuePathBuilderTest {
             expectedPath = JsonPointer.ROOT,
             includePropertyKeys = false
         )
-        assertPathAtCaret(
-            "{x: {a: } <caret> }",
-            expectedPath = JsonPointer.fromTokens(listOf("x"))
-        )
     }
 
     @Test
@@ -264,10 +260,10 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildTreePointerToPosition_afterEmptyValueCloserAndComma_forDefinition() {
-        // whitespace past a comma is on the value before it, here the object the `}` closed
+        // a definition lookup describes the token at the caret, and whitespace past a comma is on none
         assertPathAtCaret(
             "{\"outer\": {\"x\": },\n<caret>\n}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer"))
+            expectedPath = null
         )
     }
 
@@ -289,14 +285,14 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildTreePointerToPosition_afterQuotedValueAndComma_forDefinition() {
-        // whitespace past a comma is on the value before it, quoted or not
+        // whitespace past a comma is on no token, whatever the value before it
         assertPathAtCaret(
             "{\"outer\": {\"a\": \"x\",\n<caret>\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
         assertPathAtCaret(
             "{\"outer\": {\"a\": 1,\n<caret>\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
     }
 
@@ -327,13 +323,14 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildTreePointerToPosition_rightAfterComma_forDefinition() {
+        // a comma holds nothing to describe, so the caret touching its end is on no token
         assertPathAtCaret(
             "{\"outer\": {\"a\": 1,<caret>\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
         assertPathAtCaret(
             "{\"outer\": {\"a\": \"x\",<caret>\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
     }
 
@@ -399,14 +396,14 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildTreePointerToPosition_betweenCloserAndComma_forDefinition() {
-        // a caret touching the `}` is past it, as whitespace past the `}` is, so on `outer`
+        // a caret touching the `}` is past it, as whitespace past the `}` is, so on no token
         assertPathAtCaret(
             "{\"outer\": {\"x\": 1}<caret>, \"b\": 2}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer"))
+            expectedPath = null
         )
         assertPathAtCaret(
             "{\"outer\": {\"x\": 1} <caret>, \"b\": 2}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer"))
+            expectedPath = null
         )
     }
 
@@ -466,14 +463,14 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildTreePointerToPosition_beforeSpacedComma_forDefinition() {
-        // whitespace before a comma is on the value before it, as whitespace past one is
+        // whitespace before a comma is on no token, as whitespace past one is
         assertPathAtCaret(
             "{\"outer\": {\"a\": 1 <caret>,\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
         assertPathAtCaret(
             "{\"outer\": {\"a\": \"x\" <caret>,\n}}",
-            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+            expectedPath = null
         )
     }
 
@@ -564,18 +561,14 @@ class KsonValuePathBuilderTest {
             expectedPath = JsonPointer.fromTokens(listOf("a")),
             includePropertyKeys = false
         )
-        assertPathAtCaret(
-            "{a: <caret>,}",
-            expectedPath = JsonPointer.fromTokens(listOf("a"))
-        )
     }
 
     @Test
     fun testBuildTreePointerToPosition_definitionAfterDelimitedObject() {
-        // whitespace past the `}` is on the object it closed, not on `dark`, the last value inside it
+        // whitespace past the `}` is on no token, so it resolves to neither the object nor `dark` inside it
         assertPathAtCaret(
             "settings: {theme: dark} <caret>",
-            expectedPath = JsonPointer.fromTokens(listOf("settings"))
+            expectedPath = null
         )
     }
 
@@ -583,8 +576,18 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_definitionAfterBracketList() {
         assertPathAtCaret(
             "a: [1, 2] <caret>",
-            expectedPath = JsonPointer.fromTokens(listOf("a"))
+            expectedPath = null
         )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_definitionOffAToken() {
+        // a definition lookup describes the token at the caret, and a comment, the space after a colon or an empty
+        // document holds none
+        assertPathAtCaret("a: x # a <caret>note\nb: y", expectedPath = null)
+        assertPathAtCaret("# a <caret>note\na: x", expectedPath = null)
+        assertPathAtCaret("name: <caret>\nage: 30", expectedPath = null)
+        assertPathAtCaret("<caret>", expectedPath = null)
     }
 
     @Test
@@ -597,7 +600,7 @@ class KsonValuePathBuilderTest {
               name: John
               a<caret>
             """.trimIndent(),
-            expectedPath = JsonPointer.ROOT
+            expectedPath = null
         )
     }
 
@@ -622,7 +625,8 @@ class KsonValuePathBuilderTest {
             name: <caret>
             age: 30
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name")),
+            includePropertyKeys = false
         )
     }
 
@@ -630,7 +634,8 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
+            expectedPath = JsonPointer.ROOT, // Empty document returns root pointer for schema completions
+            includePropertyKeys = false
         )
     }
 
@@ -748,7 +753,8 @@ class KsonValuePathBuilderTest {
               "age": 30
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name")),
+            includePropertyKeys = false
         )
     }
 
@@ -756,7 +762,8 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
+            expectedPath = JsonPointer.ROOT, // Empty document returns root pointer for schema completions
+            includePropertyKeys = false
         )
     }
 
@@ -798,7 +805,8 @@ class KsonValuePathBuilderTest {
               "key": <caret>
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("key"))
+            expectedPath = JsonPointer.fromTokens(listOf("key")),
+            includePropertyKeys = false
         )
     }
 
@@ -844,7 +852,8 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name", "name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name", "name")),
+            includePropertyKeys = false
         )
     }
 
@@ -858,7 +867,8 @@ class KsonValuePathBuilderTest {
               "key\twith\ttabs": <caret>
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs"))
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs")),
+            includePropertyKeys = false
         )
     }
 
@@ -888,7 +898,8 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("it's", "it\\'s"))
+            expectedPath = JsonPointer.fromTokens(listOf("it's", "it\\'s")),
+            includePropertyKeys = false
         )
     }
 

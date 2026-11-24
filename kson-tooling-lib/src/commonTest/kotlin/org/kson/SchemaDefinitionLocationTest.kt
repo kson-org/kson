@@ -762,6 +762,42 @@ class SchemaDefinitionLocationTest {
     }
 
     @Test
+    fun testJumpToDefinition_nothingOffAToken() {
+        // go-to-definition answers for the token at the caret, and whitespace, a comment, a comma or a closer's end
+        // holds none
+        val schema = """
+            {
+              "properties": {
+                "a": { "type": "string" },
+                "o": { "type": "object" }
+              }
+            }
+        """.trimIndent()
+        assertDefinitionLocation(schema, "{\n  \"a\": \"x\",\n  <caret>\n  \"o\": {}\n}")
+        assertDefinitionLocation(schema, "{ \"a\": \"x\",<caret> \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"a\": \"x\" <caret>, \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"a\": \"x\",   <caret>   \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"a\": \"x\", # a <caret>note\n  \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"o\": {}<caret>, \"a\": \"x\" }")
+    }
+
+    @Test
+    fun testJumpToDefinition_onAToken() {
+        val schema = """
+            {
+              "properties": {
+                "a": <caret>{ "type": "string" }<caret>,
+                "o": { "type": "object" }
+              }
+            }
+        """.trimIndent()
+        assertDefinitionLocation(schema, "{ \"<caret>a\": \"x\", \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"a\": \"<caret>x\", \"o\": {} }")
+        assertDefinitionLocation(schema, "{ \"a\": \"x\"<caret>, \"o\": {} }")
+        assertDefinitionLocation(schema, "{ a: xyz<caret>, o: {} }")
+    }
+
+    @Test
     fun testJumpToDefinition_propertyNothingDeclaresFindsTheTrueAllowingIt() {
         assertDefinitionLocation(
             schemaWithCaret = """
