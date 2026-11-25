@@ -138,7 +138,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
     }
 
     /**
-     * Transform the given [KsonMarker] tree rooted at [marker] into a full Kson [AstNode] tree.
+     * Transform the given [KsonMarker] tree rooted at [marker] into a full KSON [AstNode] tree.
      *
      * WARNING "UNSAFE" CODE: this is the RARE (ideally ONLY???) place where we allow unsafe/loose
      *  coding practices to convert our [KsonMarker] tree in a proper [AstNode]-based AST.  We allow this
@@ -203,13 +203,8 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
 
                         val embedTagNode = childMarkers.find { it.element == EMBED_TAG }?.let{
-                            QuotedStringNode(
-                                it.getSourceTokens(),
-                                // TODO this needs to be formalized as a "quoted" string, even if the quotes are novel
-                                //   then this should pass the quote type, not null
-                                null
-                            )
-                        }
+                            QuotedStringNode(it.getSourceTokens(), StringQuote.Quoteless)
+                        } ?: throw ShouldNotHappenException("The parser ensures we have an embed tag here")
 
                         val embedDelim = EmbedDelim.fromString(embedDelimChar)
 
@@ -238,7 +233,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                                 throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
                             }
                         }
-                        return ObjectKeyNodeImpl(objectKey)
+                        ObjectKeyNodeImpl(objectKey)
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
@@ -389,16 +384,10 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         propertyNodes: List<ObjectPropertyNode>,
         marker: KsonMarker
     ): EmbedBlockNode? {
-        if (propertyNodes.size > 2) { return null }
+        if (propertyNodes.size != EmbedObjectKeys.entries.size) { return null }
 
         val embedTagNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_TAG)
-
-        if (embedTagNode == null && propertyNodes.size > 1) {
-            // if embed tag is null, then in order to be decoded as an embed block,
-            // the object must have exactly one property: the embed content
-            return null
-        }
-
+            ?: return null
         val embedContentNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_CONTENT)
             ?: return null
 
@@ -419,7 +408,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
     ): StringNodeImpl? {
         return propertyNodes.filterIsInstance<ObjectPropertyNodeImpl>().find { prop ->
             val keyString = (prop.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
-            keyString?.rawStringContent == embedKey.key && prop.value is StringNodeImpl
+            keyString?.processedStringContent == embedKey.key && prop.value is StringNodeImpl
         }?.value as? StringNodeImpl
     }
 

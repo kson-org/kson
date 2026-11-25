@@ -294,7 +294,7 @@ class KotlinObjectBase:
 
 
 class FormatOptions(KotlinObjectBase):
-    """Options for formatting Kson output.
+    """Options for formatting KSON output.
 
     @param indentType The type of indentation to use (spaces or tabs)
     @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
@@ -445,7 +445,7 @@ class Position(KotlinObjectBase):
 
 
 class Message(KotlinObjectBase):
-    """Represents a message logged during Kson processing"""
+    """Represents a message logged during KSON processing"""
 
 
 
@@ -539,7 +539,7 @@ class Message(KotlinObjectBase):
 
 
 class Token(KotlinObjectBase):
-    """[Token] produced by the lexing phase of a Kson parse"""
+    """[Token] produced by the lexing phase of a KSON parse"""
 
 
 
@@ -727,7 +727,7 @@ class KsonValue(KotlinObjectBase):
                 return _from_kotlin_object(_KsonValue_KsonNumber_Integer, jni_ref)
 
 class _KsonValue_KsonObject(KsonValue):
-    """A Kson object with key-value pairs"""
+    """A KSON object with key-value pairs"""
 
 
 
@@ -768,7 +768,7 @@ KsonValue.KsonObject = _KsonValue_KsonObject
 
 
 class _KsonValue_KsonArray(KsonValue):
-    """A Kson array with elements"""
+    """A KSON array with elements"""
 
 
 
@@ -792,7 +792,7 @@ KsonValue.KsonArray = _KsonValue_KsonArray
 
 
 class _KsonValue_KsonString(KsonValue):
-    """A Kson string value"""
+    """A KSON string value"""
 
 
 
@@ -816,7 +816,7 @@ KsonValue.KsonString = _KsonValue_KsonString
 
 
 class _KsonValue_KsonNumber(KsonValue):
-    """A Kson number value."""
+    """A KSON number value."""
 
 
     Decimal: TypeAlias
@@ -932,7 +932,7 @@ KsonValue.KsonNumber.Decimal = _KsonValue_KsonNumber_Decimal
 
 
 class _KsonValue_KsonBoolean(KsonValue):
-    """A Kson boolean value"""
+    """A KSON boolean value"""
 
 
 
@@ -956,20 +956,20 @@ KsonValue.KsonBoolean = _KsonValue_KsonBoolean
 
 
 class _KsonValue_KsonNull(KsonValue):
-    """A Kson null value"""
+    """A KSON null value"""
 
 
 KsonValue.KsonNull = _KsonValue_KsonNull
 
 
 class _KsonValue_KsonEmbed(KsonValue):
-    """A Kson embed block"""
+    """A KSON embed block"""
 
 
 
     def tag(
         self,
-    ) -> Optional[str]:
+    ) -> str:
 
 
         jni_ref = self._jni_ref
@@ -982,7 +982,7 @@ class _KsonValue_KsonEmbed(KsonValue):
             []
         )
 
-        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
+        return cast(Any, (_java_string_to_python_str)(result))
 
     def content(
         self,
@@ -1005,7 +1005,7 @@ KsonValue.KsonEmbed = _KsonValue_KsonEmbed
 
 
 class SchemaValidator(KotlinObjectBase):
-    """A validator that can check if Kson source conforms to a schema."""
+    """A validator that can check if KSON source conforms to a schema."""
 
 
 
@@ -1139,7 +1139,7 @@ EmbedRuleResult.Failure = _EmbedRuleResult_Failure
 
 
 class Analysis(KotlinObjectBase):
-    """The result of statically analyzing a Kson document"""
+    """The result of statically analyzing a KSON document"""
 
 
 
@@ -1199,7 +1199,7 @@ class Analysis(KotlinObjectBase):
 
 
 class Result(KotlinObjectBase):
-    """Result of a Kson conversion operation"""
+    """Result of a KSON conversion operation"""
 
 
     Failure: TypeAlias
@@ -1414,7 +1414,7 @@ class TranspileOptions(KotlinObjectBase):
                 return _from_kotlin_object(_TranspileOptions_Yaml, jni_ref)
 
 class _TranspileOptions_Json(TranspileOptions):
-    """Options for transpiling Kson to JSON."""
+    """Options for transpiling KSON to JSON."""
 
 
     def __init__(
@@ -1435,7 +1435,7 @@ TranspileOptions.Json = _TranspileOptions_Json
 
 
 class _TranspileOptions_Yaml(TranspileOptions):
-    """Options for transpiling Kson to YAML."""
+    """Options for transpiling KSON to YAML."""
 
 
     def __init__(
@@ -1457,7 +1457,7 @@ TranspileOptions.Yaml = _TranspileOptions_Yaml
 
 
 class Kson(KotlinObjectBase):
-    """The [Kson](https://kson.org) language"""
+    """The [KSON](https://kson.org) language"""
 
 
 
@@ -1467,11 +1467,11 @@ class Kson(KotlinObjectBase):
         format_options: FormatOptions,
 
     ) -> str:
-        """Formats Kson source with the specified formatting options.
+        """Formats KSON source with the specified formatting options.
 
-        @param kson The Kson source to format
+        @param kson The KSON source to format
         @param formatOptions The formatting options to apply
-        @return The formatted Kson source
+        @return The formatted KSON source
         """
 
         if kson is None:
@@ -1500,9 +1500,9 @@ class Kson(KotlinObjectBase):
         options: _TranspileOptions_Json,
 
     ) -> Result:
-        """Converts Kson to Json.
+        """Converts KSON to Json.
 
-        @param kson The Kson source to convert
+        @param kson The KSON source to convert
         @param options Options for the JSON transpilation
         @return A Result containing either the Json output or error messages
         """
@@ -1533,9 +1533,9 @@ class Kson(KotlinObjectBase):
         options: _TranspileOptions_Yaml,
 
     ) -> Result:
-        """Converts Kson to Yaml, preserving comments
+        """Converts KSON to Yaml, preserving comments
 
-        @param kson The Kson source to convert
+        @param kson The KSON source to convert
         @param options Options for the YAML transpilation
         @return A Result containing either the Yaml output or error messages
         """
@@ -1567,9 +1567,9 @@ class Kson(KotlinObjectBase):
         schema_validator: Optional[SchemaValidator],
 
     ) -> Analysis:
-        """Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
+        """Statically analyze the given KSON and return an [Analysis] object containing any messages generated along with a
         tokenized version of the source.  Useful for tooling/editor support.
-        @param kson The Kson source to analyze
+        @param kson The KSON source to analyze
         @param filepath (Optional) Filepath of the document being analyzed
         @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
                  able to be validated against a schema
@@ -1599,10 +1599,10 @@ class Kson(KotlinObjectBase):
         schema_kson: str,
 
     ) -> SchemaResult:
-        """Parses a Kson schema definition and returns a validator for that schema.
+        """Parses a KSON schema definition and returns a validator for that schema.
 
-        @param schemaKson The Kson source defining a Json Schema
-        @return A SchemaValidator that can validate Kson documents against the schema
+        @param schemaKson The KSON source defining a Json Schema
+        @return A SchemaValidator that can validate KSON documents against the schema
         """
 
         if schema_kson is None:
@@ -1733,7 +1733,7 @@ class EmbedRule(KotlinObjectBase):
 
 
 class IndentType(KotlinObjectBase):
-    """Options for indenting Kson Output"""
+    """Options for indenting KSON Output"""
 
 
     Tabs: TypeAlias
@@ -1851,7 +1851,7 @@ class KsonValueType(Enum):
 
 
 class FormattingStyle(Enum):
-    """[FormattingStyle] options for Kson Output"""
+    """[FormattingStyle] options for KSON Output"""
 
     def _to_kotlin_enum(self):
         match self:

@@ -110,7 +110,7 @@ interface AstNode {
 }
 
 /**
- * Base [AstNode] to be subclassed by all Kson AST Node classes
+ * Base [AstNode] to be subclassed by all KSON AST Node classes
  */
 sealed class AstNodeImpl(override val sourceTokens: List<Token>) : AstNode {
     override val location: Location by lazy {
@@ -696,16 +696,16 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
      * Renders this string as an embed block with the given tag.
      *
      * @param indent The indentation to apply
-     * @param compileTarget The Kson compile target with formatting configuration
+     * @param compileTarget The KSON compile target with formatting configuration
      * @param embedTag Optional embed tag to include (e.g., "yaml", "sql")
      * @return The rendered embed block string
      */
     private fun renderAsEmbedBlock(indent: Indent, compileTarget: Kson, embedTag: String?): String {
         val content = processedStringContent
-        val preamble = embedTag ?: ""
+        val embedTagSource = EmbedTagSource.fromTag(embedTag ?: "")
 
         return EmbedBlockRenderer.renderKsonEmbedBlock(
-            content, preamble, indent, compileTarget.formatConfig.formattingStyle,
+            content, embedTagSource, indent, compileTarget.formatConfig.formattingStyle,
             nestedContentIndent = false
         )
     }
@@ -729,8 +729,7 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
 
 class QuotedStringNode(
     sourceTokens: List<Token>,
-    // TODO this should not be nullable
-    val stringQuote: StringQuote?,
+    val stringQuote: StringQuote,
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
@@ -738,16 +737,12 @@ class QuotedStringNode(
     }
 
     override val processedStringContent: String by lazy {
-        if (stringQuote != null) {
-            contentTransformer.processedContent
-        } else {
-            rawStringContent
-        }
+        contentTransformer.processedContent
     }
 
     /**
      * Note: [rawStringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
-     *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
+     *   including all escapes, but excluding any outer quotes. A [Kson] string is escaped identically to a Json string,
      *   except that [Kson] allows raw whitespace to be embedded in strings
      */
     override val rawStringContent: String by lazy {
@@ -755,18 +750,18 @@ class QuotedStringNode(
     }
 
     /**
-     * An "unquoted" Kson string: i.e. a valid Kson string with all escapes intact except for quote escapes.
+     * An "unquoted" KSON string: i.e. a valid KSON string with all escapes intact except for quote escapes.
      * This string must be [SingleQuote]'ed or [DoubleQuote]'ed and then quote-escaped with [StringQuote.escapeQuotes]
      * to obtain a fully valid KsonString
      */
     override val delimiterUnescapedRawContent: String by lazy {
-        stringQuote?.unescapeQuotes(rawStringContent) ?: rawStringContent
+        stringQuote.unescapeQuotes(rawStringContent)
     }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (StringUnquoted.isUnquotable(delimiterUnescapedRawContent)) {
             /**
-             * This string does not require quotes in Kson, so we use the [renderUnquotableKsonString]
+             * This string does not require quotes in KSON, so we use the [renderUnquotableKsonString]
              * to get the best rendering for this string across all compile targets
              */
             return renderUnquotableKsonString(delimiterUnescapedRawContent, indent, compileTarget)
@@ -790,7 +785,7 @@ class QuotedStringNode(
     }
 
     /**
-     * Renders this string as a quoted Kson string, preferring single-quotes unless double-quotes would
+     * Renders this string as a quoted KSON string, preferring single-quotes unless double-quotes would
      * require less escaping
      */
     private fun renderWithPreferredQuote(indent: Indent): String {
@@ -939,20 +934,17 @@ class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     }
 }
 
+/**
+ * An embed block, equivalent to an object with exactly the two string properties described by [EmbedObjectKeys]
+ */
 class EmbedBlockNode(
-    val embedTagNode: StringNodeImpl?,
+    val embedTagNode: StringNodeImpl,
     val embedContentNode: StringNodeImpl,
     sourceTokens: List<Token>
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
-    /**
-     * A "raw" KSON embed tag, with all its escapes needed to embed directly into KSON/JSON/YAML intact
-     */
-    private val rawEmbedTag: String = embedTagNode?.delimiterUnescapedRawContent?.let {
-        // embedTags are ended by raw newlines, so we simply escape all raw whitespace
-        escapeRawWhitespace(it)
-    } ?: ""
+    private val embedTagSource: EmbedTagSource = EmbedTagSource.fromTagNode(embedTagNode)
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -972,7 +964,7 @@ class EmbedBlockNode(
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
         return when (val formattingStyle = compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED, COMPACT -> EmbedBlockRenderer.renderKsonEmbedBlock(
-                embedContent, rawEmbedTag, indent, formattingStyle
+                embedContent, embedTagSource, indent, formattingStyle
             )
             CLASSIC -> renderJsonFormat(indent, compileTarget as? Json ?: Json())
         }
@@ -1016,13 +1008,10 @@ class EmbedBlockNode(
      * @return The rendered JSON object string
      */
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
-        val embedTagLine = if (rawEmbedTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\",\n"
-        } else ""
-
         return """
             |${indent.firstLineIndent()}{
-            |$embedTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
+            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_TAG.key}": "${embedTagSource.doubleQuotedStringSource}",
+            |${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
             |${indent.bodyLinesIndent()}}
         """.trimMargin()
     }
@@ -1034,11 +1023,7 @@ class EmbedBlockNode(
      * @return The rendered YAML object string
      */
     private fun renderYamlObject(indent: Indent): String {
-        val embedTagLine = if (rawEmbedTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(rawEmbedTag)}\"\n"
-        } else ""
-
-        return embedTagLine +
+        return "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${embedTagSource.doubleQuotedStringSource}\"\n" +
                 "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                 renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }
@@ -1145,7 +1130,7 @@ internal object EmbedBlockRenderer {
      * Renders content as a KSON embed block.
      *
      * @param content The string content to render
-     * @param preamble The embed block preamble (tag and optional metadata)
+     * @param embedTagSource The source for the embed block's tag
      * @param indent The indentation to apply
      * @param formattingStyle The formatting style to use (NOTE: [FormattingStyle.CLASSIC] is unsupported because
      *   embed blocks are not rendered in [FormattingStyle.CLASSIC])
@@ -1155,7 +1140,7 @@ internal object EmbedBlockRenderer {
      */
     fun renderKsonEmbedBlock(
         content: String,
-        preamble: String,
+        embedTagSource: EmbedTagSource,
         indent: Indent,
         formattingStyle: FormattingStyle,
         nestedContentIndent: Boolean = false
@@ -1168,12 +1153,12 @@ internal object EmbedBlockRenderer {
                 val indentedContent = escapedContent.lines()
                     .joinToString("\n${contentIndent.bodyLinesIndent()}")
 
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}$preamble\n" +
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}${embedTagSource.embedBlockSource}\n" +
                     "${contentIndent.bodyLinesIndent()}$indentedContent\n" +
                     "${contentIndent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                "${delimiter.openDelimiter}$preamble\n$escapedContent\n${delimiter.closeDelimiter}"
+                "${delimiter.openDelimiter}${embedTagSource.embedBlockSource}\n$escapedContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> throw ShouldNotHappenException("Embed blocks are not rendered in CLASSIC format, which is JSON")
         }

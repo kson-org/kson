@@ -11,7 +11,7 @@ import org.kson.TranspileOptions
 /**
  * Gradle task that transpiles KSON files to YAML format.
  *
- * This task reads a KSON input file, transpiles it to YAML using the Kson library,
+ * This task reads a KSON input file, transpiles it to YAML using the KSON library,
  * and writes the result to an output file. The task is configured with input/output
  * file tracking for Gradle's up-to-date checking.
  *

@@ -9,8 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Interface to tie together our tests that exercise and verify [KsonCore] behavior on invalid Kson and give a home to our
- * custom assertions for these tests.  For tests parsing valid Kson, see [KsonCoreTest].
+ * Interface to tie together our tests that exercise and verify [KsonCore] behavior on invalid KSON and give a home to our
+ * custom assertions for these tests.  For tests parsing valid KSON, see [KsonCoreTest].
  *
  * The tests of type [KsonCoreTestError] are split out basically along the lines of the grammar.  Tests that cross-cut
  * concerns may live in this root test class.

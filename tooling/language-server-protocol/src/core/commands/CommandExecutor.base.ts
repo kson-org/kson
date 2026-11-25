@@ -12,7 +12,7 @@ import {formattingStyleFromId} from '../formattingStyle.js';
 import {KsonDocument} from "../document/KsonDocument.js";
 
 /**
- * Base class for command execution in the Kson Language Server.
+ * Base class for command execution in the KSON Language Server.
  * Platform-specific implementations extend this to handle environment-specific commands.
  */
 export abstract class CommandExecutorBase {

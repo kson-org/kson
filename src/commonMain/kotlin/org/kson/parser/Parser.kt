@@ -4,9 +4,10 @@ import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.stdlibx.exceptions.FatalParseException
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
- * Defines the Kson parser, implemented as a recursive descent parser which directly implements
+ * Defines the KSON parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
@@ -630,7 +631,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
+     * embedBlock -> EMBED_OPEN_DELIM EMBED_TAG EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_OPEN_DELIM) {
@@ -641,13 +642,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             builder.advanceLexer()
             embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
 
-            val embedTagMark = builder.mark()
-            if (builder.getTokenType() == EMBED_TAG) {
-                builder.advanceLexer()
-                embedTagMark.done(EMBED_TAG)
-            } else {
-                embedTagMark.drop()
+            if (builder.eof()) {
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
+                return true
             }
+            if (builder.getTokenType() != EMBED_TAG) {
+                throw ShouldNotHappenException("The lexer should ensure we have an EMBED_TAG token")
+            }
+
+            val embedTagMark = builder.mark()
+            builder.advanceLexer()
+            embedTagMark.done(EMBED_TAG)
 
             if (builder.eof()) {
                 embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))

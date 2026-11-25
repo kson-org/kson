@@ -95,7 +95,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param charToType the [Char] to type at the `<caret>` in the [before] text
      * @param expected the expected file contents (and `<caret>`) after [charToType] is entered
      * @param fileType defaults to [KsonFileType] which is what will mostly be tested, but can be overridden for special
-     *                  cases such testing to ensure that a Kson behavior does NOT appear for another filetype
+     *                  cases such testing to ensure that a KSON behavior does NOT appear for another filetype
      */
     fun doCharTest(before: String, charToType: Char, expected: String, fileType: LanguageFileType = KsonFileType) {
         val typedAction = TypedAction.getInstance()
@@ -115,7 +115,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      *   executed at the `<caret>` int he [before] text
      * @param expected the expected file contents after the actions is executed
      * @param fileType defaults to [KsonFileType] which is what will mostly be tested, but can be overridden for special
-     *                  cases such testing to ensure that a Kson behavior does NOT appear for another filetype
+     *                  cases such testing to ensure that a KSON behavior does NOT appear for another filetype
      */
     fun doIdeActionTest(before: String, ideActionId: String, expected: String, fileType: LanguageFileType = KsonFileType) {
         validateTestStrings(before, expected)

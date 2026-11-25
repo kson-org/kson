@@ -63,7 +63,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
     }
 
     /**
-     * Sanity check that we do NOT auto-delete closing angle brackets in non-Kson files
+     * Sanity check that we do NOT auto-delete closing angle brackets in non-KSON files
      */
     fun testNonKsonAngleBracketAutoDelete() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -71,7 +71,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
                 "<caret>>",
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
         }
@@ -229,7 +229,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
     }
 
     /**
-     * Sanity check that we do NOT auto-delete closing embed delimiters in non-Kson files
+     * Sanity check that we do NOT auto-delete closing embed delimiters in non-KSON files
      */
     fun testNonKsonEmbedDelimAutoDelete() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -243,7 +243,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 <caret>
                 %%
                 """.trimIndent(),
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
 
@@ -257,7 +257,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 <caret>
                 $$
                 """.trimIndent(),
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
         }

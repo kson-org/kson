@@ -154,7 +154,7 @@ All parsed values are subclasses of `KsonValue`:
 | `KsonValue.KsonNumber.Decimal` | `.value()` returns `float` |
 | `KsonValue.KsonBoolean` | `.value()` returns `bool` |
 | `KsonValue.KsonNull` | (no value) |
-| `KsonValue.KsonEmbed` | `.tag()` returns `str` or `None`, `.content()` returns `str` |
+| `KsonValue.KsonEmbed` | `.tag()` returns `str`, `.content()` returns `str` |
 
 Every value also has `.start()` and `.end()` returning a `Position` with `.line()` and `.column()` (both 0-based), useful for editor tooling and diagnostics.
 

@@ -2,7 +2,7 @@ package org.kson.jsonsuite
 
 /**
  * This class owns the list of modifications to the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
- * tests that we want to incorporate for Kson when generating [org.kson.parser.json.generated.JsonSuiteTest]
+ * tests that we want to incorporate for KSON when generating [org.kson.parser.json.generated.JsonSuiteTest]
  *
  * Note: we wrap the raw [jsonTestSuiteEditList] val in this class because we want to be able to link to this list
  *   from other places in the source (particularly the generated tests this affects, and Kotlin doc
@@ -24,7 +24,7 @@ class JsonTestSuiteEditList {
  */
 enum class JsonTestEditType {
     /**
-     * Assert that a "No"/"n_" test for Json should pass in Kson due to it being a superset of JSON
+     * Assert that a "No"/"n_" test for Json should pass in KSON due to it being a superset of JSON
      */
     ACCEPT_N_FOR_SUPERSET,
 

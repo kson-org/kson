@@ -2,9 +2,9 @@ package org.kson.jsonsuite
 
 /**
  * This is the list of [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
- * tests which currently fail against Kson and so are not run as part of the test suite, grouped by the reason they
+ * tests which currently fail against KSON and so are not run as part of the test suite, grouped by the reason they
  * fail.  It doubles as the to-do list for our Json Schema support.  The exception is [heldBackTests]: Draft 2020-12
- * tests that pass, but are held back until Kson supports that draft.
+ * tests that pass, but are held back until KSON supports that draft.
  *
  * Exclusions are listed per [SchemaDraft] as test ids of the form `file::group::test`.  The drafts share many test
  * names, so an id excludes its test only from the drafts it is listed for.
@@ -32,13 +32,13 @@ fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
         heldBackTests
 )
 
-/** Kson applies Draft 7's rules to every referenced schema document, whatever its `$schema` */
+/** KSON applies Draft 7's rules to every referenced schema document, whatever its `$schema` */
 private val crossDraftRefTests = setOf(
     "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid",
     "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid"
 )
 
-/** These expect `format` to be asserted, but Kson treats `format` as an annotation only */
+/** These expect `format` to be asserted, but KSON treats `format` as an annotation only */
 private val sharedFormatAssertionTests = setOf(
     "format-date-time::validation of date-time strings::2021 is not a leap year",
     "format-date-time::validation of date-time strings::a comma decimal separator with a time-offset",
@@ -541,7 +541,7 @@ private val draft2020_12OnlyFormatAssertionTests = setOf(
     "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string"
 )
 
-/** Kson does not support `$dynamicRef` or `$dynamicAnchor` */
+/** KSON does not support `$dynamicRef` or `$dynamicAnchor` */
 private val dynamicRefTests = setOf(
     $$"dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/$defs/length",
     $$"dynamicRef::$dynamicRef points to a boolean schema::follow $dynamicRef to a false schema",
@@ -568,7 +568,7 @@ private val dynamicRefTests = setOf(
     $$"unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with unevaluated properties"
 )
 
-/** Kson does not support `unevaluatedItems` or `unevaluatedProperties` */
+/** KSON does not support `unevaluatedItems` or `unevaluatedProperties` */
 private val unevaluatedTests = setOf(
     "not::collect annotations inside a 'not', even if collection is disabled::unevaluated property",
     "ref::ref creates new scope when adjacent to keywords::referenced subschema doesn't see annotations from properties",
@@ -645,7 +645,7 @@ private val unevaluatedTests = setOf(
     "unevaluatedProperties::unevaluatedProperties with oneOf::with unevaluated properties"
 )
 
-/** Kson does not support `prefixItems`, so applies `items` to every item instead of those after the prefix */
+/** KSON does not support `prefixItems`, so applies `items` to every item instead of those after the prefix */
 private val prefixItemsTests = setOf(
     "items::a schema given for prefixItems::wrong types",
     "items::items and subitems::fewer items is valid",
@@ -665,7 +665,7 @@ private val prefixItemsTests = setOf(
     "uniqueItems::uniqueItems=false with prefixItems and items=false::[true, true] from items array is valid"
 )
 
-/** Kson does not support `minContains` or `maxContains` */
+/** KSON does not support `minContains` or `maxContains` */
 private val minMaxContainsTests = setOf(
     "contains::maxContains < minContains::invalid maxContains",
     "contains::maxContains < minContains::invalid maxContains and minContains",
@@ -687,7 +687,7 @@ private val minMaxContainsTests = setOf(
     "contains::minContains=2 with contains::some elements match, invalid minContains"
 )
 
-/** Kson does not support `dependentRequired` or `dependentSchemas`, only their Draft 7 predecessor `dependencies` */
+/** KSON does not support `dependentRequired` or `dependentSchemas`, only their Draft 7 predecessor `dependencies` */
 private val dependentKeywordTests = setOf(
     "dependentRequired::dependencies with escaped characters::CRLF missing dependent",
     "dependentRequired::dependencies with escaped characters::quoted quotes missing dependent",
@@ -707,7 +707,7 @@ private val dependentKeywordTests = setOf(
     "dependentSchemas::single dependency::wrong type other"
 )
 
-/** Kson does not support `$anchor` */
+/** KSON does not support `$anchor` */
 private val anchorTests = setOf(
     $$"anchor::$ref to $ref finds detached $anchor::number is valid",
     "anchor::Location-independent identifier in remote ref::integer is valid",
@@ -733,12 +733,12 @@ private val anchorTests = setOf(
     $$"optional/non-schemas::anchor inside an enum is not a real identifier ($anchor)::no match on enum or $ref to $anchor"
 )
 
-/** Kson does not support `$vocabulary`, so applies the keywords of vocabularies a meta-schema leaves out */
+/** KSON does not support `$vocabulary`, so applies the keywords of vocabularies a meta-schema leaves out */
 private val vocabularyTests = setOf(
     "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"
 )
 
-/** Kson ignores the keywords beside a `$ref`, `$id` included, where 2020-12 applies them */
+/** KSON ignores the keywords beside a `$ref`, `$id` included, where 2020-12 applies them */
 private val refSiblingTests = setOf(
     "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field",
     "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema",
@@ -755,7 +755,7 @@ private val refSiblingTests = setOf(
     "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
 )
 
-/** Kson reads `$defs` as an unknown keyword, so an `$id` under it identifies no schema */
+/** KSON reads `$defs` as an unknown keyword, so an `$id` under it identifies no schema */
 private val defsTests = setOf(
     $$"dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/$defs/length",
     $$"dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::integer property passes",
@@ -794,7 +794,7 @@ private val defsTests = setOf(
     $$"unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with no unevaluated properties"
 )
 
-/** Kson rejects patterns using Unicode property escapes such as `\p{Letter}` as invalid regexes */
+/** KSON rejects patterns using Unicode property escapes such as `\p{Letter}` as invalid regexes */
 private val unicodePropertyEscapeTests = setOf(
     "optional/ecmascript-regex::pattern with non-ASCII digits::ascii digits",
     "optional/ecmascript-regex::pattern with non-ASCII digits::ascii non-digits",
@@ -821,7 +821,7 @@ private val unicodePropertyEscapeTests = setOf(
     "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches but value type is incorrect"
 )
 
-/** Kson's regexes do not follow ECMA-262 for `\s`, `\S` and `\c` */
+/** KSON's regexes do not follow ECMA-262 for `\s`, `\S` and `\c` */
 private val ecmascriptRegexTests = setOf(
     "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::EM SPACE does not match (Space_Separator)",
     "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::latin-1 non-breaking-space does not match",
@@ -834,7 +834,7 @@ private val ecmascriptRegexTests = setOf(
     "optional/ecmascript-regex::ECMA 262 regex escapes control codes with \\c and lower letter::matches"
 )
 
-/** Kson holds numbers at 64-bit precision, so rejects larger integers and conflates decimals differing beyond it */
+/** KSON holds numbers at 64-bit precision, so rejects larger integers and conflates decimals differing beyond it */
 private val bignumTests = setOf(
     "optional/bignum::const comparison with high precision::a slightly larger decimal is invalid",
     "optional/bignum::const comparison with high precision::a slightly smaller decimal is invalid",
@@ -853,7 +853,7 @@ private val bignumTests = setOf(
     "optional/bignum::uniqueItems comparison with high precision::objects containing distinct decimals are unique"
 )
 
-/** Kson does not assert `contentEncoding` or `contentMediaType`, which Draft 7 permits but does not require */
+/** KSON does not assert `contentEncoding` or `contentMediaType`, which Draft 7 permits but does not require */
 private val contentTests = setOf(
     "optional/content::validation of binary string-encoding::an invalid base64 string (% is not a valid character)",
     "optional/content::validation of binary-encoded media type documents::a validly-encoded invalid JSON document",
@@ -861,7 +861,7 @@ private val contentTests = setOf(
     "optional/content::validation of string-encoded content based on media type::an invalid JSON document"
 )
 
-/** These pass on Kson's Draft 7 engine, but are held back until Kson supports Draft 2020-12 */
+/** These pass on KSON's Draft 7 engine, but are held back until KSON supports Draft 2020-12 */
 private val heldBackTests = setOf(
     $$"anchor::$ref to $ref finds detached $anchor::non-number is invalid",
     "anchor::Location-independent identifier in remote ref::string is invalid",

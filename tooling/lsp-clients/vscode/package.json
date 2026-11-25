@@ -1,7 +1,7 @@
 {
   "name": "kson",
   "displayName": "KSON",
-  "description": "Provides language support for the Kson data format.",
+  "description": "Provides language support for the KSON data format.",
   "authors": [
     {
       "name": "KSON",
@@ -81,7 +81,7 @@
       }
     ],
     "configuration": {
-      "title": "Kson",
+      "title": "KSON",
       "properties": {
         "kson.enableBundledSchemas": {
           "type": "boolean",
@@ -99,7 +99,7 @@
             "Delimited formatting"
           ],
           "default": "plain",
-          "description": "Formatting style for Kson documents"
+          "description": "Formatting style for KSON documents"
         },
         "kson.codeLens.enable": {
           "type": "boolean",

@@ -44,7 +44,7 @@ type SchemaProviderFactory = (
 ) => Promise<SchemaProvider | undefined>;
 
 /**
- * Core Kson Language Server implementation.
+ * Core KSON Language Server implementation.
  *
  * @param connection The LSP connection
  * @param createSchemaProvider Factory function to create the appropriate schema provider for the environment
@@ -229,7 +229,7 @@ export function startKsonServer(
             // Pull initial configuration
             await pullConfiguration();
         }
-        logger.info('Kson Language Server initialized');
+        logger.info('KSON Language Server initialized');
     });
 
     // Handle custom request to get schema information for a document
@@ -308,5 +308,5 @@ export function startKsonServer(
 
     // Start listening for requests
     connection.listen();
-    connection.console.info('Kson Language Server started and listening');
+    connection.console.info('KSON Language Server started and listening');
 }

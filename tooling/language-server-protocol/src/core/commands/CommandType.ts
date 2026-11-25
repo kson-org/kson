@@ -1,21 +1,21 @@
 /**
- * Enum defining all commands the Kson Language Server can execute.
+ * Enum defining all commands the KSON Language Server can execute.
  *
  * Values are unqualified ids used internally as discriminators. On the wire,
  * they are prefixed with the active distribution id via {@link toWireCommandId}
  * and stripped again in {@link fromWireCommandId}.
  */
 export enum CommandType {
-    /** Format the document as plain Kson */
+    /** Format the document as plain KSON */
     PLAIN_FORMAT = 'plainFormat',
 
-    /** Format the document as delimited Kson */
+    /** Format the document as delimited KSON */
     DELIMITED_FORMAT = 'delimitedFormat',
 
-    /** Format the document as compact Kson */
+    /** Format the document as compact KSON */
     COMPACT_FORMAT = 'compactFormat',
 
-    /** Format the document as classic Kson */
+    /** Format the document as classic KSON */
     CLASSIC_FORMAT = 'classicFormat',
 
     /** Associate a schema with the current document */

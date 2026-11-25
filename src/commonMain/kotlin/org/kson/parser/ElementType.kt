@@ -11,7 +11,7 @@ interface ElementType
 /**
  * [ElementType]s for the tokens produced by [Lexer].
  *
- * Note: these generally correspond to the terminals in the Kson grammar documented on the [Parser] class, though
+ * Note: these generally correspond to the terminals in the KSON grammar documented on the [Parser] class, though
  *   some are produced by [Lexer] for the purpose of helping the parser produce more effective help/errors for
  *   the end user
  */
@@ -47,11 +47,12 @@ enum class TokenType : ElementType {
      */
     EMBED_CLOSE_DELIM,
     /**
-     * The line of text starting at an embed block's [EMBED_OPEN_DELIM], "tagging" that embedded content
+     * The rest of the line after an [EMBED_OPEN_DELIM] and any spaces or tabs following it: the (possibly empty)
+     * string "tagging" the embedded content
      */
     EMBED_TAG,
     /**
-     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
+     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
     EMBED_PREAMBLE_NEWLINE,
@@ -66,7 +67,7 @@ enum class TokenType : ElementType {
      */
     UNQUOTED_STRING,
     /**
-     * A char completely outside the Kson grammar. Used to give helpful errors to the user.
+     * A char completely outside the KSON grammar. Used to give helpful errors to the user.
      */
     ILLEGAL_CHAR,
     /**

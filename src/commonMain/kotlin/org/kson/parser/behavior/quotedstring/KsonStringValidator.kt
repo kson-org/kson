@@ -54,10 +54,9 @@ class KsonStringValidator {
             is ListNode -> validateListElements(node, messageSink)
             is QuotedStringNode -> validateQuotedString(node, messageSink)
             is EmbedBlockNode -> {
-                val tagNode = node.embedTagNode
-                if (tagNode is QuotedStringNode) {
-                    validateQuotedString(tagNode, messageSink)
-                }
+                listOf(node.embedTagNode, node.embedContentNode)
+                    .filterIsInstance<QuotedStringNode>()
+                    .forEach { validateQuotedString(it, messageSink) }
             }
             // No validation needed for other node types
             is UnquotedStringNode,
@@ -99,14 +98,13 @@ class KsonStringValidator {
      * Validates the raw string content for invalid escapes, invalid unicode escapes, and illegal control characters.
      *
      * @param rawContent The raw string content (excluding quotes)
-     * @param stringQuote The quote delimiting [rawContent], which is the only quote it may escape, or null if
-     *   [rawContent] is not delimited by quotes
+     * @param stringQuote The [StringQuote] defining how [rawContent] is delimited
      * @param baseLocation The location of the STRING_CONTENT token in the source
      * @param messageSink The sink for reporting validation errors
      */
     private fun validateRawStringContent(
         rawContent: String,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         baseLocation: Location,
         messageSink: MessageSink
     ) {
@@ -133,7 +131,7 @@ class KsonStringValidator {
 
     private fun validateEscapeSequence(
         scanner: StringContentScanner,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         messageSink: MessageSink
     ) {
         val escapeStartLocation = scanner.currentLocation()
@@ -182,7 +180,7 @@ class KsonStringValidator {
     private fun validateRegularEscape(
         scanner: StringContentScanner,
         nextChar: Char,
-        stringQuote: StringQuote?,
+        stringQuote: StringQuote,
         escapeStartLocation: Location,
         messageSink: MessageSink
     ) {
@@ -206,8 +204,8 @@ class KsonStringValidator {
     /**
      * A string may escape any of [validNonQuoteEscapes], along with the quote that delimits it
      */
-    private fun isValidStringEscape(escapedChar: Char, stringQuote: StringQuote?): Boolean {
-        return escapedChar in validNonQuoteEscapes || escapedChar == stringQuote?.quoteChar
+    private fun isValidStringEscape(escapedChar: Char, stringQuote: StringQuote): Boolean {
+        return escapedChar in validNonQuoteEscapes || escapedChar == stringQuote.quoteChar
     }
 
     private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
@@ -276,7 +274,7 @@ class KsonStringValidator {
 }
 
 /**
- * Enumerate the set of Kson string escapes valid in every quoted string for easy validation.  A string may also escape
+ * Enumerate the set of KSON string escapes valid in every quoted string for easy validation.  A string may also escape
  * the quote that delimits it (see [StringQuote]), and `\u` is also supported, but is validated separately against
  * [validHexChars]. Note that these are exactly the escapes allowed by [Section 7. Strings of RFC8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7), minus the `"` escape
  */

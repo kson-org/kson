@@ -1,17 +1,17 @@
-# Kson Language Server
+# KSON Language Server
 
-A Language Server Protocol (LSP) implementation for Kson, written in TypeScript. We support the
+A Language Server Protocol (LSP) implementation for KSON, written in TypeScript. We support the
 [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/), because it is a standard that allows programming language tooling to be decoupled
 from the code editor.
 
-By implementing a language server, this project provides Kson language support that can be used by any LSP-compatible
+By implementing a language server, this project provides KSON language support that can be used by any LSP-compatible
 editor, such as Visual Studio Code, Neovim, or Sublime Text. This approach avoids the need to write a new extension for
 each editor and ensures that features are implemented in one place, improving performance and maintainability [1].
 
 ## Current Features
 
 * **Real-time Diagnostics:** Identifies syntax errors as you type.
-* **Document Formatting:** Automatically formats Kson files.
+* **Document Formatting:** Automatically formats KSON files.
 * **Semantic Highlighting:** Provides rich, context-aware syntax highlighting.
 
 ## Local development
