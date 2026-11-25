@@ -18,7 +18,7 @@ import java.nio.file.Path
  * an actual test method per test from these suites, we also get the benefit of being able to run them across all
  * platforms without wrangling cross-platform file reads
  *
- * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
+ * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit KSON's needs as a
  * superset of JSON
  *
  * Each [SchemaDraft] gets the JSON-Schema-Test-Suite cases whose [SchemaTestCompatibility] admits it
@@ -257,7 +257,7 @@ private fun assertParseResult(
         )
         ${ResultEnumData.className}.${ResultEnumData.rejectEntry} -> assertTrue(
             parseResult.hasErrors(),
-            "Should have rejected `" + source + "`, but accepted as valid Kson.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
+            "Should have rejected `" + source + "`, but accepted as valid KSON.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
         )
         ${ResultEnumData.className}.${ResultEnumData.unspecifiedEntry} -> {
             // no-op: doesn't matter if we accept or reject as long as we didn't blow up

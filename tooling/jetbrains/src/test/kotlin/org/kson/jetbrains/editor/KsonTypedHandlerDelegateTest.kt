@@ -75,7 +75,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
     }
 
     /**
-     * Sanity check that we do NOT auto-insert closing angle brackets in non-Kson files `>`
+     * Sanity check that we do NOT auto-insert closing angle brackets in non-KSON files `>`
      */
     fun testNonKsonAngleBracketAutoInsert() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -83,7 +83,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 "<caret>",
                 '<',
                 "<<caret>",
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
         }
@@ -242,7 +242,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
     }
 
     /**
-     * Sanity check that we do NOT auto-insert closing embed delimiters in non-Kson files
+     * Sanity check that we do NOT auto-insert closing embed delimiters in non-KSON files
      */
     fun testNonKsonEmbedDelimiterAutoInsert() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -250,7 +250,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 "%<caret>",
                 EmbedDelim.Percent.char,
                 "%%<caret>",
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
 
@@ -258,7 +258,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 "$<caret>",
                 EmbedDelim.Dollar.char,
                 "$$<caret>",
-                // NOTE: this is NOT a Kson file
+                // NOTE: this is NOT a KSON file
                 PlainTextFileType.INSTANCE
             )
         }

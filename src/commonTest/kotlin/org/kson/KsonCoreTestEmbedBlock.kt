@@ -1,8 +1,34 @@
 package org.kson
 
+import org.kson.value.EmbedBlock
+import org.kson.value.toKsonValue
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 class KsonCoreTestEmbedBlock : KsonCoreTest {
+    /**
+     * Assert that an embed object with the given [ksonTag] formats as an embed block opening with
+     * [expectedTagLine], and that this embed block parses back to the value of the original embed object
+     */
+    private fun assertEmbedTagRoundTrips(ksonTag: String, expectedTagLine: String) {
+        val embedObjectSource = "embedTag: $ksonTag\nembedContent: content"
+        val embedBlockSource = assertNotNull(
+            KsonCore.parseToKson(embedObjectSource).kson,
+            "$embedObjectSource should format as KSON"
+        )
+
+        assertEquals("$expectedTagLine\ncontent\n%%", embedBlockSource)
+        assertEquals(parseEmbedTag(embedObjectSource), parseEmbedTag(embedBlockSource))
+    }
+
+    private fun parseEmbedTag(source: String): String {
+        val embedBlock = KsonCore.parseToAst(source).ast.toKsonValue()
+        assertIs<EmbedBlock>(embedBlock)
+        return embedBlock.embedTag.value
+    }
+
     @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
@@ -239,11 +265,13 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """.trimIndent(),
             """
+                embedTag: ""
                 embedContent: |
                   content
             """.trimIndent(),
             """
                 {
+                  "embedTag": "",
                   "embedContent": "content"
                 }
             """.trimIndent(), compileSettings = compileSettings
@@ -329,6 +357,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "content\n"
             """.trimIndent(),
             """
@@ -339,6 +368,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     content
                     
@@ -346,6 +376,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "content\n"
                   }
                 }
@@ -373,6 +404,78 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   "embedBlock": {
                     "embedContent": "content\n",
                     "unrelatedKey": "is not an embed block"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    /**
+     * Embed object keys are matched on their value, so any spelling of `embedTag` and `embedContent` decodes as an
+     * embed block, just as it would from the equivalent JSON
+     */
+    @Test
+    fun testEmbedBlockFromObjectWithEscapedKeys() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embed\u0054ag": sql
+                 'embed\u0043ontent': content
+            """.trimIndent(),
+            """
+                embedBlock: %sql
+                  content
+                  %%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "sql"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "sql",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    /**
+     * Embed blocks must have both `embedContent` and `embedTag` properties, not just `embedContent`
+     */
+    @Test
+    fun testEmbedContentWithoutTagNotDecodedAsEmbedBlock() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "content\n"
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: 'content\n'
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: "content\n"
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "content\n"
                   }
                 }
             """.trimIndent(), compileSettings = compileSettings
@@ -460,7 +563,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             jsonSettings = Json(retainEmbedTags = true)
         )
 
-        // Tag with \t escape — raw text "my\ttag" is preserved as the tag value
+        // Tag with \t escape carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %my\ttag
@@ -484,7 +587,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
 
-        // Tag with unicode escape — raw text "\u0041tag" is preserved as the tag value
+        // Tag with unicode escape carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %\u0041tag
@@ -508,7 +611,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
 
-        // Tag with escaped backslash — raw text "path\\to" is preserved as the tag value
+        // Tag with escaped backslash carries through to outputs with the escape intact
         assertParsesTo(
             """
                 %path\\to
@@ -670,6 +773,82 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 }
             """.trimIndent(), compileSettings = compileSettings
         )
+    }
+
+    /**
+     * Verifies the embed tag syntax rule that raw whitespace separating an embed block's open delimiter from its tag
+     * is not part of the tag, while escaped whitespace is
+     */
+    @Test
+    fun testEmbedBlockTagExcludesSeparatingWhitespace() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            "% \t sql\ncontent%%",
+            """
+                %sql
+                content
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "sql"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "sql",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+                %\u0020sql
+                content%%
+            """.trimIndent(),
+            """
+                %\u0020sql
+                content
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "\u0020sql"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "\u0020sql",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    /**
+     * Raw whitespace separating an embed block's open delimiter from its tag is not part of the tag, so a tag's
+     * leading whitespace must be rendered escaped to survive a round trip
+     */
+    @Test
+    fun testEmbedBlockTagWithLeadingWhitespaceRoundTrips() {
+        assertEmbedTagRoundTrips("'  sql'", """%\u0020\u0020sql""")
+        assertEmbedTagRoundTrips("""'\tsql'""", """%\tsql""")
+        assertEmbedTagRoundTrips("' '", """%\u0020""")
+    }
+
+    /**
+     * An embed block's open delimiter is its first `%`, so a tag may itself begin with `%`: `%%sql` is tagged `%sql`
+     */
+    @Test
+    fun testEmbedBlockTagStartingWithDelimiterRoundTrips() {
+        assertEmbedTagRoundTrips("'%sql'", "%%sql")
+        assertEmbedTagRoundTrips("'%'", "%%")
+        assertEmbedTagRoundTrips("'%%'", "%%%")
     }
 
     @Test
@@ -857,6 +1036,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
             """.trimIndent(),
             """
@@ -869,6 +1049,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     embeddedEmbed: %
                     EMBED CONTENT
@@ -878,6 +1059,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
                   }
                 }
@@ -887,6 +1069,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "embeddedEmbed: $\nEMBED WITH %\\% CONTENT\n$$\n"
             """.trimIndent(),
             """
@@ -899,6 +1082,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
+                  embedTag: ""
                   embedContent: |
                     embeddedEmbed: ${'$'}
                     EMBED WITH %\% CONTENT
@@ -908,6 +1092,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %\\% CONTENT\n${'$'}${'$'}\n"
                   }
                 }
@@ -992,13 +1177,15 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
         assertParsesTo(
             """
                embedBlock:
+                 "embedTag": ""
                  "embedContent": "    "
             """.trimIndent(),
             "embedBlock: %\n      \n  %%",
-            "embedBlock:\n  embedContent: |4\n        ",
+            "embedBlock:\n  embedTag: \"\"\n  embedContent: |4\n        ",
             """
                 {
                   "embedBlock": {
+                    "embedTag": "",
                     "embedContent": "    "
                   }
                 }

@@ -297,7 +297,7 @@ describeNode('Schema Loading Tests', () => {
         }
     }).timeout(10000);
 
-    it('Should report errors for valid Kson file that does not follow schema', async () => {
+    it('Should report errors for valid KSON file that does not follow schema', async () => {
         // Create a test file that matches the pattern but doesn't follow the schema
         // (missing required properties: appName and version)
         const content = 'key: "value"';

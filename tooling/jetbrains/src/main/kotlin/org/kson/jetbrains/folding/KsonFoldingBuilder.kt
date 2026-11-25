@@ -13,9 +13,9 @@ import org.kson.jetbrains.psi.KsonEmbedBlock
 import org.kson.parser.ParsedElementType
 
 /**
- * Provides code folding support for Kson files.
+ * Provides code folding support for KSON files.
  *
- * This builder implements intelligent folding behavior for various Kson elements:
+ * This builder implements intelligent folding behavior for various KSON elements:
  *
  * Supported folding types:
  * - Lists:

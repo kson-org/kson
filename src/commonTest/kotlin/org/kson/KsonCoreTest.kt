@@ -9,8 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Interface to tie together our tests that exercise and verify [KsonCore] behavior on valid Kson and give a home to our
- * custom assertions for these tests.  For tests parsing invalid Kson, see [KsonCoreTestError].
+ * Interface to tie together our tests that exercise and verify [KsonCore] behavior on valid KSON and give a home to our
+ * custom assertions for these tests.  For tests parsing invalid KSON, see [KsonCoreTestError].
  *
  * The tests of type [KsonCoreTest] are split out basically along the lines of the grammar.  Tests that cross-cut concerns
  * may live in [KsonCoreTestGeneralValue].
@@ -83,18 +83,18 @@ interface KsonCoreTest {
         val reParsedResult = KsonCore.parseToKson(ksonParseResult.kson!!, compileSettings.ksonSettings)
         assertFalse(
             reParsedResult.hasErrors(),
-            "Re-parsing our transpiled Kson should not produce errors, got:\n\n" +
+            "Re-parsing our transpiled KSON should not produce errors, got:\n\n" +
                     LoggedMessage.print(reParsedResult.messages)
         )
         assertEquals(
             ksonParseResult.kson,
             reParsedResult.kson,
-            "Re-parsing our transpiled Kson must be idempotent"
+            "Re-parsing our transpiled KSON must be idempotent"
         )
         assertEquals(
             expectedJson,
             KsonCore.parseToJson(ksonParseResult.kson!!, compileSettings.jsonSettings).json,
-            "Our transpiled Kson must have the same value as its source"
+            "Our transpiled KSON must have the same value as its source"
         )
 
         // now validate the Yaml produced for this source

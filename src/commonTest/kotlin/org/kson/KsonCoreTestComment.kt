@@ -5,7 +5,7 @@ import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 
 /**
- * Tests for Kson comment handling and preservation
+ * Tests for KSON comment handling and preservation
  */
 class KsonCoreTestComment : KsonCoreTest {
     @Test

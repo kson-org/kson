@@ -28,24 +28,24 @@ import org.kson.value.EmbedBlock as InternalEmbedBlock
 import kotlin.js.JsExport
 
 /**
- * The [Kson](https://kson.org) language
+ * The [KSON](https://kson.org) language
  */
 object Kson {
     /**
-     * Formats Kson source with the specified formatting options.
+     * Formats KSON source with the specified formatting options.
      *
-     * @param kson The Kson source to format
+     * @param kson The KSON source to format
      * @param formatOptions The formatting options to apply
-     * @return The formatted Kson source
+     * @return The formatted KSON source
      */
     fun format(kson: String, formatOptions: FormatOptions = FormatOptions()): String {
         return org.kson.tools.format(kson, formatOptions.toInternal())
     }
 
     /**
-     * Converts Kson to Json.
+     * Converts KSON to Json.
      *
-     * @param kson The Kson source to convert
+     * @param kson The KSON source to convert
      * @param options Options for the JSON transpilation
      * @return A Result containing either the Json output or error messages
      */
@@ -62,9 +62,9 @@ object Kson {
     }
 
     /**
-     * Converts Kson to Yaml, preserving comments
+     * Converts KSON to Yaml, preserving comments
      *
-     * @param kson The Kson source to convert
+     * @param kson The KSON source to convert
      * @param options Options for the YAML transpilation
      * @return A Result containing either the Yaml output or error messages
      */
@@ -81,9 +81,9 @@ object Kson {
     }
 
     /**
-     * Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
+     * Statically analyze the given KSON and return an [Analysis] object containing any messages generated along with a
      * tokenized version of the source.  Useful for tooling/editor support.
-     * @param kson The Kson source to analyze
+     * @param kson The KSON source to analyze
      * @param filepath (Optional) Filepath of the document being analyzed
      * @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
      *          able to be validated against a schema
@@ -103,10 +103,10 @@ object Kson {
     }
 
     /**
-     * Parses a Kson schema definition and returns a validator for that schema.
+     * Parses a KSON schema definition and returns a validator for that schema.
      *
-     * @param schemaKson The Kson source defining a Json Schema
-     * @return A SchemaValidator that can validate Kson documents against the schema
+     * @param schemaKson The KSON source defining a Json Schema
+     * @return A SchemaValidator that can validate KSON documents against the schema
      */
     fun parseSchema(schemaKson: String): SchemaResult {
         val schemaParseResult = KsonCore.parseSchema(schemaKson)
@@ -143,7 +143,7 @@ object Kson {
 
 
 /**
- * Result of a Kson conversion operation
+ * Result of a KSON conversion operation
  */
 sealed class Result {
     class Success(val output: String) : Result() {
@@ -169,7 +169,7 @@ sealed class SchemaResult {
 }
 
 /**
- * A validator that can check if Kson source conforms to a schema.
+ * A validator that can check if KSON source conforms to a schema.
  */
 class SchemaValidator internal constructor(internal val schema: JsonSchema) {
     /**
@@ -256,7 +256,7 @@ sealed class EmbedRuleResult {
 
 
 /**
- * Options for formatting Kson output.
+ * Options for formatting KSON output.
  *
  * @param indentType The type of indentation to use (spaces or tabs)
  * @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
@@ -268,7 +268,7 @@ class FormatOptions(
     val embedBlockRules: List<EmbedRule> = emptyList()
 ) {
     /**
-     * Map [FormatOptions] to [KsonFormatterConfig] that is used internally to format a Kson document.
+     * Map [FormatOptions] to [KsonFormatterConfig] that is used internally to format a KSON document.
      */
     @OptIn(ExperimentalJsonPointerGlobLanguage::class)
     internal fun toInternal(): KsonFormatterConfig {
@@ -307,14 +307,14 @@ sealed class TranspileOptions {
     abstract val retainEmbedTags: Boolean
 
     /**
-     * Options for transpiling Kson to JSON.
+     * Options for transpiling KSON to JSON.
      */
     class Json(
         override val retainEmbedTags: Boolean = true
     ) : TranspileOptions()
 
     /**
-     * Options for transpiling Kson to YAML.
+     * Options for transpiling KSON to YAML.
      */
     class Yaml(
         override val retainEmbedTags: Boolean = true
@@ -322,7 +322,7 @@ sealed class TranspileOptions {
 }
 
 /**
- * [FormattingStyle] options for Kson Output
+ * [FormattingStyle] options for KSON Output
  */
 enum class FormattingStyle{
     /**
@@ -335,7 +335,7 @@ enum class FormattingStyle{
 }
 
 /**
- * Options for indenting Kson Output
+ * Options for indenting KSON Output
  */
 sealed class IndentType {
     /** Use spaces for indentation with the specified count */
@@ -346,7 +346,7 @@ sealed class IndentType {
 }
 
 /**
- * The result of statically analyzing a Kson document
+ * The result of statically analyzing a KSON document
  */
 class Analysis internal constructor(
     val errors: List<Message>,
@@ -359,7 +359,7 @@ class Analysis internal constructor(
 )
 
 /**
- * [Token] produced by the lexing phase of a Kson parse
+ * [Token] produced by the lexing phase of a KSON parse
  */
 class Token internal constructor(
     val tokenType: TokenType,
@@ -402,7 +402,7 @@ enum class TokenType {
 }
 
 /**
- * Represents a message logged during Kson processing
+ * Represents a message logged during KSON processing
  */
 class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position) {
     /**
@@ -632,7 +632,7 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         }
         is InternalEmbedBlock -> {
             KsonValue.KsonEmbed(
-                tag = ksonValue.embedTag?.value,
+                tag = ksonValue.embedTag.value,
                 content = ksonValue.embedContent.value,
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -664,7 +664,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
      */
     abstract val type: KsonValueType
     /**
-     * A Kson object with key-value pairs
+     * A KSON object with key-value pairs
      */
     @ConsistentCopyVisibility
     data class KsonObject internal constructor(
@@ -677,7 +677,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     }
 
     /**
-     * A Kson array with elements
+     * A KSON array with elements
      */
     class KsonArray internal constructor(
         val elements: List<KsonValue>,
@@ -688,7 +688,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     }
 
     /**
-     * A Kson string value
+     * A KSON string value
      */
     class KsonString internal constructor(
         val value: String,
@@ -699,7 +699,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     }
 
     /**
-     * A Kson number value.
+     * A KSON number value.
      */
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
 
@@ -722,7 +722,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
 
 
     /**
-     * A Kson boolean value
+     * A KSON boolean value
      */
     class KsonBoolean internal constructor(
         val value: Boolean,
@@ -733,7 +733,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     }
 
     /**
-     * A Kson null value
+     * A KSON null value
      */
     class KsonNull internal constructor(
         internalStart: Position,
@@ -743,10 +743,10 @@ sealed class KsonValue(val start: Position, val end: Position) {
     }
 
     /**
-     * A Kson embed block
+     * A KSON embed block
      */
     class KsonEmbed internal constructor(
-        val tag: String?,
+        val tag: String,
         val content: String,
         internalStart: Position,
         internalEnd: Position

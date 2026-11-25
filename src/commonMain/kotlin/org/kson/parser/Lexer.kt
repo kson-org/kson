@@ -299,7 +299,7 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
 /**
  * Tokenizes the given `source` into a list of [Token] by calling [tokenize]
  *
- * @param source the input Kson source to tokenize
+ * @param source the input KSON source to tokenize
  * @param gapFree whether to ensure _all_ source, including comments and whitespace is precisely
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
@@ -375,6 +375,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
             }
             Percent.char, Dollar.char -> {
                 addLiteralToken(EMBED_OPEN_DELIM)
+                // consume any inline whitespace following our opening delimiter; it's not considered embed tag content
+                if (isInlineWhitespace(sourceScanner.peek())) {
+                    while (isInlineWhitespace(sourceScanner.peek())) {
+                        sourceScanner.advance()
+                    }
+                    addLiteralToken(WHITESPACE)
+                }
                 embeddedBlock(char)
             }
             else -> {
@@ -449,37 +456,21 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun embeddedBlock(delimChar: Char) {
-        // consume non-newline whitespace right after our opening delimiter
-        if (isInlineWhitespace(sourceScanner.peek())) {
-            while (isInlineWhitespace(sourceScanner.peek())) {
-                sourceScanner.advance()
-            }
-            addLiteralToken(WHITESPACE)
+        if (sourceScanner.eof()) {
+            return
         }
 
+        while (!scannerAtEndOfLine()) {
+            sourceScanner.advance()
+        }
+        // extract our embed tag (note: may be empty, that's supported)
+        addToken(EMBED_TAG, sourceScanner.extractLexeme())
+
+        // consume the newline (or CRLF) from after this embed tag
         if (consumeLineEnding()) {
-            // no embed tag on this block
             addLiteralToken(EMBED_PREAMBLE_NEWLINE)
         } else if (sourceScanner.eof()) {
             return
-        } else {
-            // we have an embed tag, let's scan it
-            while (!scannerAtEndOfLine()) {
-                sourceScanner.advance()
-            }
-
-            // extract our embed tag (note: may be empty, that's supported)
-            val embedTagLexeme = sourceScanner.extractLexeme()
-            addToken(
-                EMBED_TAG, embedTagLexeme
-            )
-
-            // consume the newline (or CRLF) from after this embed tag
-            if (consumeLineEnding()) {
-                addLiteralToken(EMBED_PREAMBLE_NEWLINE)
-            } else if (sourceScanner.eof()) {
-                return
-            }
         }
 
         // read embedded content until the closing delimChar pair (or EOF in the case of an unclosed block)

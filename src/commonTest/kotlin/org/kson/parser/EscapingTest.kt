@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.ast.renderForJsonString
 import org.kson.ast.unescapeForwardSlashes
 import org.kson.parser.behavior.StringQuote.DoubleQuote
+import org.kson.parser.behavior.StringQuote.Quoteless
 import org.kson.parser.behavior.StringQuote.SingleQuote
 import org.kson.parser.behavior.quotedstring.unescapeStringContent
 import org.kson.testSupport.validateJson
@@ -182,7 +183,7 @@ class EscapingTest {
         assertEquals("\\'\"", unescapeStringContent("\\'\\\"", DoubleQuote))
 
         // Content not delimited by quotes may not escape either quote
-        assertEquals("\\'\\\"", unescapeStringContent("\\'\\\"", null))
+        assertEquals("\\'\\\"", unescapeStringContent("\\'\\\"", Quoteless))
     }
 
     @Test
@@ -195,6 +196,25 @@ class EscapingTest {
 
         // Existing escapes are not re-escaped
         assertEquals("\\\"q\\\" it's", DoubleQuote.escapeQuotes("\\\"q\\\" it's"))
+
+        // A quoteless string has no quotes to escape
+        assertEquals("it's \"q\"", Quoteless.escapeQuotes("it's \"q\""))
+    }
+
+    @Test
+    fun testCountDelimiterOccurrences() {
+        assertEquals(1, SingleQuote.countDelimiterOccurrences("it's \"q\""))
+        assertEquals(2, DoubleQuote.countDelimiterOccurrences("it's \"q\""))
+        assertEquals(0, Quoteless.countDelimiterOccurrences("it's \"q\""))
+    }
+
+    @Test
+    fun testUnescapeQuotes() {
+        assertEquals("it's \\\"q\\\"", SingleQuote.unescapeQuotes("it\\'s \\\"q\\\""))
+        assertEquals("it\\'s \"q\"", DoubleQuote.unescapeQuotes("it\\'s \\\"q\\\""))
+
+        // A quoteless string has no quote escapes to process, so all its escapes are left intact
+        assertEquals("a\\nullb \\'\\\"", Quoteless.unescapeQuotes("a\\nullb \\'\\\""))
     }
 
     @Test

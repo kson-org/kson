@@ -10,13 +10,12 @@ import org.kson.parser.behavior.StringQuote
  *
  * @param rawContent The raw quoted string content from the original KSON document (without surrounding quotes)
  * @param rawLocation Where rawContent exists in the original KSON document
- * @param stringQuote The quote delimiting [rawContent], which is the only quote [rawContent] may escape, or null for
- *   content not delimited by quotes (i.e. an embed tag), which may escape neither quote
+ * @param stringQuote The [StringQuote] defining how [rawContent] is delimited
  */
 class QuotedStringContentTransformer(
     rawContent: String,
     rawLocation: Location,
-    stringQuote: StringQuote?
+    stringQuote: StringQuote
 ) : KsonContentTransformer(rawContent, rawLocation) {
     // The processed content after all transformations
     override val processedContent: String
@@ -82,7 +81,7 @@ private data class EscapeInfo(
  *
  * @param stringQuote the quote delimiting the given [content] (see [QuotedStringContentTransformer])
  */
-internal fun unescapeStringContent(content: String, stringQuote: StringQuote?): String {
+internal fun unescapeStringContent(content: String, stringQuote: StringQuote): String {
     return unescapeAndTrackEscapes(content, stringQuote).first
 }
 
@@ -90,7 +89,7 @@ internal fun unescapeStringContent(content: String, stringQuote: StringQuote?): 
  * Unescapes the content and tracks all escape sequences for source mapping.
  * Returns a pair of (unescaped content, list of escape info).
  */
-private fun unescapeAndTrackEscapes(content: String, stringQuote: StringQuote?): Pair<String, List<EscapeInfo>> {
+private fun unescapeAndTrackEscapes(content: String, stringQuote: StringQuote): Pair<String, List<EscapeInfo>> {
     val sb = StringBuilder(content.length)
     val escapes = mutableListOf<EscapeInfo>()
 
@@ -108,7 +107,7 @@ private fun unescapeAndTrackEscapes(content: String, stringQuote: StringQuote?):
         when (val escaped = content[i + 1]) {
             // a string may only escape the quote that delimits it, so an escape of any other quote
             // falls through to the unknown escape handling below
-            stringQuote?.quoteChar, '\\', '/' -> {
+            stringQuote.quoteChar, '\\', '/' -> {
                 sb.append(escaped)
                 escapes.add(EscapeInfo(rawStart, 2, 1))
                 i += 2

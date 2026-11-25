@@ -48,7 +48,7 @@ class FormatterTest {
     /**
      * Formatting must never leave a user worse off than the document they handed us: every message
      * re-parsing [formatted] reports must be one [source] already reported.  A clean document therefore
-     * stays clean in every [FormattingStyle], and every style stays a lossless way to move Kson around.
+     * stays clean in every [FormattingStyle], and every style stays a lossless way to move KSON around.
      *
      * The formatter is still free to _cure_ complaints, for instance laying out a document so its indentation stops
      * misleading is one of its key jobs.
@@ -308,7 +308,7 @@ class FormatterTest {
 
     /**
      * Regression test for an issue where our formatter was re-inserted embed blocks with escapes
-     * processed, resulting in illegal Kson
+     * processed, resulting in illegal KSON
      */
     @Test
     fun testEmbedBlockWithEscapes() {
@@ -1584,7 +1584,7 @@ class FormatterTest {
     }
 
     /**
-     * If a Kson document is fairly well-formed but has some unexpected trialing content, we should still
+     * If a KSON document is fairly well-formed but has some unexpected trialing content, we should still
      * be able to format the valid portion of the document
      */
     @Test
@@ -2781,6 +2781,39 @@ class FormatterTest {
                 %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
+        )
+    }
+
+    @Test
+    fun testEmbedRuleTagIsEscaped() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            // note that the quotes here are of course not escaped: escaped quotes are illegal in an embed tag
+            """
+            scripts:
+              build: %"C:\\temp"\nbash
+                make all
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "\"C:\\temp\"\nbash")),
+        )
+
+        // leading spaces are escaped since they would otherwise be skipped as the space between delimiter and tag
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            """
+            scripts:
+              build: %\u0020\u0020bash
+                make all
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "  bash")),
         )
     }
 

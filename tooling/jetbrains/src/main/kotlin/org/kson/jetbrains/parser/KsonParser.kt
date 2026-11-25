@@ -9,7 +9,7 @@ import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
 
 /**
- * [PsiParser] for Kson, implemented by delegating to the official Kson [Parser]
+ * [PsiParser] for KSON, implemented by delegating to the official KSON [Parser]
  */
 class KsonParser : PsiParser {
     override fun parse(root: IElementType, builder: PsiBuilder): ASTNode {

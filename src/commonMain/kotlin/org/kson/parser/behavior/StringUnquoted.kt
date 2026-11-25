@@ -1,14 +1,14 @@
 package org.kson.parser.behavior
 
 /**
- * Behaviors and rules around unquoted Kson strings
+ * Behaviors and rules around unquoted KSON strings
  */
 object StringUnquoted {
 
     private val reservedKeywords = setOf("true", "false", "null")
 
     /**
-     * Returns true if the given string may be used without quotes in a Kson document
+     * Returns true if the given string may be used without quotes in a KSON document
      */
     fun isUnquotable(str: String): Boolean {
         return !reservedKeywords.contains(str) && str.isNotBlank() && str.withIndex().all { (index, letter) ->
@@ -21,7 +21,7 @@ object StringUnquoted {
     }
 
     /**
-     * Returns true if [ch] is a legal first [Char] for an unquoted Kson string
+     * Returns true if [ch] is a legal first [Char] for an unquoted KSON string
      *
      * This rule is stated to users by [org.kson.parser.messages.UNQUOTED_STRING_START_RULE]---if this
      * rule ever changes, that statement must change with it
@@ -32,7 +32,7 @@ object StringUnquoted {
     }
 
     /**
-     * Returns true if [ch] is a legal [Char] for the body of an unquoted Kson string
+     * Returns true if [ch] is a legal [Char] for the body of an unquoted KSON string
      *
      * Note that `-` is legal in the body but not as a start [Char], where it would
      * clash with list dashes and negative numbers
