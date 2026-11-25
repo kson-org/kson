@@ -44,6 +44,8 @@ object KsonTooling {
      * for it. Filters schemas based on validation — only returns info from schemas
      * compatible with the existing document properties (for oneOf/anyOf combinators).
      * When multiple valid schemas exist, their information is combined with separators.
+     * A position in whitespace, in a comment, or just past a comma or closer is on no
+     * value, so it has no info.
      *
      * @param document The pre-parsed document being edited
      * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results
@@ -74,7 +76,9 @@ object KsonTooling {
      * Finds the KsonValue at the given position and returns its location in the
      * schema document. Filters schemas based on validation — only returns locations
      * for schemas compatible with the existing document properties.  A `true` or `false`
-     * schema is only returned when nothing else defines the property.
+     * schema is only returned when nothing else defines the property.  A position in
+     * whitespace, in a comment, or just past a comma or closer is on no value, so it has
+     * no location.
      *
      * @param document The pre-parsed document being edited
      * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results

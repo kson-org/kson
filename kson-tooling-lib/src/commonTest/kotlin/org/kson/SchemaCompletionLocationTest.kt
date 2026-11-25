@@ -447,6 +447,19 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testNoCompletionsBetweenClosingQuoteAndComma() {
+        // A comma after the closing quote does not move the boundary: the value is still finished, so neither its
+        // enum values nor the object's other keys are offered
+        val schema = """
+            { type: object, properties: {
+                status: { type: string, enum: ["active", "inactive"] }
+                other: { type: string }
+            } }
+        """
+        assertCompletionLabels(schema, """{ status: "active"<caret>, }""", emptySet())
+    }
+
+    @Test
     fun testValueCompletionsWhileTypingUnquotedValue() {
         // The caret at the end of a half-typed unquoted token is the normal typing position —
         // it must offer completions just like the quoted `"activ<caret>"` position does.
@@ -2501,7 +2514,7 @@ class SchemaCompletionLocationTest {
     fun testListElementInErrorOffersEveryBranch() {
         assertCompletionLabels(kindedItemsSchema, """
             items:
-              - }<caret>
+              - <caret>}
               - kind: b
         """.trimIndent(), setOf("kind", "alpha", "beta"))
     }

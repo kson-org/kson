@@ -655,4 +655,42 @@ class SchemaInfoLocationTest {
 
         assertEquals("N", getInfoAtCaret(schema, "<caret>note: 1")?.trim())
     }
+
+    /** A description for each property, so an answer shows which property the caret resolved to */
+    private val describedPropertiesSchema = """
+        {
+          "properties": {
+            "a": { "description": "The a property" },
+            "b": { "description": "The b property" },
+            "o": { "description": "The o property" }
+          }
+        }
+    """.trimIndent()
+
+    @Test
+    fun testGetSchemaInfoAtLocation_nothingOffAToken() {
+        // Hover describes the token at the caret, and whitespace, a comment, a comma or a closer's end holds none
+        for ((placement, documentWithCaret) in listOf(
+            "on the blank line after a comma" to "{\n  \"a\": \"x\",\n  <caret>\n  \"b\": \"y\"\n}",
+            "right after a comma" to "{ \"a\": \"x\",<caret> \"b\": \"y\" }",
+            "at a comma spaced from its value" to "{ \"a\": \"x\" <caret>, \"b\": \"y\" }",
+            "in whitespace between tokens" to "{ \"a\": \"x\",   <caret>   \"b\": \"y\" }",
+            "inside a comment" to "{ \"a\": \"x\", # a <caret>note\n  \"b\": \"y\" }",
+            "right after a closer" to "{ \"o\": {}<caret>, \"b\": \"y\" }"
+        )) {
+            assertNull(getInfoAtCaret(describedPropertiesSchema, documentWithCaret), placement)
+        }
+    }
+
+    @Test
+    fun testGetSchemaInfoAtLocation_onAToken() {
+        for ((placement, documentWithCaret) in listOf(
+            "on a key" to "{ \"<caret>a\": \"x\", \"b\": \"y\" }",
+            "on a scalar" to "{ \"a\": \"<caret>x\", \"b\": \"y\" }",
+            "touching a quoted scalar's end" to "{ \"a\": \"x\"<caret>, \"b\": \"y\" }",
+            "touching an unquoted scalar's end" to "{ a: xyz<caret>, b: y }"
+        )) {
+            assertEquals("The a property\n\n", getInfoAtCaret(describedPropertiesSchema, documentWithCaret), placement)
+        }
+    }
 }

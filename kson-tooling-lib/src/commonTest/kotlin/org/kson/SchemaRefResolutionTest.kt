@@ -213,6 +213,35 @@ class SchemaRefResolutionTest {
     }
 
     @Test
+    fun testResolveRef_cursorAfterTheRefValue() {
+        // touching the value's close quote is on the value; whitespace past it is on no token
+        assertRefResolution("""
+            {
+              "properties": {
+                "user": { "${'$'}ref": "#/${'$'}defs/User"<cursor> }
+              },
+              "${'$'}defs": {
+                "User": <target>{
+                  "type": "object"
+                }</target>
+              }
+            }
+        """.trimIndent())
+        assertRefResolution("""
+            {
+              "properties": {
+                "user": { "${'$'}ref": "#/${'$'}defs/User" <cursor> }
+              },
+              "${'$'}defs": {
+                "User": {
+                  "type": "object"
+                }
+              }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun testResolveRef_definitions() {
         // Test with "definitions" (older JSON Schema draft) instead of "$defs"
         assertRefResolution($$"""

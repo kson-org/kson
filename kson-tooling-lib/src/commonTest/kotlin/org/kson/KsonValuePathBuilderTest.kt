@@ -229,6 +229,261 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
+    fun testBuildTreePointerToPosition_afterEmptyValueCloser() {
+        // past the `}` of `{a: }` the caret is in the object around it, not in the empty value of `a`
+        assertPathAtCaret(
+            "{x: {a: } <caret> }",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterEmptyValueCloserAndComma_forCompletion() {
+        // past the comma after the `}` of an object with an empty value, the caret is in the container around it
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": },\n<caret>\n}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": },<caret> \"b\": 2}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"list\": [{\"k\": },<caret> {}]}",
+            expectedPath = JsonPointer.fromTokens(listOf("list")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterEmptyValueCloserAndComma_forDefinition() {
+        // a definition lookup describes the token at the caret, and whitespace past a comma is on none
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": },\n<caret>\n}",
+            expectedPath = null
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterQuotedValueAndComma_forCompletion() {
+        // a quoted string's span ends before its close quote, so the comma starts outside it; the caret past the
+        // comma is still in `outer`, as it is after an unquoted value
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\",\n<caret>\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1,\n<caret>\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterQuotedValueAndComma_forDefinition() {
+        // whitespace past a comma is on no token, whatever the value before it
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\",\n<caret>\n}}",
+            expectedPath = null
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1,\n<caret>\n}}",
+            expectedPath = null
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterQuotedListItemAndComma() {
+        // likewise the caret past `"red",` is still in the list
+        assertPathAtCaret(
+            "{\"tags\": [\"red\",\n<caret>\n]}",
+            expectedPath = JsonPointer.fromTokens(listOf("tags")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_rightAfterComma_forCompletion() {
+        // the caret touching the comma's end is past the comma, in `outer`
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1,<caret>\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\",<caret>\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_rightAfterComma_forDefinition() {
+        // a comma holds nothing to describe, so the caret touching its end is on no token
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1,<caret>\n}}",
+            expectedPath = null
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\",<caret>\n}}",
+            expectedPath = null
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_beforeComma_forCompletion() {
+        // the caret touching the value is still on it, as at `a: tr<caret>` without a comma
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": tr<caret>,\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer", "a")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenQuotedValueAndComma_forCompletion() {
+        // likewise the caret touching the close quote is on the value, as at `"a": "x"<caret>` without a comma
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\"<caret>,\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer", "a")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenQuotedValueAndComma_forDefinition() {
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\"<caret>,\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+        )
+        assertPathAtCaret(
+            "outer:\n  a: 'x'<caret>,\n  b: 1",
+            expectedPath = JsonPointer.fromTokens(listOf("outer", "a"))
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenQuotedListItemAndComma() {
+        assertPathAtCaret(
+            "{\"tags\": [\"red\"<caret>, \"blue\"]}",
+            expectedPath = JsonPointer.fromTokens(listOf("tags", "0")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"tags\": [\"red\"<caret>, \"blue\"]}",
+            expectedPath = JsonPointer.fromTokens(listOf("tags", "0"))
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenCloserAndComma_forCompletion() {
+        // a closer holds nothing to type, so a caret touching its end is past it, in the object around what it closes
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": 1}<caret>, \"b\": 2}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"outer\": [1, 2]<caret>, \"b\": 2}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenCloserAndComma_forDefinition() {
+        // a caret touching the `}` is past it, as whitespace past the `}` is, so on no token
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": 1}<caret>, \"b\": 2}",
+            expectedPath = null
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": 1} <caret>, \"b\": 2}",
+            expectedPath = null
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_touchingCloserWithoutComma() {
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": 1}<caret>\n}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "a: [1, 2]<caret>\nb: 3",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "a: <- x - y><caret>\nb: 3",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_touchingEmptyValueCloser() {
+        // touching the `}` of `{a: }` is past it, in the object around it, not in the empty value of `a`
+        assertPathAtCaret(
+            "{x: {a: }<caret> }",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"x\": }<caret>, \"b\": 2}",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_touchingEndDotOrEndDash() {
+        assertPathAtCaret(
+            "a:\n  x: y.<caret>\nb: 3",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "a:\n  - x\n  - y=<caret>\nb: 3",
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+        // an end-dot inside `{}` ends nothing, so past it the caret is still in `settings`
+        assertPathAtCaret(
+            "settings: {theme: dark.<caret> }",
+            expectedPath = JsonPointer.fromTokens(listOf("settings")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_beforeSpacedComma_forDefinition() {
+        // whitespace before a comma is on no token, as whitespace past one is
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1 <caret>,\n}}",
+            expectedPath = null
+        )
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": \"x\" <caret>,\n}}",
+            expectedPath = null
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_afterValueSpacedFromItsComma() {
+        assertPathAtCaret(
+            "{\"outer\": {\"a\": 1 ,\n<caret>\n}}",
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
     fun testBuildTreePointerToPosition_betweenValueAndCloser_forCompletion() {
         // the caret is at the `}`, not past it, so it is still on `act`
         assertPathAtCaret(
@@ -248,11 +503,72 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
+    fun testBuildTreePointerToPosition_betweenColonAndCloser() {
+        // the caret touching the `}` right after a colon is in that empty value, at any depth
+        assertPathAtCaret(
+            "{a: <caret>}",
+            expectedPath = JsonPointer.fromTokens(listOf("a")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{a: <caret>}",
+            expectedPath = JsonPointer.fromTokens(listOf("a"))
+        )
+        assertPathAtCaret(
+            "{x: {a: <caret>}}",
+            expectedPath = JsonPointer.fromTokens(listOf("x", "a")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{x: {a: <caret>}}",
+            expectedPath = JsonPointer.fromTokens(listOf("x", "a"))
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenColonAndQuotedValue() {
+        // the caret just before a value's open quote is in that value
+        assertPathAtCaret(
+            "{\"a\": <caret>\"x\"}",
+            expectedPath = JsonPointer.fromTokens(listOf("a")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{\"a\": <caret>\"x\"}",
+            expectedPath = JsonPointer.fromTokens(listOf("a"))
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenColonAndUnreadableValue() {
+        // the caret before a value the parser cannot read, here a list without dashes, is still on its property
+        assertPathAtCaret(
+            "{x: <caret><1>}",
+            expectedPath = JsonPointer.fromTokens(listOf("x")),
+            includePropertyKeys = false
+        )
+        assertPathAtCaret(
+            "{x: <caret><1>}",
+            expectedPath = JsonPointer.fromTokens(listOf("x"))
+        )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_betweenColonAndComma() {
+        // a comma holds nothing to type, so the caret at it is still right after the colon
+        assertPathAtCaret(
+            "{a: <caret>,}",
+            expectedPath = JsonPointer.fromTokens(listOf("a")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
     fun testBuildTreePointerToPosition_definitionAfterDelimitedObject() {
-        // whitespace past the `}` is on the object it closed, not on `dark`, the last value inside it
+        // whitespace past the `}` is on no token, so it resolves to neither the object nor `dark` inside it
         assertPathAtCaret(
             "settings: {theme: dark} <caret>",
-            expectedPath = JsonPointer.fromTokens(listOf("settings"))
+            expectedPath = null
         )
     }
 
@@ -260,8 +576,18 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_definitionAfterBracketList() {
         assertPathAtCaret(
             "a: [1, 2] <caret>",
-            expectedPath = JsonPointer.fromTokens(listOf("a"))
+            expectedPath = null
         )
+    }
+
+    @Test
+    fun testBuildTreePointerToPosition_definitionOffAToken() {
+        // a definition lookup describes the token at the caret, and a comment, the space after a colon or an empty
+        // document holds none
+        assertPathAtCaret("a: x # a <caret>note\nb: y", expectedPath = null)
+        assertPathAtCaret("# a <caret>note\na: x", expectedPath = null)
+        assertPathAtCaret("name: <caret>\nage: 30", expectedPath = null)
+        assertPathAtCaret("<caret>", expectedPath = null)
     }
 
     @Test
@@ -274,7 +600,7 @@ class KsonValuePathBuilderTest {
               name: John
               a<caret>
             """.trimIndent(),
-            expectedPath = JsonPointer.ROOT
+            expectedPath = null
         )
     }
 
@@ -299,7 +625,8 @@ class KsonValuePathBuilderTest {
             name: <caret>
             age: 30
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name")),
+            includePropertyKeys = false
         )
     }
 
@@ -307,7 +634,8 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
+            expectedPath = JsonPointer.ROOT, // Empty document returns root pointer for schema completions
+            includePropertyKeys = false
         )
     }
 
@@ -425,7 +753,8 @@ class KsonValuePathBuilderTest {
               "age": 30
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name")),
+            includePropertyKeys = false
         )
     }
 
@@ -433,7 +762,8 @@ class KsonValuePathBuilderTest {
     fun testBuildTreePointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
+            expectedPath = JsonPointer.ROOT, // Empty document returns root pointer for schema completions
+            includePropertyKeys = false
         )
     }
 
@@ -475,7 +805,8 @@ class KsonValuePathBuilderTest {
               "key": <caret>
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("key"))
+            expectedPath = JsonPointer.fromTokens(listOf("key")),
+            includePropertyKeys = false
         )
     }
 
@@ -521,7 +852,8 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("name", "name"))
+            expectedPath = JsonPointer.fromTokens(listOf("name", "name")),
+            includePropertyKeys = false
         )
     }
 
@@ -535,7 +867,8 @@ class KsonValuePathBuilderTest {
               "key\twith\ttabs": <caret>
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs"))
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs")),
+            includePropertyKeys = false
         )
     }
 
@@ -565,7 +898,8 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = JsonPointer.fromTokens(listOf("it's", "it\\'s"))
+            expectedPath = JsonPointer.fromTokens(listOf("it's", "it\\'s")),
+            includePropertyKeys = false
         )
     }
 
