@@ -3,11 +3,12 @@ package org.kson.schema
 import kotlin.test.Test
 
 /**
- * These tests are ["bundled"/Compound Schema](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents)
- * ports of the [org.kson.parser.json.generated.SchemaSuiteTest] tests which require fetching remote schemas.  Those
- * remote fetching tests are excluded in [org.kson.jsonsuite.schemaTestSuiteExclusions] because we do not current
- * support remote fetching. These tests let us have most of that coverage while also doing the the important work
- * of ensuring our Schema $id and $ref code effectively navigates compound schemas
+ * ["Bundled"/Compound Schema](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents) versions
+ * of JSON-Schema-Test-Suite's Draft 7 tests of remote references, ensuring our Schema `$id` and `$ref` code also
+ * navigates compound schemas that embed those remote schemas.
+ *
+ * Where the suite's schema is a bare `$ref`, the bundle wraps it in an `allOf`, because a `$ref` ignores the
+ * `definitions` bundled beside it.
  */
 class JsonSchemaTestBundledRemotes : JsonSchemaTest {
     /**
@@ -19,20 +20,20 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo",
+                  "allOf": [{ "$ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo" }],
                   "definitions": {
                     "http://localhost:1234/draft7/detached-ref.json": {
-                      "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-                      "${'$'}id": "http://localhost:1234/draft7/detached-ref.json",
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "$id": "http://localhost:1234/draft7/detached-ref.json",
                       "definitions": {
                         "detached": {
-                          "${'$'}id": "#detached",
+                          "$id": "#detached",
                           "type": "integer"
                         },
                         "foo": {
-                          "${'$'}ref": "#detached"
+                          "$ref": "#detached"
                         }
                       }
                     }
@@ -40,7 +41,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """${'$'}ref to ${'$'}ref finds location-independent ${'$'}id -> non-number is invalid"""
+            $$"""$ref to $ref finds location-independent $id -> non-number is invalid"""
         )
     }
 
@@ -51,12 +52,12 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/integer.json",
+                  "allOf": [{ "$ref": "http://localhost:1234/integer.json" }],
                   "definitions": {
                     "http://localhost:1234/integer.json": {
-                      "${'$'}id": "http://localhost:1234/integer.json",
+                      "$id": "http://localhost:1234/integer.json",
                       "type": "integer"
                     }
                   }
@@ -73,12 +74,12 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/integer.json",
+                  "allOf": [{ "$ref": "http://localhost:1234/integer.json" }],
                   "definitions": {
                     "http://localhost:1234/integer.json": {
-                      "${'$'}id": "http://localhost:1234/integer.json",
+                      "$id": "http://localhost:1234/integer.json",
                       "type": "integer"
                     }
                   }
@@ -96,18 +97,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer",
+                  "allOf": [{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/integer" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
-                      "${'$'}id": "http://localhost:1234/subSchemas.json",
+                      "$id": "http://localhost:1234/subSchemas.json",
                       "definitions": {
                         "integer": {
                           "type": "integer"
                         },
                         "refToInteger": {
-                          "${'$'}ref": "#/definitions/integer"
+                          "$ref": "#/definitions/integer"
                         }
                       }
                     }
@@ -125,18 +126,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer",
+                  "allOf": [{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/integer" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
-                      "${'$'}id": "http://localhost:1234/subSchemas.json",
+                      "$id": "http://localhost:1234/subSchemas.json",
                       "definitions": {
                         "integer": {
                           "type": "integer"
                         },
                         "refToInteger": {
-                          "${'$'}ref": "#/definitions/integer"
+                          "$ref": "#/definitions/integer"
                         }
                       }
                     }
@@ -155,18 +156,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger",
+                  "allOf": [{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
-                      "${'$'}id": "http://localhost:1234/subSchemas.json",
+                      "$id": "http://localhost:1234/subSchemas.json",
                       "definitions": {
                         "integer": {
                           "type": "integer"
                         },
                         "refToInteger": {
-                          "${'$'}ref": "#/definitions/integer"
+                          "$ref": "#/definitions/integer"
                         }
                       }
                     }
@@ -184,18 +185,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 "a"
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger",
+                  "allOf": [{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/subSchemas.json": {
-                      "${'$'}id": "http://localhost:1234/subSchemas.json",
+                      "$id": "http://localhost:1234/subSchemas.json",
                       "definitions": {
                         "integer": {
                           "type": "integer"
                         },
                         "refToInteger": {
-                          "${'$'}ref": "#/definitions/integer"
+                          "$ref": "#/definitions/integer"
                         }
                       }
                     }
@@ -218,18 +219,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/",
+                  "$id": "http://localhost:1234/",
                   "items": {
-                    "${'$'}id": "baseUriChange/",
+                    "$id": "baseUriChange/",
                     "items": {
-                      "${'$'}ref": "folderInteger.json"
+                      "$ref": "folderInteger.json"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/baseUriChange/folderInteger.json": {
-                      "${'$'}id": "http://localhost:1234/baseUriChange/folderInteger.json",
+                      "$id": "http://localhost:1234/baseUriChange/folderInteger.json",
                       "type": "integer"
                     }
                   }
@@ -250,17 +251,17 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 ]
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/",
+                  "$id": "http://localhost:1234/",
                   "items": {
-                    "${'$'}id": "baseUriChange/",
+                    "$id": "baseUriChange/",
                     "items": {
-                      "${'$'}ref": "folderInteger.json"
+                      "$ref": "folderInteger.json"
                     },
                     "definitions": {
                       "folderInteger.json": {
-                        "${'$'}id": "folderInteger.json",
+                        "$id": "folderInteger.json",
                         "type": "integer"
                       }
                     }
@@ -283,25 +284,25 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                  "$id": "http://localhost:1234/scope_change_defs1.json",
                   "type": "object",
                   "properties": {
                     "list": {
-                      "${'$'}ref": "#/definitions/baz"
+                      "$ref": "#/definitions/baz"
                     }
                   },
                   "definitions": {
                     "baz": {
-                      "${'$'}id": "baseUriChangeFolder/",
+                      "$id": "baseUriChangeFolder/",
                       "type": "array",
                       "items": {
-                        "${'$'}ref": "folderInteger.json"
+                        "$ref": "folderInteger.json"
                       }
                     },
                     "http://localhost:1234/baseUriChangeFolder/folderInteger.json": {
-                      "${'$'}id": "http://localhost:1234/baseUriChangeFolder/folderInteger.json",
+                      "$id": "http://localhost:1234/baseUriChangeFolder/folderInteger.json",
                       "type": "integer"
                     }
                   }
@@ -322,25 +323,25 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                  "$id": "http://localhost:1234/scope_change_defs1.json",
                   "type": "object",
                   "properties": {
                     "list": {
-                      "${'$'}ref": "#/definitions/baz"
+                      "$ref": "#/definitions/baz"
                     }
                   },
                   "definitions": {
                     "baz": {
-                      "${'$'}id": "baseUriChangeFolder/",
+                      "$id": "baseUriChangeFolder/",
                       "type": "array",
                       "items": {
-                        "${'$'}ref": "folderInteger.json"
+                        "$ref": "folderInteger.json"
                       }
                     },
                     "http://localhost:1234/baseUriChangeFolder/folderInteger.json": {
-                      "${'$'}id": "http://localhost:1234/baseUriChangeFolder/folderInteger.json",
+                      "$id": "http://localhost:1234/baseUriChangeFolder/folderInteger.json",
                       "type": "integer"
                     }
                   }
@@ -362,29 +363,29 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                  "$id": "http://localhost:1234/scope_change_defs2.json",
                   "type": "object",
                   "properties": {
                     "list": {
-                      "${'$'}ref": "#/definitions/baz/definitions/bar"
+                      "$ref": "#/definitions/baz/definitions/bar"
                     }
                   },
                   "definitions": {
                     "baz": {
-                      "${'$'}id": "baseUriChangeFolderInSubschema/",
+                      "$id": "baseUriChangeFolderInSubschema/",
                       "definitions": {
                         "bar": {
                           "type": "array",
                           "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                           }
                         }
                       }
                     },
                     "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json": {
-                      "${'$'}id": "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json",
+                      "$id": "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json",
                       "type": "integer"
                     }
                   }
@@ -405,29 +406,29 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     ]
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                  "$id": "http://localhost:1234/scope_change_defs2.json",
                   "type": "object",
                   "properties": {
                     "list": {
-                      "${'$'}ref": "#/definitions/baz/definitions/bar"
+                      "$ref": "#/definitions/baz/definitions/bar"
                     }
                   },
                   "definitions": {
                     "baz": {
-                      "${'$'}id": "baseUriChangeFolderInSubschema/",
+                      "$id": "baseUriChangeFolderInSubschema/",
                       "definitions": {
                         "bar": {
                           "type": "array",
                           "items": {
-                            "${'$'}ref": "folderInteger.json"
+                            "$ref": "folderInteger.json"
                           }
                         }
                       }
                     },
                     "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json": {
-                      "${'$'}id": "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json",
+                      "$id": "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json",
                       "type": "integer"
                     }
                   }
@@ -445,18 +446,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 1
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger",
+                  "allOf": [{ "$ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/locationIndependentIdentifierPre2019.json": {
-                      "${'$'}id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",
+                      "$id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",
                       "definitions": {
                         "refToInteger": {
-                          "${'$'}ref": "#foo"
+                          "$ref": "#foo"
                         },
                         "A": {
-                          "${'$'}id": "#foo",
+                          "$id": "#foo",
                           "type": "integer"
                         }
                       }
@@ -475,18 +476,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
             """
                 "foo"
             """,
-            """
+            $$"""
                 {
-                  "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger",
+                  "allOf": [{ "$ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger" }],
                   "definitions": {
                     "http://localhost:1234/locationIndependentIdentifierPre2019.json": {
-                      "${'$'}id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",
+                      "$id": "http://localhost:1234/locationIndependentIdentifierPre2019.json",
                       "definitions": {
                         "refToInteger": {
-                          "${'$'}ref": "#foo"
+                          "$ref": "#foo"
                         },
                         "A": {
-                          "${'$'}id": "#foo",
+                          "$id": "#foo",
                           "type": "integer"
                         }
                       }
@@ -508,17 +509,17 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     "bar": "a"
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+                  "$id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
                   "allOf": [
                     {
-                      "${'$'}ref": "ref-and-definitions.json"
+                      "$ref": "ref-and-definitions.json"
                     }
                   ],
                   "definitions": {
                     "http://localhost:1234/ref-and-definitions.json": {
-                      "${'$'}id": "http://localhost:1234/ref-and-definitions.json",
+                      "$id": "http://localhost:1234/ref-and-definitions.json",
                       "definitions": {
                         "inner": {
                           "properties": {
@@ -526,7 +527,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                           }
                         }
                       },
-                      "allOf": [ { "${'$'}ref": "#/definitions/inner" } ]
+                      "allOf": [ { "$ref": "#/definitions/inner" } ]
                     }
                   }
                 }
@@ -544,17 +545,17 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     "bar": 1
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+                  "$id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
                   "allOf": [
                     {
-                      "${'$'}ref": "ref-and-definitions.json"
+                      "$ref": "ref-and-definitions.json"
                     }
                   ],
                   "definitions": {
                     "http://localhost:1234/ref-and-definitions.json": {
-                      "${'$'}id": "http://localhost:1234/ref-and-definitions.json",
+                      "$id": "http://localhost:1234/ref-and-definitions.json",
                       "definitions": {
                         "inner": {
                           "properties": {
@@ -562,7 +563,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                           }
                         }
                       },
-                      "allOf": [ { "${'$'}ref": "#/definitions/inner" } ]
+                      "allOf": [ { "$ref": "#/definitions/inner" } ]
                     }
                   }
                 }
@@ -583,31 +584,31 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/some-id",
+                  "$id": "http://localhost:1234/some-id",
                   "properties": {
                     "name": {
-                      "${'$'}ref": "nested/foo-ref-string.json"
+                      "$ref": "nested/foo-ref-string.json"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/nested/foo-ref-string.json": {
-                      "${'$'}id": "http://localhost:1234/nested/foo-ref-string.json",
+                      "$id": "http://localhost:1234/nested/foo-ref-string.json",
                       "type": "object",
                       "properties": {
-                        "foo": {"${'$'}ref": "string.json"}
+                        "foo": {"$ref": "string.json"}
                       }
                     },
                     "http://localhost:1234/nested/string.json": {
-                      "${'$'}id": "http://localhost:1234/nested/string.json",
+                      "$id": "http://localhost:1234/nested/string.json",
                       "type": "string"
                     }
                   }
                 }
             """,
             true,
-            """retrieved nested refs resolve relative to their URI not ${'$'}id -> string is valid"""
+            $$"""retrieved nested refs resolve relative to their URI not $id -> string is valid"""
         )
     }
 
@@ -621,31 +622,31 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/some-id",
+                  "$id": "http://localhost:1234/some-id",
                   "properties": {
                     "name": {
-                      "${'$'}ref": "nested/foo-ref-string.json"
+                      "$ref": "nested/foo-ref-string.json"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/nested/foo-ref-string.json": {
-                      "${'$'}id": "http://localhost:1234/nested/foo-ref-string.json",
+                      "$id": "http://localhost:1234/nested/foo-ref-string.json",
                       "type": "object",
                       "properties": {
-                        "foo": {"${'$'}ref": "string.json"}
+                        "foo": {"$ref": "string.json"}
                       }
                     },
                     "http://localhost:1234/nested/string.json": {
-                      "${'$'}id": "http://localhost:1234/nested/string.json",
+                      "$id": "http://localhost:1234/nested/string.json",
                       "type": "string"
                     }
                   }
                 }
             """,
             false,
-            """retrieved nested refs resolve relative to their URI not ${'$'}id -> number is invalid"""
+            $$"""retrieved nested refs resolve relative to their URI not $id -> number is invalid"""
         )
     }
 
@@ -658,18 +659,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     "name": "foo"
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/object",
+                  "$id": "http://localhost:1234/object",
                   "type": "object",
                   "properties": {
                     "name": {
-                      "${'$'}ref": "name.json#/definitions/orNull"
+                      "$ref": "name.json#/definitions/orNull"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/name.json": {
-                      "${'$'}id": "http://localhost:1234/name.json",
+                      "$id": "http://localhost:1234/name.json",
                       "definitions": {
                         "orNull": {
                           "anyOf": [
@@ -677,7 +678,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                               "type": "null"
                             },
                             {
-                              "${'$'}ref": "#"
+                              "$ref": "#"
                             }
                           ]
                         }
@@ -700,18 +701,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     "name": null
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/object",
+                  "$id": "http://localhost:1234/object",
                   "type": "object",
                   "properties": {
                     "name": {
-                      "${'$'}ref": "name.json#/definitions/orNull"
+                      "$ref": "name.json#/definitions/orNull"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/name.json": {
-                      "${'$'}id": "http://localhost:1234/name.json",
+                      "$id": "http://localhost:1234/name.json",
                       "definitions": {
                         "orNull": {
                           "anyOf": [
@@ -719,7 +720,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                               "type": "null"
                             },
                             {
-                              "${'$'}ref": "#"
+                              "$ref": "#"
                             }
                           ]
                         }
@@ -744,18 +745,18 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                     }
                 }
             """,
-            """
+            $$"""
                 {
-                  "${'$'}id": "http://localhost:1234/object",
+                  "$id": "http://localhost:1234/object",
                   "type": "object",
                   "properties": {
                     "name": {
-                      "${'$'}ref": "name.json#/definitions/orNull"
+                      "$ref": "name.json#/definitions/orNull"
                     }
                   },
                   "definitions": {
                     "http://localhost:1234/name.json": {
-                      "${'$'}id": "http://localhost:1234/name.json",
+                      "$id": "http://localhost:1234/name.json",
                       "definitions": {
                         "orNull": {
                           "anyOf": [
@@ -763,7 +764,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                               "type": "null"
                             },
                             {
-                              "${'$'}ref": "#"
+                              "$ref": "#"
                             }
                           ]
                         }

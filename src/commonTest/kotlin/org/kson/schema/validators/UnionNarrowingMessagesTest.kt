@@ -144,7 +144,7 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
                     required:
                       - kind
                     .
-                '$defs':
+                definitions:
                   N:
                     '$id': 'sub/'
                     type: array
@@ -178,7 +178,7 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
                     .
                   .
                 .
-            '$defs':
+            definitions:
               S:
                 '$id': shared
                 allOf:

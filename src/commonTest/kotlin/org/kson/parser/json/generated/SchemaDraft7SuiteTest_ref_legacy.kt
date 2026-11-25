@@ -1,7 +1,6 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -922,11 +921,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment valid"
      *
      * Test ID: "ref-legacy::fragment within remote ref::remote fragment valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_25() {
         
@@ -941,7 +936,19 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::fragment within remote ref::remote fragment valid"    """)
+            """    schemaTestId: "ref-legacy::fragment within remote ref::remote fragment valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -949,11 +956,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "fragment within remote ref -> remote fragment invalid"
      *
      * Test ID: "ref-legacy::fragment within remote ref::remote fragment invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_26() {
         
@@ -968,7 +971,19 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::fragment within remote ref::remote fragment invalid"    """)
+            """    schemaTestId: "ref-legacy::fragment within remote ref::remote fragment invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -976,11 +991,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref valid"
      *
      * Test ID: "ref-legacy::ref within remote ref::ref within ref valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_27() {
         
@@ -995,7 +1006,22 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::ref within remote ref::ref within ref valid"    """)
+            """    schemaTestId: "ref-legacy::ref within remote ref::ref within ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "$ref": "#/definitions/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1003,11 +1029,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "ref within remote ref -> ref within ref invalid"
      *
      * Test ID: "ref-legacy::ref within remote ref::ref within ref invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_28() {
         
@@ -1022,7 +1044,22 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::ref within remote ref::ref within ref invalid"    """)
+            """    schemaTestId: "ref-legacy::ref within remote ref::ref within ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "$ref": "#/definitions/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1030,11 +1067,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "root ref in remote ref -> string is valid"
      *
      * Test ID: "ref-legacy::root ref in remote ref::string is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_29() {
         
@@ -1056,7 +1089,27 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::root ref in remote ref::string is valid"    """)
+            """    schemaTestId: "ref-legacy::root ref in remote ref::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1064,11 +1117,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "root ref in remote ref -> null is valid"
      *
      * Test ID: "ref-legacy::root ref in remote ref::null is valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_30() {
         
@@ -1090,7 +1139,27 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::root ref in remote ref::null is valid"    """)
+            """    schemaTestId: "ref-legacy::root ref in remote ref::null is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1098,11 +1167,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "root ref in remote ref -> object is invalid"
      *
      * Test ID: "ref-legacy::root ref in remote ref::object is invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_31() {
         
@@ -1126,7 +1191,27 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::root ref in remote ref::object is invalid"    """)
+            """    schemaTestId: "ref-legacy::root ref in remote ref::object is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1134,11 +1219,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "remote ref with ref to definitions -> invalid"
      *
      * Test ID: "ref-legacy::remote ref with ref to definitions::invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_32() {
         
@@ -1159,7 +1240,28 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref-legacy::remote ref with ref to definitions::invalid"    """)
+            """    schemaTestId: "ref-legacy::remote ref with ref to definitions::invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-definitions.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/inner"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -1167,11 +1269,7 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
      *     "remote ref with ref to definitions -> valid"
      *
      * Test ID: "ref-legacy::remote ref with ref to definitions::valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_33() {
         
@@ -1192,6 +1290,27 @@ class SchemaDraft7SuiteTest_ref_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref-legacy::remote ref with ref to definitions::valid"    """)
+            """    schemaTestId: "ref-legacy::remote ref with ref to definitions::valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-definitions.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/inner"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }

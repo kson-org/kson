@@ -15,7 +15,7 @@ class SchemaProgressTest {
 
     private fun progressTowards(schema: String): SchemaProgress {
         val node = kson(schema)
-        return SchemaProgress(node, UriReference.parse(""), SchemaIdLookup(node))
+        return SchemaProgress(node, UriReference.parse(""), IndexedSchemaDocuments(SchemaDocument(node)))
     }
 
     private fun locationOf(property: String, document: KsonValue) =
@@ -40,20 +40,20 @@ class SchemaProgressTest {
     fun refsAreReadUnderTheBaseUriItIsGiven() {
         val root = kson(
             $$"""
-                '$id': 'https://example.org/root'
                 '$ref': '#/$defs/count'
                 '$defs':
                   count:
                     type: number
             """.trimIndent()
         )
-        val idLookup = SchemaIdLookup(root)
+        val retrievalUri = UriReference.parse("https://example.org/root")
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, retrievalUri))
 
-        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), idLookup)
-        assertTrue(underItsId.accepts(kson("3")))
-        assertTrue(underItsId.rejects(kson("three")))
+        val underItsRetrievalUri = SchemaProgress(root, retrievalUri, indexedDocuments)
+        assertTrue(underItsRetrievalUri.accepts(kson("3")))
+        assertTrue(underItsRetrievalUri.rejects(kson("three")))
 
-        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), idLookup)
+        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments)
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }

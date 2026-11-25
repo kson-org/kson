@@ -112,18 +112,14 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_simpleStringProperty() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "name": <caret>{
-                      "type": "string",
-                      "description": "The person's name"
-                    }<caret>,
-                    "age": {
-                      "type": "number"
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  name:
+                    <caret>type: string
+                    description: "The person's name"
+                    .<caret>
+                  age:
+                    type: number
             """.trimIndent(),
             documentWithCaret = """
                 name: <caret>John
@@ -136,18 +132,14 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_numberProperty() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "age": <caret>{
-                      "type": "number",
-                      "description": "The person's age"
-                    }<caret>
-                  }
-                }
+                type: object
+                properties:
+                  name:
+                    type: string
+                    .
+                  age:
+                    <caret>type: number
+                    description: "The person's age"<caret>
             """.trimIndent(),
             documentWithCaret = """
                 name: John
@@ -160,23 +152,17 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_nestedObject() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "person": {
-                      "type": "object",
-                      "properties": {
-                        "name": <caret>{
-                          "type": "string",
-                          "description": "Person's name"
-                        }<caret>,
-                        "age": {
-                          "type": "number"
-                        }
-                      }
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  person:
+                    type: object
+                    properties:
+                      name:
+                        <caret>type: string
+                        description: "Person's name"
+                        .<caret>
+                      age:
+                        type: number
             """.trimIndent(),
             documentWithCaret = """
                 person:
@@ -190,18 +176,13 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_arrayItems() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "tags": {
-                      "type": "array",
-                      "items": <caret>{
-                        "type": "string",
-                        "description": "A tag value"
-                      }<caret>
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      <caret>type: string
+                      description: 'A tag value'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 tags:
@@ -215,21 +196,15 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_deeplyNestedArray() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "matrix": {
-                      "type": "array",
-                      "items": {
-                        "type": "array",
-                        "items": <caret>{
-                          "type": "number",
-                          "description": "Matrix cell value"
-                        }<caret>
-                      }
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  matrix:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        <caret>type: number
+                        description: 'Matrix cell value'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 matrix:
@@ -247,10 +222,8 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_noSchemaForProperty() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {}
-                }
+                type: object
+                properties: {}
             """.trimIndent(),
             documentWithCaret = """
                 undefinedProp: <caret>value
@@ -265,9 +238,7 @@ class SchemaDefinitionLocationTest {
         // so the schema location for the root object type is returned.
         assertDefinitionLocation(
             schemaWithCaret = """
-                <caret>{
-                  "type": "object"
-                }<caret>
+                <caret>type: object<caret>
             """.trimIndent(),
             documentWithCaret = """
                 {inva<caret>lid kson
@@ -278,29 +249,23 @@ class SchemaDefinitionLocationTest {
     @Test
     fun testGetSchemaLocationAtLocation_refDefinition() {
         assertDefinitionLocation(
-            schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "${'$'}ref": "#/${'$'}defs/Item"
-                      }
-                    }
-                  },
-                  "${'$'}defs": {
-                    "Item": {
-                      "type": "object",
-                      "properties": {
-                        "name": <caret>{
-                          "type": "string",
-                          "description": "Item name from ref"
-                        }<caret>
-                      }
-                    }
-                  }
-                }
+            schemaWithCaret = $$"""
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/Item'
+                      .
+                    .
+                  .
+                '$defs':
+                  Item:
+                    type: object
+                    properties:
+                      name:
+                        <caret>type: string
+                        description: 'Item name from ref'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 items:
@@ -313,13 +278,10 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_additionalProperties() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "additionalProperties": <caret>{
-                    "type": "string",
-                    "description": "Any additional string field"
-                  }<caret>
-                }
+                type: object
+                additionalProperties:
+                  <caret>type: string
+                  description: 'Any additional string field'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 customField: <caret>customValue
@@ -331,15 +293,11 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_patternProperties() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "patternProperties": {
-                    "^field_": <caret>{
-                      "type": "string",
-                      "description": "A field matching the pattern"
-                    }<caret>
-                  }
-                }
+                type: object
+                patternProperties:
+                  '^field_':
+                    <caret>type: string
+                    description: 'A field matching the pattern'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 field_1: <caret>value1
@@ -354,14 +312,10 @@ class SchemaDefinitionLocationTest {
         // it should point to the property's schema definition (not drop the last element)
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "username": <caret>{
-                      "type": "string"
-                    }<caret>
-                  }
-                }
+                type: object
+                properties:
+                  username:
+                    <caret>type: string<caret>
             """.trimIndent(),
             documentWithCaret = """
                 user<caret>name: johndoe
@@ -372,29 +326,23 @@ class SchemaDefinitionLocationTest {
     @Test
     fun testGetSchemaLocationAtLocation_refDefinition_onPropertyKey() {
         assertDefinitionLocation(
-            schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "${'$'}ref": "#/${'$'}defs/Item"
-                      }
-                    }
-                  },
-                  "${'$'}defs": {
-                    "Item": {
-                      "type": "object",
-                      "properties": {
-                        "name": <caret>{
-                          "type": "string",
-                          "description": "Item name from ref"
-                        }<caret>
-                      }
-                    }
-                  }
-                }
+            schemaWithCaret = $$"""
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/Item'
+                      .
+                    .
+                  .
+                '$defs':
+                  Item:
+                    type: object
+                    properties:
+                      name:
+                        <caret>type: string
+                        description: 'Item name from ref'<caret>
             """.trimIndent(),
             documentWithCaret = """
                 items:
@@ -409,27 +357,16 @@ class SchemaDefinitionLocationTest {
         // Document has name: value (string), so only the string branch validates
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "anyOf": [
-                    {
-                      "properties": {
-                        "name": <caret>{
-                          "type": "string",
-                          "description": "Name from first branch"
-                        }<caret>
-                      }
-                    },
-                    {
-                      "properties": {
-                        "name": {
-                          "type": "number",
-                          "description": "Name from second branch"
-                        }
-                      }
-                    }
-                  ]
-                }
+                type: object
+                anyOf:
+                  - properties:
+                      name:
+                        <caret>type: string
+                        description: 'Name from first branch'<caret>
+                  - properties:
+                      name:
+                        type: number
+                        description: 'Name from second branch'
             """.trimIndent(),
             documentWithCaret = """
                 name: <caret>value
@@ -442,25 +379,14 @@ class SchemaDefinitionLocationTest {
         // Property defined in multiple allOf branches should return multiple locations
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "allOf": [
-                    {
-                      "properties": {
-                        "shared": <caret>{
-                          "type": "string"
-                        }<caret>
-                      }
-                    },
-                    {
-                      "properties": {
-                        "shared": <caret>{
-                          "minLength": 5
-                        }<caret>
-                      }
-                    }
-                  ]
-                }
+                type: object
+                allOf:
+                  - properties:
+                      shared:
+                        <caret>type: string<caret>
+                  - properties:
+                      shared:
+                        <caret>minLength: 5<caret>
             """.trimIndent(),
             documentWithCaret = """
                 shared: <caret>test
@@ -474,37 +400,24 @@ class SchemaDefinitionLocationTest {
         // Document has type: email, so only the email branch validates
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "notification": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "type": <caret>{
-                              "const": "email"
-                            }<caret>,
-                            "recipient": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "const": "sms"
-                            },
-                            "phoneNumber": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  notification:
+                    anyOf:
+                      - type: object
+                        properties:
+                          type:
+                            <caret>const: email
+                            .<caret>
+                          recipient:
+                            type: string
+                      - type: object
+                        properties:
+                          type:
+                            const: sms
+                            .
+                          phoneNumber:
+                            type: string
             """.trimIndent(),
             documentWithCaret = """
                 notification:
@@ -520,45 +433,28 @@ class SchemaDefinitionLocationTest {
         // Document has value: test (a string), so only the string branch validates
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "value": <caret>{
-                              "type": "string",
-                              "description": "String value"
-                            }<caret>
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "value": {
-                              "type": "number",
-                              "description": "Numeric value"
-                            }
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "value": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              },
-                              "description": "Array value"
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
+                type: object
+                properties:
+                  data:
+                    oneOf:
+                      - type: object
+                        properties:
+                          value:
+                            <caret>type: string
+                            description: 'String value'<caret>
+                      - type: object
+                        properties:
+                          value:
+                            type: number
+                            description: 'Numeric value'
+                      - type: object
+                        properties:
+                          value:
+                            type: array
+                            items:
+                              type: string
+                              .
+                            description: 'Array value'
             """.trimIndent(),
             documentWithCaret = """
                 data:
@@ -570,8 +466,8 @@ class SchemaDefinitionLocationTest {
     @Test
     fun testJumpToDefinition_anyOfInArray_Test() {
         assertDefinitionLocation(
-            schemaWithCaret = """
-                '${'$'}defs':
+            schemaWithCaret = $$"""
+                '$defs':
                   UrlSource:
                     type: object
                     properties:
@@ -582,11 +478,11 @@ class SchemaDefinitionLocationTest {
                     .
                   .
                 anyOf:
-                  - '${'$'}ref': '#/${'$'}defs/UrlSource'
+                  - '$ref': '#/$defs/UrlSource'
                   - type: array
                     items:
                       anyOf:
-                        - '${'$'}ref': '#/${'$'}defs/UrlSource'
+                        - '$ref': '#/$defs/UrlSource'
             """.trimIndent(),
             documentWithCaret = """
                 - ur<caret>l: 'https://example.com/file.exe'
@@ -601,31 +497,23 @@ class SchemaDefinitionLocationTest {
         // the leaf value is authoritative for navigation, unlike in completion.
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "properties": {
-                          "type": { "const": "foo" },
-                          "config": <caret>{
-                            "type": "string",
-                            "description": "config for foo"
-                          }<caret>
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": { "const": "bar" },
-                          "config": {
-                            "type": "number",
-                            "description": "config for bar"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
+                type: array
+                items:
+                  anyOf:
+                    - properties:
+                        type:
+                          const: foo
+                          .
+                        config:
+                          <caret>type: string
+                          description: 'config for foo'<caret>
+                    - properties:
+                        type:
+                          const: bar
+                          .
+                        config:
+                          type: number
+                          description: 'config for bar'
             """.trimIndent(),
             documentWithCaret = """
                 - type: foo
@@ -640,19 +528,46 @@ class SchemaDefinitionLocationTest {
         // parse error (missing value after "other":).  The partial AST
         // still recovers "kind": "a" so the if/then condition can evaluate.
         assertDefinitionLocation(
-            schemaWithCaret = """
-                {
-                    "${'$'}defs": {
-                        "ConfigA": <caret>{ "type": "object", "description": "Settings for A" }<caret>,
-                        "ConfigB": { "type": "object", "description": "Settings for B" }
-                    },
-                    "type": "object",
-                    "properties": { "kind": { "type": "string" } },
-                    "allOf": [
-                        { "if": { "properties": { "kind": { "const": "a" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } } },
-                        { "if": { "properties": { "kind": { "const": "b" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } } }
-                    ]
-                }
+            schemaWithCaret = $$"""
+                '$defs':
+                  ConfigA:
+                    <caret>type: object
+                    description: 'Settings for A'
+                    .<caret>
+                  ConfigB:
+                    type: object
+                    description: 'Settings for B'
+                    .
+                  .
+                type: object
+                properties:
+                  kind:
+                    type: string
+                    .
+                  .
+                allOf:
+                  - if:
+                      properties:
+                        kind:
+                          const: a
+                          .
+                        .
+                      .
+                    then:
+                      properties:
+                        config:
+                          '$ref': '#/$defs/ConfigA'
+                  - if:
+                      properties:
+                        kind:
+                          const: b
+                          .
+                        .
+                      .
+                    then:
+                      properties:
+                        config:
+                          '$ref': '#/$defs/ConfigB'
             """.trimIndent(),
             documentWithCaret = """
                 { "kind": "a", "other": , "<caret>config": {} }
@@ -665,10 +580,13 @@ class SchemaDefinitionLocationTest {
         // `0` names a property here, not a list's first item, so it resolves to the property's own schema
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "properties": { "0": <caret>{ "type": "string" }<caret> },
-                  "items": { "type": "number" }
-                }
+                properties:
+                  '0':
+                    <caret>type: string
+                    .<caret>
+                  .
+                items:
+                  type: number
             """.trimIndent(),
             documentWithCaret = """
                 '0': <caret>hello
@@ -681,13 +599,18 @@ class SchemaDefinitionLocationTest {
         // The keywords beside a `$ref` that loops are still read, so `x` resolves to its own schema
         assertDefinitionLocation(
             schemaWithCaret = $$"""
-                {
-                  "type": "object",
-                  "properties": { "p": { "$ref": "#/$defs/loop" } },
-                  "$defs": {
-                    "loop": { "$ref": "#/$defs/loop", "properties": { "x": <caret>{ "type": "string" }<caret> } }
-                  }
-                }
+                type: object
+                properties:
+                  p:
+                    '$ref': '#/$defs/loop'
+                    .
+                  .
+                '$defs':
+                  loop:
+                    '$ref': '#/$defs/loop'
+                    properties:
+                      x:
+                        <caret>type: string<caret>
             """.trimIndent(),
             documentWithCaret = """
                 p:
@@ -697,14 +620,57 @@ class SchemaDefinitionLocationTest {
     }
 
     @Test
+    fun testJumpToDefinition_besideARootRefThatDoesNotResolve() {
+        // The keywords beside a root `$ref` that resolves to no schema are still read
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                '$id': 'schemas/root.json'
+                '$ref': 'missing.json'
+                properties:
+                  name:
+                    '$ref': '#/definitions/name'
+                    .
+                  .
+                definitions:
+                  name:
+                    <caret>type: string<caret>
+            """.trimIndent(),
+            documentWithCaret = """
+                name: <caret>hello
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_throughARefWithinASchemaWithTheMetaSchemaId() {
+        // the schema's own `$id` outranks the built-in Draft 7 meta-schema's
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                '$id': 'http://json-schema.org/draft-07/schema#'
+                properties:
+                  count:
+                    '$ref': '#/definitions/nonNegativeInteger'
+                    .
+                  .
+                definitions:
+                  nonNegativeInteger:
+                    <caret>type: integer
+                    minimum: 0<caret>
+            """.trimIndent(),
+            documentWithCaret = """
+                count: <caret>3
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testJumpToDefinition_belowAFalseSchemaFindsNothing() {
         // `a` allows no value, and the `false` saying so isn't offered as the definition of what's below it
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "type": "object",
-                  "properties": { "a": false }
-                }
+                type: object
+                properties:
+                  a: false
             """.trimIndent(),
             documentWithCaret = """
                 a:
@@ -717,12 +683,11 @@ class SchemaDefinitionLocationTest {
     fun testJumpToDefinition_propertyDeclaredInOneAllOfMemberAndClosedByAnother() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "allOf": [
-                    { "properties": { "a": <caret>{ "type": "string" }<caret> } },
-                    { "additionalProperties": false }
-                  ]
-                }
+                allOf:
+                  - properties:
+                      a:
+                        <caret>type: string<caret>
+                  - additionalProperties: false
             """.trimIndent(),
             documentWithCaret = """
                 <caret>a: x
@@ -734,12 +699,11 @@ class SchemaDefinitionLocationTest {
     fun testJumpToDefinition_propertyDeclaredInOneAllOfMemberAndLeftOpenByAnother() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "allOf": [
-                    { "properties": { "a": <caret>{ "type": "string" }<caret> } },
-                    { "additionalProperties": true }
-                  ]
-                }
+                allOf:
+                  - properties:
+                      a:
+                        <caret>type: string<caret>
+                  - additionalProperties: true
             """.trimIndent(),
             documentWithCaret = """
                 <caret>a: x
@@ -751,9 +715,7 @@ class SchemaDefinitionLocationTest {
     fun testJumpToDefinition_propertyNothingDeclaresFindsTheFalseClosingIt() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "additionalProperties": <caret>false<caret>
-                }
+                additionalProperties: <caret>false<caret>
             """.trimIndent(),
             documentWithCaret = """
                 <caret>a: 1
@@ -765,9 +727,7 @@ class SchemaDefinitionLocationTest {
     fun testJumpToDefinition_propertyNothingDeclaresFindsTheTrueAllowingIt() {
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
-                  "additionalProperties": <caret>true<caret>
-                }
+                additionalProperties: <caret>true<caret>
             """.trimIndent(),
             documentWithCaret = """
                 <caret>a: 1

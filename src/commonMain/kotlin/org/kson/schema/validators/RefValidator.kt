@@ -13,35 +13,43 @@ import org.kson.value.navigation.json_pointer.fragmentPointer
  * Validator for JSON Schema `$ref` references
  *
  * @param [resolvedRef] the [ResolvedRef] object for this $ref
- * @param [idLookup] the IdSchemaLookup for resolving nested $ref references within the referenced schema
+ * @param [indexedDocuments] the [IndexedSchemaDocuments] for resolving nested $ref references within the referenced
+ *   schema
  * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), kept to name the target
  *   when it declares no `title`
  */
 internal class RefValidator(
     private val resolvedRef: ResolvedRef,
-    private val idLookup: SchemaIdLookup,
+    private val indexedDocuments: IndexedSchemaDocuments,
     private val refString: String
 ) : JsonSchemaValidator {
     private val refParseResult: Pair<JsonSchema?, List<LoggedMessage>> by lazy {
         val parseMessageSink = MessageSink()
         // TODO these parsed $ref schemas should be cached for efficiency
-        val schema = SchemaParser.parseSchemaElement(
-            resolvedRef.resolvedValue,
-            parseMessageSink,
-            resolvedRef.resolvedValueBaseUri,
-            idLookup)
+        val chainEnd = indexedDocuments.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        val unresolvedRef = chainEnd.unresolvedRef
+        val schema = if (unresolvedRef != null) {
+            SchemaParser.reportUnresolvedRef(unresolvedRef, parseMessageSink)
+            null
+        } else {
+            SchemaParser.parseSchemaElement(
+                chainEnd.resolvedValue,
+                parseMessageSink,
+                chainEnd.resolvedValueBaseUri,
+                indexedDocuments)
+        }
         schema to parseMessageSink.loggedMessages()
     }
 
     // the whole chain is resolved at once: parsing it hop by hop would never notice a cycle
     private val targetPins: Set<KsonValue>? by lazy {
-        val target = idLookup.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        val target = indexedDocuments.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
         if (target.endsAtUnresolvedRef) return@lazy null
         val schema = SchemaParser.parseSchemaElement(
             target.resolvedValue,
             MessageSink(),
             target.resolvedValueBaseUri,
-            idLookup)
+            indexedDocuments)
         (schema as? JsonObjectSchema)?.pinnedValues()
     }
 
