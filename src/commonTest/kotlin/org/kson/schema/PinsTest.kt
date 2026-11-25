@@ -2,7 +2,6 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.parser.MessageSink
-import org.kson.uri.UriReference
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -15,15 +14,11 @@ class PinsTest {
     private fun kson(source: String): KsonValue =
         assertNotNull(KsonCore.parseToAst(source).ksonValue, "should parse: $source")
 
-    private fun compile(node: KsonValue, baseUri: UriReference, indexedDocuments: IndexedSchemaDocuments): JsonSchema? =
-        SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, indexedDocuments)
+    private fun compile(schema: SchemaNode): JsonSchema? = SchemaParser.parseSchemaElement(schema, MessageSink())
 
     private fun compiled(schema: String): JsonSchema {
-        val node = kson(schema)
-        return assertNotNull(
-            compile(node, UriReference.parse(""), IndexedSchemaDocuments(SchemaDocument(node))),
-            "should compile: $schema"
-        )
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(kson(schema)))
+        return assertNotNull(compile(indexedDocuments.rootSchema), "should compile: $schema")
     }
 
     private fun branchesOf(union: String): List<JsonSchema> {
@@ -31,9 +26,7 @@ class PinsTest {
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
         val oneOf = root.propertyLookup.getValue("oneOf") as KsonList
         return oneOf.elements.map {
-            val baseUri =
-                ResolvedRef(root, indexedDocuments.rootBaseUri).descend(listOf(oneOf, it)).resolvedValueBaseUri
-            assertNotNull(compile(it, baseUri, indexedDocuments), "should compile: $it")
+            assertNotNull(compile(indexedDocuments.rootSchema.descend(listOf(oneOf, it))), "should compile: $it")
         }
     }
 

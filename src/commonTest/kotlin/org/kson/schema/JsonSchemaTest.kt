@@ -85,6 +85,29 @@ interface JsonSchemaTest {
     }
 
     /**
+     * Validates [ksonSource] against [schemaJson], a schema with errors of its own, and returns the messages from
+     * validating.  Compiling [schemaJson] must report errors of exactly the [expectedSchemaMessageTypes].
+     */
+    fun validateAgainstSchemaWithErrors(
+        ksonSource: String,
+        schemaJson: String,
+        expectedSchemaMessageTypes: List<MessageType>,
+        sourceContext: SourceContext = SourceContext()
+    ): List<LoggedMessage> {
+        val schemaParseResult = KsonCore.parseSchema(schemaJson)
+        assertEquals(
+            expectedSchemaMessageTypes,
+            schemaParseResult.messages.map { it.message.type },
+            "Compiling the schema should report these errors"
+        )
+        val jsonSchema = assertNotNull(schemaParseResult.jsonSchema, "Should produce a schema despite its errors")
+        return KsonCore.parseToAst(
+            ksonSource.trimIndent(),
+            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)
+        ).messages
+    }
+
+    /**
      * Assertion helper for testing that [source] is successfully parsed by the schema parser
      * (produces non-null jsonSchema) with no error messages
      */

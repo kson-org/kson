@@ -1,6 +1,5 @@
 package org.kson.schema
 import org.kson.value.KsonNumber
-import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
@@ -48,7 +47,6 @@ internal class JsonObjectSchema(
     val description: String?,
     val comment: String?,
     val default: KsonValue?,
-    val definitions: Map<KsonString, JsonSchema?>?,
 
     private val typeValidator: TypeValidator?,
     private val schemaValidators: List<JsonSchemaValidator>
@@ -131,12 +129,12 @@ internal class JsonObjectSchema(
   /** The properties required or declared across every [compositionSources] schema. */
   internal fun knownProperties(): Set<String> =
     compositionSources().flatMapTo(mutableSetOf()) { source ->
-      source.ownRequiredProperties() + source.ownPropertySchemas().keys.map { it.value }
+      source.ownRequiredProperties() + source.ownPropertySchemas().keys
     }
 
   private fun ownPinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> =
-    ownPropertySchemas().filterKeys { it.value in present }.mapNotNull { (name, propertySchema) ->
-      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name.value to it }
+    ownPropertySchemas().filterKeys { it in present }.mapNotNull { (name, propertySchema) ->
+      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name to it }
     }.toMap()
 
   /** The values this schema's lone validator restricts its target to, or `null` if it doesn't pin. */
@@ -148,7 +146,7 @@ internal class JsonObjectSchema(
       ?.required
       ?.mapTo(mutableSetOf()) { it.value } ?: emptySet()
 
-  private fun ownPropertySchemas(): Map<KsonString, JsonSchema?> =
+  private fun ownPropertySchemas(): Map<String, JsonSchema?> =
     schemaValidators.filterIsInstance<PropertiesValidator>()
       .firstOrNull()
       ?.propertySchemas ?: emptyMap()

@@ -1,11 +1,13 @@
 package org.kson.schema.validators
 
 import org.kson.parser.messages.MessageType.SCHEMA_OBJECT_TOO_MANY_PROPERTIES
+import org.kson.parser.messages.MessageType.SCHEMA_REF_RESOLUTION_FAILED
 import org.kson.parser.messages.MessageType.SCHEMA_VALUE_TYPE_MISMATCH
 import org.kson.schema.JsonSchemaTest
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class IfValidatorTest : JsonSchemaTest {
     private val partial = SourceContext(mode = ValidationMode.PARTIAL)
@@ -44,5 +46,18 @@ class IfValidatorTest : JsonSchemaTest {
         // Full validation takes the `else`, which rejects `a: x`, and partial validation the `then`
         assertKsonSchemaErrors("a: x", kindPicksA, listOf(SCHEMA_VALUE_TYPE_MISMATCH))
         assertKsonSchemaErrors("a: x", kindPicksA, listOf(SCHEMA_OBJECT_TOO_MANY_PROPERTIES), sourceContext = partial)
+    }
+
+    @Test
+    fun anIfThatDoesNotCompileAppliesNeitherThenNorElse() {
+        // `then` and `else` both reject every value, so a value that passes shows that neither applied
+        val schema = $$"""{ "if": { "$ref": "#/missing" }, "then": false, "else": false }"""
+        for (sourceContext in listOf(SourceContext(), partial)) {
+            assertEquals(
+                emptyList(),
+                validateAgainstSchemaWithErrors("a: 1", schema, listOf(SCHEMA_REF_RESOLUTION_FAILED), sourceContext),
+                "${sourceContext.mode} validation"
+            )
+        }
     }
 }

@@ -149,6 +149,18 @@ class TreeNavigationTest {
     }
 
     @Test
+    fun `navigate returns null for array index with leading zero`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                hobbies:
+                  - 'reading'
+                  - 'coding'
+            """.trimIndent(),
+            pointer = JsonPointer("/hobbies/01")
+        )
+    }
+
+    @Test
     fun `navigate with empty path returns root`() {
         assertJsonPointerNavigation(
             documentWithMatch = """

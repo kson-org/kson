@@ -2917,6 +2917,35 @@ class FormatterTest {
     }
 
     @Test
+    fun testArrayIndexWithLeadingZeroInPathMatchesNoItem() {
+        val source = """
+            scripts:
+              - "echo first"
+              - "echo second"
+        """.trimIndent()
+        assertFormatting(
+            source,
+            """
+            scripts:
+              - 'echo first'
+              - %
+                echo second
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/1")),
+        )
+        assertFormatting(
+            source,
+            """
+            scripts:
+              - 'echo first'
+              - 'echo second'
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/01")),
+        )
+    }
+
+    @Test
     fun testWildcardMatchesArrayIndices() {
         assertFormatting(
             """

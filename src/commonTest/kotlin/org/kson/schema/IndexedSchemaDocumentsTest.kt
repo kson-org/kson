@@ -25,13 +25,12 @@ class IndexedSchemaDocumentsTest {
         return indexedDocuments.resolveRef(ref, indexedDocuments.rootBaseUri)
     }
 
-    private fun resolve(schema: String): ResolvedRef {
+    private fun resolve(schema: String): SchemaNode {
         val root = value(schema)
         val properties = root.propertyLookup.getValue("properties") as KsonObject
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
-        val field = ResolvedRef(root, indexedDocuments.rootBaseUri)
-            .descend(listOf(properties, properties.propertyLookup.getValue("field")))
-        return indexedDocuments.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
+        val field = indexedDocuments.rootSchema.descend(listOf(properties, properties.propertyLookup.getValue("field")))
+        return indexedDocuments.resolveRefIfPresent(field)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
@@ -40,14 +39,12 @@ class IndexedSchemaDocumentsTest {
     /** Resolves [schema]'s root, read under the URI it was retrieved from, returning its `title` and base URI. */
     private fun resolveRoot(schema: String): Pair<String?, String> {
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(value(schema)))
-        return titleAndBaseUri(
-            indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, indexedDocuments.rootBaseUri)
-        )
+        return titleAndBaseUri(indexedDocuments.resolveRefIfPresent(indexedDocuments.rootSchema))
     }
 
-    private fun titleAndBaseUri(resolved: ResolvedRef): Pair<String?, String> {
-        val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
-        return title?.value to resolved.resolvedValueBaseUri.toString()
+    private fun titleAndBaseUri(resolved: SchemaNode): Pair<String?, String> {
+        val title = (resolved.value as KsonObject).propertyLookup["title"] as? KsonString
+        return title?.value to resolved.baseUri.toString()
     }
 
     /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
@@ -192,6 +189,38 @@ class IndexedSchemaDocumentsTest {
                 title: café
         """.trimIndent()
         assertEquals("café" to "", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesAPointerToAPropertyNamedByDigitsWithALeadingZero() {
+        val schema = $$"""
+            properties:
+              field:
+                '$ref': '#/properties/01'
+                .
+              '01':
+                title: '01'
+        """.trimIndent()
+        assertEquals("01" to "", resolveField(schema))
+    }
+
+    @Test
+    fun doesNotIndexAValueAgainThroughARefByANonCanonicalIndex() {
+        // indexing `x` again through the `$ref` would resolve its `$id` against the root instead of `second/`
+        val schema = $$"""
+            '$id': 'http://example.com/root.json'
+            allOf:
+              - '$ref': '#/items/01/properties/x'
+                .
+            items:
+              - {}
+              - '$id': 'http://example.com/second/'
+                properties:
+                  x:
+                    '$id': 'x.json'
+        """.trimIndent()
+        assertIs<RefResolution.Found>(resolveRef(schema, "http://example.com/second/x.json"))
+        assertEquals(RefResolution.NotFound, resolveRef(schema, "http://example.com/x.json"))
     }
 
     @Test
@@ -477,7 +506,7 @@ class IndexedSchemaDocumentsTest {
               field:
                 '$ref': 'http://json-schema.org/draft-07/schema#'
         """.trimIndent()
-        assertSame(KsonDraft7MetaSchema.schemaValue, resolve(schema).resolvedValue)
+        assertSame(KsonDraft7MetaSchema.schemaValue, resolve(schema).value)
     }
 
     @Test
@@ -536,8 +565,8 @@ class IndexedSchemaDocumentsTest {
 
     @Test
     fun indexesAPointerTargetWithinTheDeepestSchemaSharingAnId() {
-        // `s1` is read before the deeper `s2`, whichever key comes first
-        val definitions = $$"""
+        // `s1` is read before the deeper `s2`, and only `s2` has the pointer's target
+        val root = value($$"""
             definitions: {
               s1: { '$id': 'http://x.test/shared.json' }
               a: {
@@ -546,52 +575,32 @@ class IndexedSchemaDocumentsTest {
                 }
               }
             }
-        """.trimIndent()
-        val allOf = $$"""allOf: [{ '$ref': 'http://x.test/shared.json#/extension/t' }]"""
-        for (keys in listOf(listOf(definitions, allOf), listOf(allOf, definitions))) {
-            val root = value(keys.joinToString("\n"))
-            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+            allOf: [{ '$ref': 'http://x.test/shared.json#/extension/t' }]
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
 
-            assertEquals(
-                listOf(UriReference.parse("http://x.test/dep.json")),
-                indexedDocuments.missingDocumentUris,
-                "keys in order ${root.propertyLookup.keys}"
-            )
-        }
+        assertEquals(listOf(UriReference.parse("http://x.test/dep.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test
-    fun indexesAPointerTargetWithinTheSchemaASharedIdFallsBackTo() {
-        // `a` is read under root.json before `hook` makes `e` a schema, so s.json identifies `a`, deeper than `b`,
-        // until `a` is read again under `e`'s `$id` and the pointer into s.json finds `t` in `b`
-        val allOf = $$"""
+    fun readsAPointerRefAgainWhenTheSchemaItNamesMovesToAnotherUri() {
+        // `a` is deeper than `b`, so it takes s.json until `e`'s `$id`, found late through `hook2`, moves it away
+        val root = value($$"""
             allOf: [
-              { '$ref': '#/extension/e/a' },
+              { '$ref': '#/extension/e/x/y/a' },
               { '$ref': 'file:///s.json#/extension/t' },
-              { '$ref': '#/extension/hook' }
+              { '$ref': '#/extension/hook2' },
+              { definitions: { b: { '$id': 'file:///s.json', extension: { t: { '$ref': 'dep.json' } } } } }
             ]
-        """.trimIndent()
-        val definitions = $$"""
-            definitions: {
-              b: { '$id': 'file:///s.json', extension: { t: { '$ref': 'dep.json' } } }
-            }
-        """.trimIndent()
-        val extension = $$"""
             extension: {
+              hook2: { '$ref': '#/extension/hook' }
               hook: { '$ref': '#/extension/e' }
-              e: { '$id': 'http://e.test/', a: { '$id': 's.json' } }
+              e: { '$id': 'http://e.test/', x: { y: { a: { '$id': 's.json' } } } }
             }
-        """.trimIndent()
-        for (keys in listOf(listOf(allOf, definitions, extension), listOf(definitions, allOf, extension))) {
-            val root = value(keys.joinToString("\n"))
-            val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
+        """.trimIndent())
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("file:///root.json")))
 
-            assertEquals(
-                listOf(UriReference.parse("file:///dep.json")),
-                indexedDocuments.missingDocumentUris,
-                "keys in order ${root.propertyLookup.keys}"
-            )
-        }
+        assertEquals(listOf(UriReference.parse("file:///dep.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test
@@ -906,5 +915,20 @@ class IndexedSchemaDocumentsTest {
                     title: target
         """.trimIndent()
         assertEquals("target", resolveField(schema).first)
+    }
+
+    @Test
+    fun resolvedRootSchemaFollowsTheRootsRef() {
+        val root = KsonCore.parseToAst(
+            $$"""
+                '$ref': '#/$defs/target'
+                '$defs':
+                  target:
+                    title: target
+            """.trimIndent()
+        ).ksonValue as KsonObject
+        val target = (root.propertyLookup.getValue($$"$defs") as KsonObject).propertyLookup.getValue("target")
+
+        assertSame(target, IndexedSchemaDocuments(SchemaDocument(root)).resolvedRootSchema.value)
     }
 }
